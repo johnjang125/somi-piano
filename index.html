@@ -121,7 +121,37 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;l
 /* 탭 바 */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--card);border-top:2px solid var(--line);
   padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.tabs nav{max-width:780px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tabs nav{max-width:780px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+@media (max-width:420px){.tab{font-size:12px;padding:6px 2px}}
+
+/* 곡 연습실 */
+.lvtabs{display:flex;gap:6px;flex-wrap:wrap}
+.setname{font-family:var(--display);font-size:16px;color:var(--ink2);margin-top:6px}
+.pieces{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.piece{display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 14px;border-radius:16px;background:var(--card);border:2px solid var(--line)}
+.piece b{font-family:var(--display);font-weight:400;font-size:17px}
+.piece span{font-size:13px;color:var(--ink2)}
+.piece:hover{border-color:var(--pink)}
+.labhead{display:flex;align-items:center;gap:12px}
+.labhead .txt{flex:1;min-width:0}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctrl label{font-family:var(--display);min-width:3.2em}
+.stepper{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:99px;overflow:hidden;background:var(--bg)}
+.stepper button{width:34px;height:34px;font-size:18px}
+.stepper output{min-width:3.2em;text-align:center;font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.rollwrap{overflow-x:auto;max-width:100%;border-radius:14px;background:var(--bg2)}
+#roll{display:block;height:200px}
+.barmap{display:flex;flex-wrap:wrap;gap:6px}
+.barchip{min-width:52px;padding:6px 8px;border-radius:12px;text-align:center;font-family:var(--display);font-size:15px;color:#fff;line-height:1.15}
+.barchip small{display:block;font-family:var(--body);font-size:11px;opacity:.9}
+.barchip.g{background:var(--mint)} .barchip.y{background:var(--butter);color:var(--ink)} .barchip.r{background:var(--pink)}
+.barchip[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:1px}
+.recbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;border-radius:18px;background:var(--bg2);text-align:center}
+.recbig{font-family:var(--display);font-size:56px;line-height:1;color:var(--pink)}
+.plan{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:1.4em}
+.plan li{padding:2px 0}
+.takes{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.takes div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:3px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px;border-radius:16px;font-family:var(--display);font-size:14px;color:var(--ink2)}
 .tab svg{width:26px;height:26px}
 .tab[aria-current="page"]{background:var(--pink-soft);color:var(--pink)}
@@ -245,6 +275,7 @@ details.help summary{cursor:pointer;color:var(--ink2);font-size:14px}
   <section class="screen" id="s-map" hidden></section>
   <section class="screen" id="s-stk" hidden></section>
   <section class="screen" id="s-shop" hidden></section>
+  <section class="screen" id="s-lab" hidden></section>
   <section class="screen" id="s-parent" hidden></section>
   <section class="screen" id="s-play" hidden style="flex:1">
     <div class="playtop">
@@ -263,6 +294,7 @@ details.help summary{cursor:pointer;color:var(--ink2);font-size:14px}
   <button class="tab" data-go="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg>별나라 지도</button>
   <button class="tab" data-go="stk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>스티커북</button>
   <button class="tab" data-go="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18 3-18"/></svg>보석 상점</button>
+  <button class="tab" data-go="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>곡 연습실</button>
   <button class="tab" data-go="parent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>어른 코너</button>
 </nav></div>
 <canvas id="fx"></canvas>
@@ -319,6 +351,8 @@ const STICKERS = [
   ["sight","🔮","악보 탐정","깜짝 악보를 실수 없이 치기"],
   ["stage","🎤","연주회 스타","연주회 모드로 노래 별 3개"],
   ["dyn","🦁","셈여림 박사","셈여림 놀이 별 3개"],
+  ["recorder","🎙️","녹음 연주가","곡 연습실에서 처음 녹음하기"],
+  ["allgreen","🌟","초록 마디","녹음한 마디가 모두 초록"],
   ["mission1","🍓","미션 클리어","오늘의 미션 3개 모두 하기"],
   ["perfect","💖","실수 0개","한 번도 안 틀리고 끝내기"],
   ["s3","🌈","3일 연속","3일 연속 연습하기"],
@@ -332,7 +366,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,songs:[],speed:{},perf:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -365,6 +399,11 @@ function merge(o){
       ...(d.frozen?{frozen:true}:{}), ...(["great","ok","tired"].includes(d.mood)?{mood:d.mood}:{}),
       ...(Array.isArray(d.plan) && d.plan.length && d.plan.every(x=>["warm","lesson","review","sight"].includes(x)) ? {plan:d.plan.slice()} : {})}; });
   s.days = days;
+  // 곡 연습실 기록: 숫자만 남긴다
+  const num = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(+v || 0)));
+  s.lab = Object.fromEntries(Object.entries(s.lab && typeof s.lab === "object" ? s.lab : {}).filter(([k,v]) => /^\d+$/.test(k) && v && Array.isArray(v.takes)).map(([k,v]) => [k, {
+    takes: v.takes.filter(t => t && isDay(t.d)).slice(-40).map(t => ({d:t.d, a:num(t.a,1,999), b:num(t.b,1,999), hand:["both",0,1].includes(t.hand)?t.hand:"both", score:num(t.score,0,100), acc:num(t.acc,0,100), bpm:num(t.bpm,10,400),
+      bars:Object.fromEntries(Object.entries(t.bars && typeof t.bars === "object" ? t.bars : {}).filter(([b]) => /^\d+$/.test(b)).map(([b,x]) => [b, num(x,0,100)]))}))}]));
   s.perf = Object.fromEntries(Object.keys(s.perf && typeof s.perf === "object" ? s.perf : {}).filter(k => SONGS[k] && s.perf[k] === true).map(k => [k, true]));
   s.speed = Object.fromEntries(Object.entries(s.speed && typeof s.speed === "object" ? s.speed : {}).filter(([k,v]) => SONGS[k] && [0,1,2].includes(v)));
   ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
@@ -556,11 +595,12 @@ function bunny(size=96, outfit=S.outfit){
 let cur = "home";
 function go(name){
   cur = name;
-  ["home","map","stk","shop","parent","play"].forEach(s => $("#s-"+s).hidden = s!==name);
+  ["home","map","stk","shop","lab","parent","play"].forEach(s => $("#s-"+s).hidden = s!==name);
+  if(name!=="lab") recStop(true);
   document.body.classList.toggle("playing", name==="play");
   if(name!=="play") micStop();
   document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-current", t.dataset.go===name ? "page" : "false"));
-  if(name==="home") renderHome(); if(name==="map") renderMap(); if(name==="stk") renderStickers(); if(name==="shop") renderShop(); if(name==="parent") renderParent();
+  if(name==="home") renderHome(); if(name==="map") renderMap(); if(name==="stk") renderStickers(); if(name==="shop") renderShop(); if(name==="lab") renderLab(); if(name==="parent") renderParent();
   window.scrollTo(0,0);
 }
 $("#tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if(b) go(b.dataset.go); });
@@ -788,6 +828,137 @@ function makeTracker(opt){
   }};
 }
 /*PT-END*/
+
+/*AN-START*/
+/* 녹음 분석: Basic Pitch가 찾은 음(played)을 악보(piece)의 고른 마디와 맞춰 보고 마디마다 무엇이 잘됐고 무엇이 부족한지 정리한다.
+   1) 악보 음을 '같은 박에 치는 음 묶음'으로, 연주 음을 '0.06초 안에 같이 친 음 묶음'으로 만든다
+   2) 두 줄을 동적 계획법으로 맞춘다 (틀린 음, 빠뜨린 음, 더 친 음, 다시 친 부분이 모두 드러난다)
+   3) 맞춘 짝으로 실제 빠르기를 추정하고(중앙값 기울기), 박자가 밀리거나 멈칫한 곳을 찾는다 */
+const NAME_KO = ["도","도♯","레","레♯","미","파","파♯","솔","솔♯","라","라♯","시"];
+const pname = m => NAME_KO[((m%12)+12)%12];
+function scoreEvents(piece, barA, barB, hand){
+  const B = piece.bars, from = B[barA-1], to = barB < B.length ? B[barB] : Infinity, map = new Map();
+  piece.notes.forEach(([s,d,m,h]) => { if(s < from - 1e-6 || s >= to - 1e-6 || (hand !== "both" && h !== hand)) return;
+    const k = s.toFixed(3); if(!map.has(k)) map.set(k, {beat:s, notes:[]}); map.get(k).notes.push({m, h}); });
+  const barOf = s => { let i = 0; while(i+1 < B.length && B[i+1] <= s + 1e-6) i++; return i+1; };
+  // 꾸밈음(아주 짧은 음)만 있는 묶음은 orn: 놓쳐도 감점하지 않는다
+  return [...map.values()].sort((a,b)=>a.beat-b.beat).map(e => ({...e, bar:barOf(e.beat), orn: piece.notes.filter(n => Math.abs(n[0]-e.beat) < 1e-3 && e.notes.some(q=>q.m===n[2])).every(n => n[1] <= .13)}));
+}
+function playedClusters(played){
+  // 아주 낮은 음(파1 아래)은 연습곡에 거의 없고 대부분 울림·잡음이라 뺀다
+  const ps = played.filter(n => n.amp >= 0.15 && n.midi >= 29).sort((a,b)=>a.start-b.start), out = [], kept = [];
+  ps.forEach(n => {
+    // 같은 음이 0.12초 안에 또 잡힌 것은 한 번으로 본다
+    if(kept.some(k => k.midi === n.midi && n.start - k.start < .12)) return;
+    kept.push(n);
+    const c = out[out.length-1]; if(c && n.start - c.t < 0.06){ if(!c.ms.includes(n.midi)) { c.ms.push(n.midi); c.amp = Math.max(c.amp, n.amp); } c.notes.push(n); }
+    else out.push({t:n.start, ms:[n.midi], amp:n.amp, notes:[n]});
+  });
+  // 메아리: 묶음의 모든 음이 아직 울리는 음(같은 음이름)의 잔향이고 그보다 확실히 약하면, 새로 친 게 아니라 Basic Pitch가 잔향을 다시 잡은 것
+  return out.filter(c => !c.ms.every(m => kept.some(k => k.start < c.t - .02 && k.start + k.dur > c.t + .05 && (k.midi - m) % 12 === 0 && c.amp < k.amp*.75)));
+}
+function simOf(e, c){
+  let s = 0; e.notes.forEach(n => { if(c.ms.includes(n.m)) s += 1; else if(c.ms.some(x => (x-n.m)%12 === 0)) s += .6; });
+  return s / e.notes.length;
+}
+// when(i): 악보 음 묶음 i가 울릴 것 같은 시각(초). 주면 그 시각에서 멀수록 짝짓기 비용이 커진다 (2차 맞추기)
+function alignEvents(E, P, when, spb){
+  const n = E.length, m = P.length, SKIP_E = 1, SKIP_P = .55, D = [], W = [];
+  const tcost = (i, j) => when ? Math.min(.9, Math.abs(P[j].t - when(i)) / (spb*1.5)) : 0;
+  for(let i=0;i<=n;i++){ D.push(new Float64Array(m+1)); W.push(new Int8Array(m+1)); }
+  for(let i=1;i<=n;i++){ D[i][0] = i*SKIP_E; W[i][0] = 1; }
+  for(let j=1;j<=m;j++){ D[0][j] = j*SKIP_P; W[0][j] = 2; }
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    const s = simOf(E[i-1], P[j-1]), a = s > 0 ? D[i-1][j-1] + (1 - s) + tcost(i-1, j-1) : Infinity, b = D[i-1][j] + (E[i-1].orn ? .15 : SKIP_E), c = D[i][j-1] + SKIP_P;
+    if(a <= b && a <= c){ D[i][j] = a; W[i][j] = 0; } else if(b <= c){ D[i][j] = b; W[i][j] = 1; } else { D[i][j] = c; W[i][j] = 2; }
+  }
+  const pairs = []; let i = n, j = m;
+  while(i > 0 || j > 0){ const w = W[i][j];
+    if(i > 0 && j > 0 && w === 0){ pairs.push([i-1, j-1]); i--; j--; } else if(i > 0 && (j === 0 || w === 1)){ pairs.push([i-1, -1]); i--; } else { pairs.push([-1, j-1]); j--; } }
+  return pairs.reverse();
+}
+function analyzeTake(piece, barA, barB, hand, played){
+  const E = scoreEvents(piece, barA, barB, hand), P = playedClusters(played);
+  // 실제 빠르기: 맞춘 짝들 사이 기울기(초/박)의 중앙값. 이상한 값에 덜 흔들린다.
+  const tempoOf = match => { const sl = []; for(let a=0;a<match.length;a++) for(let b=a+1;b<Math.min(match.length,a+12);b++){ const db = E[match[b][0]].beat - E[match[a][0]].beat; if(db > .2) sl.push((P[match[b][1]].t - P[match[a][1]].t)/db); }
+    sl.sort((x,y)=>x-y); return sl.length ? sl[sl.length>>1] : 60/piece.tempo; };
+  // 1차: 음만 보고 맞춘다 → 빠르기와 '앞뒤 몇 개 음 기준 시작 시각'을 구한다 → 2차: 시각까지 보고 다시 맞춘다 (멈칫한 뒤에도 따라간다)
+  let pairs = alignEvents(E, P), match = pairs.filter(([i,j]) => i >= 0 && j >= 0);
+  let spb = tempoOf(match);
+  if(match.length >= 4){
+    const offs = match.map(([i,j]) => [i, P[j].t - spb*E[i].beat]);
+    const localOff = i => { const near = offs.filter(o => Math.abs(o[0]-i) <= 3).map(o=>o[1]).sort((x,y)=>x-y); return near.length ? near[near.length>>1] : offs[0][1]; };
+    pairs = alignEvents(E, P, i => localOff(i) + spb*E[i].beat, spb); match = pairs.filter(([i,j]) => i >= 0 && j >= 0); spb = tempoOf(match);
+  }
+  const its = match.map(([i,j]) => P[j].t - spb*E[i].beat).sort((x,y)=>x-y), t0 = its.length ? its[its.length>>1] : 0;
+  const bars = {}; for(let b=barA; b<=barB; b++) bars[b] = {bar:b, total:0, ok:0, wrong:[], missed:[], faint:[], extra:0, pause:0, pauseSec:0, dev:[], restart:false};
+  pairs.forEach(([i,j], k) => {
+    if(i >= 0){ const e = E[i], st = bars[e.bar];
+      if(e.orn) return;   // 꾸밈음은 녹음으로 또렷이 가려내기 어려워 채점하지 않는다
+      const afterOrn = i > 0 && E[i-1].orn && e.beat - E[i-1].beat < .25;
+      if(j < 0){ st.total += e.notes.length; e.notes.forEach(n => (afterOrn ? st.faint : st.missed).push(n)); return; }
+      st.total += e.notes.length;
+      // 옥타브만 다르게 잡힌 음은 맞은 것으로 본다(Basic Pitch가 자주 헷갈린다). 낮은 음(도3 아래)을 못 들은 것은 '잘 안 들림'으로 가볍게.
+      const c = P[j]; e.notes.forEach(n => { if(c.ms.some(x => (x-n.m)%12 === 0)) st.ok++;
+        else { const got = c.ms.find(x => !e.notes.some(q=>(q.m-x)%12===0) && Math.abs(x-n.m) <= 4); got != null ? st.wrong.push({want:n, got}) : (n.m < 48 || afterOrn) ? st.faint.push(n) : st.missed.push(n); } });
+    } else {
+      // 더 친 음 묶음: 바로 앞에서 맞춘 악보 음의 마디에 붙인다. 첫 음 전·마지막 음 뒤(준비 소리, 끝 울림)는 세지 않는다
+      if(!match.length || j < match[0][1] || j > match[match.length-1][1]) return;
+      let q = k; while(q >= 0 && pairs[q][0] < 0) q--; const bar = q >= 0 ? E[pairs[q][0]].bar : barA; bars[bar].extra++;
+    }
+  });
+  // 멈칫: 맞춘 이웃 사이 간격이 악보보다 0.35초 이상, 그리고 절반 이상 길 때. 사이에 더 친 묶음이 2개 이상이면 '다시 친 흔적'.
+  for(let k=1;k<match.length;k++){
+    const [i0,j0] = match[k-1], [i1,j1] = match[k], want = spb*(E[i1].beat - E[i0].beat), got = P[j1].t - P[j0].t, over = got - want;
+    if(over > Math.max(.35, want*.5)){ const st = bars[E[i1].bar]; st.pause++; st.pauseSec = Math.max(st.pauseSec, over); st.pauseAt = E[i1].bar !== E[i0].bar ? "edge" : "mid";
+      if(j1 - j0 - 1 >= 2) st.restart = true; }
+    // 박자: 바로 앞 음과의 간격이 악보보다 얼마나 길거나 짧은지(박 단위). 멈칫한 곳은 빼고 본다. +면 늘어짐, -면 서두름
+    else if(want > .05 && !E[i1].orn && !E[i0].orn){ bars[E[i1].bar].dev.push(over / spb); (bars[E[i1].bar].rates ||= []).push(got / want); }
+  }
+  // 빠르기 변화: 마디마다 '악보 간격 대비 실제 간격' 중앙값을 처음 두 마디와 비교한다 (선생님이 말하는 '처음 빠르기 지키기')
+  const med = a => { const s = a.slice().sort((x,y)=>x-y); return s[s.length>>1]; };
+  const openRates = [barA, barA+1].flatMap(b => bars[b]?.rates || []), ref = openRates.length >= 3 ? med(openRates) : 1;
+  Object.values(bars).forEach(st => { st.rate = st.rates && st.rates.length >= 2 ? med(st.rates) / ref : 1; });
+  const list = Object.values(bars).map(st => {
+    const acc = st.total ? (st.ok + .8*st.faint.length) / st.total : 1, devs = st.dev.map(Math.abs), drift = st.dev.length ? st.dev.reduce((a,b)=>a+b,0)/st.dev.length : 0;
+    const score = Math.max(0, Math.round(100*acc - 12*st.pause - 4*st.extra - (devs.length && Math.max(...devs) > .5 ? 8 : 0) - (st.rate < .9 || st.rate > 1.12 ? 10 : 0)));
+    return {...st, acc, drift, score, color: score >= 90 ? "g" : score >= 70 ? "y" : "r"};
+  });
+  const totalN = list.reduce((a,b)=>a+b.total,0), okN = list.reduce((a,b)=>a+b.ok,0);
+  const allDev = list.flatMap(b => b.dev), sd = allDev.length ? Math.sqrt(allDev.reduce((a,b)=>a+b*b,0)/allDev.length) : 0;
+  return {bars:list, acc: totalN ? okN/totalN : 0, bpm: Math.round(60/spb), steady: sd, events:E.length, heard:P.length, pairs, E, P, spb, t0,
+    score: Math.round(list.reduce((a,b)=>a+b.score,0)/Math.max(1,list.length))};
+}
+/* 결과를 말로: 잘한 점 하나, 고칠 마디 둘(이유와 함께), 다음 연습 계획(끊어서 → 이어서 → 전체) */
+function adviseTake(piece, r, barA, barB){
+  const hands = h => h === 0 ? "오른손" : h === 1 ? "왼손" : "";
+  const obj = w => { const c = w.charCodeAt(w.length-1); return w + (c >= 0xAC00 && c <= 0xD7A3 && (c-0xAC00)%28 ? "을" : "를"); };
+  const why = b => { const w = [];
+    b.wrong.slice(0,2).forEach(x => w.push(`${hands(x.want.h)} ${pname(x.want.m)} 대신 ${obj(pname(x.got))} 쳤어`));
+    if(b.missed.length) w.push(`${[...new Set(b.missed.map(n=>hands(n.h)))].join("·")} ${obj(b.missed.slice(0,3).map(n=>pname(n.m)).join(", ") + (b.missed.length>3?" 등":""))} 빠뜨렸어`);
+    if(b.faint.length >= 2) w.push("왼손 낮은 음이 잘 안 들렸어. 조금 더 또렷하게");
+    if(b.restart) w.push("멈췄다가 다시 쳤어");
+    else if(b.pause) w.push(b.pauseAt === "edge" ? `앞 마디에서 넘어올 때 ${b.pauseSec.toFixed(1)}초 멈칫했어` : `마디 안에서 ${b.pauseSec.toFixed(1)}초 멈칫했어`);
+    if(b.extra >= 2) w.push(`악보에 없는 음을 ${b.extra}번 더 쳤어`);
+    if(b.rate < .9) w.push("처음보다 빨라졌어 (서두름)"); else if(b.rate > 1.12) w.push("처음보다 느려졌어");
+    return w; };
+  const weak = r.bars.filter(b => b.color !== "g").sort((a,b)=>a.score-b.score).slice(0,2).map(b => ({bar:b.bar, score:b.score, why:why(b)}));
+  const best = r.bars.filter(b => b.color === "g").map(b=>b.bar);
+  const slow = Math.max(40, Math.round(r.bpm*.7/4)*4), plan = [];
+  if(!weak.length){
+    plan.push(r.steady > .2 ? `박자가 조금 흔들렸어. 메트로놈 ♩=${r.bpm}에 맞춰 ${barA}~${barB}마디를 한 번 더` : `${barA}~${barB}마디 완벽! 빠르기를 ♩=${Math.round(r.bpm*1.1)}로 올려 보자`);
+    if(barB < piece.bars.length) plan.push(`다음엔 ${barA}~${Math.min(piece.bars.length, barB+4)}마디로 늘려서 녹음하기`);
+  } else {
+    const w = weak[0].bar, edge = r.bars.find(b=>b.bar===w)?.pauseAt === "edge" && w > barA;
+    plan.push(edge ? `${w-1}마디 끝 박 → ${w}마디 첫 박만 이어서 5번 (넘어가는 곳 연습)` : `${w}마디만 ♩=${slow}로 천천히 3번`);
+    plan.push(`${Math.max(barA,w-1)}~${Math.min(barB,w+1)}마디를 이어서 2번`);
+    if(weak[1]) plan.push(`${weak[1].bar}마디도 같은 방법으로 한 번`);
+    plan.push(`마지막으로 ${barA}~${barB}마디 전체를 다시 녹음하기`);
+  }
+  const praise = r.acc >= .95 ? "음을 거의 다 맞게 쳤어!" : best.length ? `${best.slice(0,3).join(", ")}마디는 아주 깔끔했어!` : r.steady < .15 ? "박자를 고르게 지켰어!" : "끝까지 쳐 낸 게 멋져!";
+  return {weak, best, plan, praise};
+}
+/*AN-END*/
 
 const Mic = {stream:null, an:null, buf:null, timer:0, tr:null, onRaw:null, heard:null, wake:null};
 async function micStart(){
@@ -1313,6 +1484,219 @@ function finish(){
   if(medal != null) delete cfg.speed;
   m.querySelector("#again").onclick = () => { m.remove(); startActivity(cfg); };
   m.querySelector("#home").onclick = () => { m.remove(); go(A && A.lessonId && !A.mission ? "map" : "home"); };
+}
+
+/* ---------- 곡 연습실: 진짜 곡을 몇 마디씩 녹음하고, 끝난 뒤 마디별로 분석한다 ----------
+   악보: Mutopia Project(퍼블릭 도메인·CC BY-SA)의 MIDI를 tools/build-scores.js로 바꾼 data/scores.json
+   받아 적기: Spotify Basic Pitch(Apache-2.0)를 tools/build-bp.sh로 묶은 bp/basic-pitch.js — 양손·화음까지 찾는다 */
+let LIB = null, libLoading = null, BPload = null;
+const LV = {level:1, piece:null, a:1, b:4, hand:"both", bpm:80, phase:"setup", result:null, advice:null, take:null, selBar:null, msg:""};
+function loadLib(){ return libLoading ||= fetch("data/scores.json").then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))).then(j => (LIB = j.pieces)).catch(e => { libLoading = null; throw e; }); }
+function loadBP(){ return BPload ||= new Promise((res, rej) => {
+  if(window.SomiBasicPitch) return res(window.SomiBasicPitch);
+  const s = document.createElement("script"); s.src = "bp/basic-pitch.js";
+  s.onload = () => window.SomiBasicPitch ? res(window.SomiBasicPitch) : rej(new Error("no bp")); s.onerror = () => { BPload = null; rej(new Error("load")); };
+  document.head.appendChild(s); }); }
+const HANDS = [["both","양손"],[0,"오른손"],[1,"왼손"]];
+const labRec = id => (S.lab[id] ||= {takes:[]});
+
+function renderLab(){
+  const el = $("#s-lab");
+  if(!LIB){ el.innerHTML = `<div class="hello">${bunny(72)}<div class="bubble"><b>곡 연습실</b>악보를 불러오는 중이야…</div></div>`;
+    loadLib().then(() => cur==="lab" && renderLab(), () => { el.innerHTML = `<div class="card"><h2>악보를 불러오지 못했어요</h2><p class="muted">인터넷 연결을 확인하고 다시 열어 주세요.</p><button class="btn" id="libretry">다시 시도</button></div>`; $("#libretry").onclick = renderLab; }); return; }
+  if(!LV.piece) return renderLibrary(el);
+  renderPiece(el);
+}
+function renderLibrary(el){
+  const lvName = {1:"쉬움", 2:"보통", 3:"도전"}, list = LIB.filter(p => p.level === LV.level), groups = {};
+  list.forEach(p => (groups[p.set || p.composer] ||= []).push(p));
+  el.innerHTML = `<div class="hello">${bunny(72)}<div class="bubble"><b>곡 연습실</b>진짜 곡을 몇 마디씩 녹음하면, 솜이가 마디마다 잘된 곳과 연습할 곳을 알려 줄게.</div></div>
+    <div class="lvtabs" role="group" aria-label="단계">${[1,2,3].map(l => `<button class="btn ${l===LV.level?"":"ghost"}" data-lv="${l}">${lvName[l]} · ${LIB.filter(p=>p.level===l).length}곡</button>`).join("")}</div>
+    ${Object.entries(groups).map(([g, ps]) => `<div class="setname">${esc(g)}</div><div class="pieces">${ps.map(p => { const t = S.lab[p.id]?.takes || [], last = t[t.length-1];
+      return `<button class="piece" data-pc="${p.id}"><b>${esc(p.title)}</b><span>${esc(p.composer)}${p.opus?" · "+esc(p.opus):""} · ${p.bars.length}마디</span>${last?`<span>최근 ${last.a}~${last.b}마디 ${last.score}점</span>`:""}</button>`; }).join("")}</div>`).join("")}
+    <p class="muted" style="font-size:12px">악보 데이터: The Mutopia Project (mutopiaproject.org) — 곡마다 퍼블릭 도메인 또는 CC BY-SA. 받아 적기: Spotify Basic Pitch (Apache-2.0).</p>`;
+  el.querySelectorAll("[data-lv]").forEach(b => b.onclick = () => { LV.level = +b.dataset.lv; renderLab(); });
+  el.querySelectorAll("[data-pc]").forEach(b => b.onclick = () => openPiece(+b.dataset.pc));
+}
+function openPiece(id){
+  const p = LIB.find(x => x.id === id); if(!p) return;
+  const t = labRec(id).takes, last = t[t.length-1];
+  Object.assign(LV, {piece:p, phase:"setup", result:null, advice:null, take:null, selBar:null, msg:"",
+    a: last ? last.a : 1, b: last ? last.b : Math.min(p.bars.length, 4), hand: last ? last.hand : "both", bpm: last ? last.bpm : Math.max(40, Math.round(p.tempo*.7/4)*4)});
+  renderLab(); window.scrollTo(0,0);
+}
+const stepper = (id, v, label) => `<span class="stepper"><button data-st="${id}" data-d="-1" aria-label="${label} 줄이기">−</button><output>${v}</output><button data-st="${id}" data-d="1" aria-label="${label} 늘리기">+</button></span>`;
+function renderPiece(el){
+  const p = LV.piece, n = p.bars.length, rec = labRec(p.id), r = LV.result;
+  el.innerHTML = `<div class="labhead"><button class="x" id="labback" aria-label="곡 목록으로">←</button><div class="txt"><h2>${esc(p.title)}</h2><span class="muted" style="font-size:14px">${esc(p.composer)}${p.opus?" · "+esc(p.opus):""} · ${n}마디 · ${p.ts[0]}/${p.ts[1]}박자</span></div></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="ctrl"><label>마디</label>${stepper("a", LV.a, "시작 마디")}<span>~</span>${stepper("b", LV.b, "끝 마디")}
+        <span class="row" style="gap:4px;flex-wrap:wrap">${[[1,4],[5,8],[1,8]].filter(([x,y]) => y <= n).map(([x,y]) => `<button class="pill" data-rg="${x}-${y}">${x}~${y}</button>`).join("")}</span></div>
+      <div class="ctrl"><label>손</label><div class="seg" role="group" aria-label="손">${HANDS.map(([h,t]) => `<button data-hd="${h}" aria-pressed="${LV.hand===h}">${t}</button>`).join("")}</div></div>
+      <div class="ctrl"><label>빠르기</label>${stepper("bpm", "♩="+LV.bpm, "빠르기")}<span class="muted" style="font-size:13px">녹음 전에 이 빠르기로 4박을 세 줘 (원래 ♩=${p.tempo})</span></div>
+      <div class="rollwrap"><canvas id="roll" aria-label="고른 마디의 음표 모양"></canvas></div>
+      ${p.repeats ? `<span class="muted" style="font-size:12px">도돌이표가 있는 곡이라 마디 번호는 반복을 펼친 순서로 셌어요. 악보와 다를 수 있어요.</span>` : ""}
+      <div id="labact"></div>
+    </div>
+    ${r ? reportHtml() : ""}
+    ${rec.takes.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px"><h3>이 곡 녹음 기록</h3><div class="takes">${rec.takes.slice(-8).reverse().map(t => `<div><span>${esc(t.d.slice(5).replace("-","/"))} · ${t.a}~${t.b}마디 · ${HANDS.find(h=>h[0]===t.hand)[1]} · ♩=${t.bpm}</span><span>${t.score}점</span></div>`).join("")}</div></div>` : ""}
+    <p class="muted" style="font-size:12px">악보: <a href="${esc(p.source)}" target="_blank" rel="noopener">Mutopia Project에서 이 곡 악보 PDF 받기</a> · ${esc(p.license)}</p>`;
+  $("#labback").onclick = () => { recStop(true); LV.piece = null; renderLab(); };
+  el.querySelectorAll("[data-st]").forEach(b => b.onclick = () => { const d = +b.dataset.d, k = b.dataset.st;
+    if(k==="a") LV.a = Math.max(1, Math.min(LV.b, LV.a + d)); if(k==="b") LV.b = Math.max(LV.a, Math.min(n, LV.b + d)); if(k==="bpm") LV.bpm = Math.max(30, Math.min(220, LV.bpm + d*4));
+    LV.result = null; renderLab(); });
+  el.querySelectorAll("[data-rg]").forEach(b => b.onclick = () => { [LV.a, LV.b] = b.dataset.rg.split("-").map(Number); LV.result = null; renderLab(); });
+  el.querySelectorAll("[data-hd]").forEach(b => b.onclick = () => { LV.hand = b.dataset.hd === "both" ? "both" : +b.dataset.hd; LV.result = null; renderLab(); });
+  el.querySelectorAll("[data-bar]").forEach(b => b.onclick = () => { LV.selBar = LV.selBar === +b.dataset.bar ? null : +b.dataset.bar; renderLab(); });
+  el.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => { const [a2, b2, bpm2] = b.dataset.plan.split("-").map(Number); Object.assign(LV, {a:a2, b:b2, bpm:bpm2 || LV.bpm, result:null}); renderLab(); window.scrollTo(0,0); });
+  renderLabAction(); drawRoll();
+}
+function renderLabAction(){
+  const box = $("#labact"); if(!box) return;
+  if(LV.phase === "rec"){ box.innerHTML = `<div class="recbox"><div class="recbig" id="recbig">4</div><div id="rectxt">준비…</div><div class="meter" style="width:min(320px,90%)"><i id="reclv"></i></div>
+      <button class="btn" id="recstop">다 쳤어!</button><span class="muted" style="font-size:13px">다 치고 4초 동안 조용하면 저절로 끝나</span></div>`; $("#recstop").onclick = () => recStop(false); return; }
+  if(LV.phase === "busy"){ box.innerHTML = `<div class="recbox">${bunny(64)}<div id="busytxt">${LV.msg || "솜이가 듣는 중…"}</div><div class="meter" style="width:min(320px,90%)"><i id="busylv"></i></div></div>`; return; }
+  box.innerHTML = `<div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="labplay">▶ 들어보기</button><button class="btn" id="labrec">🎙 녹음하기</button>
+      <label class="btn ghost" for="labfile" style="cursor:pointer">📁 녹음 파일 올리기</label><input type="file" id="labfile" accept="audio/*" hidden></div>
+    ${LV.msg ? `<p class="muted" role="status" style="margin:0">${esc(LV.msg)}</p>` : `<p class="muted" style="margin:0;font-size:13px">휴대폰을 피아노 위에 두고, ${LV.a}~${LV.b}마디를 ${HANDS.find(h=>h[0]===LV.hand)[1]}으로 쭉 쳐 봐. 틀려도 멈추지 말고 끝까지!</p>`}`;
+  $("#labplay").onclick = () => playRange();
+  $("#labrec").onclick = () => recStart();
+  $("#labfile").onchange = e => { const f = e.target.files[0]; if(f) analyzeFile(f); e.target.value = ""; };
+}
+// 고른 마디의 음을 빠르기에 맞춰 들려준다
+function playRange(){
+  const p = LV.piece, from = p.bars[LV.a-1], to = LV.b < p.bars.length ? p.bars[LV.b] : Infinity, spb = 60/LV.bpm;
+  p.notes.filter(n => n[0] >= from-1e-6 && n[0] < to-1e-6 && (LV.hand==="both" || n[3]===LV.hand)).forEach(n => tone(n[2], Math.max(.3, n[1]*spb*1.2), .2, (n[0]-from)*spb));
+}
+// 음표 모양: 가로 = 박, 세로 = 음높이. 결과가 있으면 맞은 음 초록, 틀리거나 빠진 음 분홍 테두리, 더 친 음 회색 점
+function drawRoll(playBeat){
+  const cv = $("#roll"); if(!cv || !LV.piece) return;
+  const p = LV.piece, from = p.bars[LV.a-1], to = LV.b < p.bars.length ? p.bars[LV.b] : Math.max(...p.notes.map(n=>n[0]+n[1]));
+  const ns = p.notes.filter(n => n[0] >= from-1e-6 && n[0] < to-1e-6 && (LV.hand==="both" || n[3]===LV.hand));
+  const wrap = cv.parentElement, ppb = Math.max(28, Math.min(70, (wrap.clientWidth - 20) / Math.max(1, to-from))), W = Math.ceil((to-from)*ppb + 20), H = 200, dpr = devicePixelRatio || 1;
+  cv.style.width = W + "px"; cv.width = W*dpr; cv.height = H*dpr;
+  const c = cv.getContext("2d"), css = getComputedStyle(document.documentElement), col = v => css.getPropertyValue(v).trim();
+  c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,W,H);
+  if(!ns.length){ c.fillStyle = col("--ink2"); c.font = `14px ${col("--body")}`; c.fillText("이 손에는 고른 마디에 음이 없어요", 12, 30); return; }
+  const lo = Math.min(...ns.map(n=>n[2])) - 2, hi = Math.max(...ns.map(n=>n[2])) + 2, rowH = (H - 26) / (hi - lo + 1), X = b => 10 + (b - from)*ppb, Y = m => 20 + (hi - m)*rowH;
+  c.font = `12px ${col("--body")}`; c.textBaseline = "top";
+  for(let b = LV.a; b <= LV.b + 1 && b <= p.bars.length; b++){ const bx = X(p.bars[b-1] ?? to); c.strokeStyle = col("--line"); c.lineWidth = 1.5; c.beginPath(); c.moveTo(bx, 16); c.lineTo(bx, H-4); c.stroke();
+    if(b <= LV.b){ c.fillStyle = col("--ink2"); c.fillText(String(b), bx + 3, 2); } }
+  // 결과가 있으면 음마다 맞았는지 표시
+  const st = new Map(); const R = LV.result;
+  if(R) R.pairs.forEach(([i,j]) => { if(i < 0) return; const e = R.E[i]; e.notes.forEach(q => st.set(e.beat.toFixed(3)+":"+q.m, e.orn ? "orn" : j < 0 ? "miss" : R.P[j].ms.some(x => (x-q.m)%12 === 0) ? "ok" : "miss")); });
+  ns.forEach(n => { const x = X(n[0]), y = Y(n[2]), w = Math.max(5, n[1]*ppb - 2), s = st.get(n[0].toFixed(3)+":"+n[2]);
+    c.globalAlpha = s === "orn" ? .35 : 1;
+    c.fillStyle = !R ? (n[3] === 0 ? col("--pink") : col("--lilac")) : s === "ok" ? col("--mint") : s === "miss" ? col("--card") : col("--line");
+    c.strokeStyle = s === "miss" ? col("--pink") : "transparent"; c.lineWidth = 2.5;
+    c.beginPath(); c.roundRect ? c.roundRect(x, y, w, Math.max(4, rowH-1), 3) : c.rect(x, y, w, Math.max(4, rowH-1)); c.fill(); if(s === "miss") c.stroke(); c.globalAlpha = 1; });
+  if(R){ c.fillStyle = col("--ink2"); R.pairs.forEach(([i,j]) => { if(i >= 0 || j < 0) return; const bt = timeToBeat(R, R.P[j].t); if(bt == null || bt < from || bt > to) return;
+    R.P[j].ms.forEach(m => { if(m >= lo && m <= hi){ c.beginPath(); c.arc(X(bt), Y(m) + rowH/2, 3.5, 0, 7); c.fill(); } }); }); }
+  if(playBeat != null){ c.strokeStyle = col("--ink"); c.lineWidth = 2; c.beginPath(); c.moveTo(X(playBeat), 14); c.lineTo(X(playBeat), H); c.stroke();
+    const sx = X(playBeat) - wrap.clientWidth/2; if(Math.abs(wrap.scrollLeft - sx) > 40) wrap.scrollLeft = Math.max(0, sx); }
+}
+// 녹음 시각(초) → 악보 박: 앞뒤로 맞춘 음 사이를 이어서 계산한다 (멈칫한 곳도 따라간다)
+function timeToBeat(R, t){
+  const m = R.pairs.filter(([i,j]) => i >= 0 && j >= 0).map(([i,j]) => [R.P[j].t, R.E[i].beat]); if(!m.length) return null;
+  if(t <= m[0][0]) return m[0][1] - (m[0][0]-t)/R.spb;
+  for(let k=1;k<m.length;k++) if(t <= m[k][0]){ const [t0,b0] = m[k-1], [t1,b1] = m[k]; return t1 > t0 ? b0 + (b1-b0)*(t-t0)/(t1-t0) : b1; }
+  const [tl, bl] = m[m.length-1]; return bl + (t-tl)/R.spb;
+}
+function reportHtml(){
+  const R = LV.result, A = LV.advice, sel = LV.selBar != null ? R.bars.find(b=>b.bar===LV.selBar) : null;
+  const steady = R.steady < .12 ? "아주 고름" : R.steady < .25 ? "고른 편" : "흔들림";
+  const reasons = b => { const x = adviseTake(LV.piece, {...R, bars:[b]}, b.bar, b.bar).weak[0]; return x ? x.why : []; };
+  return `<div class="card" style="display:flex;flex-direction:column;gap:12px" id="report">
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap"><h2>${LV.a}~${LV.b}마디 분석</h2><span class="pill">총점 ${R.score}</span></div>
+    <div class="hello">${bunny(64)}<div class="bubble"><b>${esc(A.praise)}</b>${A.weak.length ? `${A.weak.map(w=>w.bar+"마디").join(", ")}를 조금 더 연습하면 돼.` : "고칠 곳이 거의 없어!"}</div></div>
+    <div class="chips"><div class="chip"><b>${Math.round(R.acc*100)}%</b><span>맞게 친 음</span></div><div class="chip"><b>♩=${R.bpm}</b><span>실제 빠르기</span></div><div class="chip"><b style="font-size:20px">${steady}</b><span>박자</span></div></div>
+    <div><div class="muted" style="font-size:13px;margin-bottom:6px">마디를 누르면 자세히 볼 수 있어</div><div class="barmap">${R.bars.map(b => `<button class="barchip ${b.color}" data-bar="${b.bar}" aria-pressed="${LV.selBar===b.bar}">${b.bar}마디<small>${b.score}점</small></button>`).join("")}</div></div>
+    ${sel ? `<div class="recbox" style="align-items:flex-start;text-align:left"><b style="font-family:var(--display);font-weight:400;font-size:18px">${sel.bar}마디 · ${sel.score}점</b>${(reasons(sel).length ? reasons(sel) : ["깔끔했어!"]).map(t=>`<span>· ${esc(t)}</span>`).join("")}</div>` : ""}
+    ${A.weak.length ? `<div>${A.weak.map(w => `<p style="margin:4px 0"><b>${w.bar}마디</b>: ${esc(w.why.join(", ") || "조금 불안했어")}</p>`).join("")}</div>` : ""}
+    <div><h3>다음 연습 계획</h3><ol class="plan">${A.plan.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+      ${A.weak.length ? `<button class="btn alt" style="margin-top:8px" data-plan="${A.weak[0].bar}-${A.weak[0].bar}-${Math.max(40, Math.round(R.bpm*.7/4)*4)}">${A.weak[0].bar}마디만 천천히 녹음하기</button>`
+        : LV.b < LV.piece.bars.length ? `<button class="btn alt" style="margin-top:8px" data-plan="${LV.a}-${Math.min(LV.piece.bars.length, LV.b+4)}-${LV.bpm}">${LV.a}~${Math.min(LV.piece.bars.length, LV.b+4)}마디로 늘리기</button>` : ""}</div>
+    ${LV.take ? `<div><h3>내 연주 다시 듣기</h3><audio id="takeaudio" controls src="${LV.take}" style="width:100%"></audio></div>` : ""}
+    <p class="muted" style="font-size:12px;margin:0">솜이가 녹음을 듣고 받아 적은 결과라 가끔 틀리게 들을 수 있어요. 낮은 왼손 음과 꾸밈음은 특히 헷갈려요.</p></div>`;
+}
+document.addEventListener("timeupdate", e => { if(e.target.id === "takeaudio" && LV.result) drawRoll(timeToBeat(LV.result, e.target.currentTime + LV.result.recOffset)); }, true);
+
+/* 녹음: 마이크 소리를 그대로 모았다가(ScriptProcessor) 22050Hz로 바꿔 Basic Pitch에 넘긴다 */
+const Rec = {stream:null, node:null, src:null, chunks:[], sr:44100, heard:false, quiet:0, t0:0, timer:0, wake:null};
+async function recStart(){
+  const a = audio(); if(!a || !navigator.mediaDevices?.getUserMedia){ LV.msg = "이 브라우저에서는 녹음이 안 돼요. '녹음 파일 올리기'를 써 주세요."; return renderLabAction(); }
+  micStop();
+  try{ Rec.stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}}); }
+  catch(e){ LV.msg = "녹음이 막혔어요. claude.ai 링크 안에서는 마이크를 못 써요. 휴대폰 주소(johnjang125.github.io/somi-piano)에서 열거나, 휴대폰 녹음 앱으로 녹음한 파일을 올려 주세요."; return renderLabAction(); }
+  try{ Rec.wake = await navigator.wakeLock?.request("screen"); }catch(e){}
+  Object.assign(Rec, {chunks:[], sr:a.sampleRate, heard:false, quiet:0, t0:a.currentTime});
+  Rec.src = a.createMediaStreamSource(Rec.stream); Rec.node = a.createScriptProcessor(4096, 1, 1);
+  Rec.node.onaudioprocess = e => { const d = e.inputBuffer.getChannelData(0); Rec.chunks.push(new Float32Array(d));
+    let s = 0; for(let i=0;i<d.length;i++) s += d[i]*d[i]; const rms = Math.sqrt(s/d.length), lv = $("#reclv"); if(lv) lv.style.width = Math.min(100, rms*600) + "%";
+    const secs = Rec.chunks.length*4096/Rec.sr;
+    if(secs > 2.4 && rms > .02) Rec.heard = true;
+    Rec.quiet = Rec.heard && rms < .006 ? Rec.quiet + 4096/Rec.sr : 0;
+    if(Rec.quiet > 4 || secs > 150) recStop(false); };
+  Rec.src.connect(Rec.node); Rec.node.connect(a.destination);
+  LV.phase = "rec"; LV.result = null; renderLabAction();
+  // 4박 세기 (첫 박은 쿵)
+  const spb = 60/LV.bpm; let k = 0;
+  const tick = () => { if(LV.phase !== "rec") return; const big = $("#recbig");
+    if(k < 4){ drum(k === 0); if(big) big.textContent = 4 - k; k++; Rec.timer = setTimeout(tick, spb*1000); }
+    else { if(big) big.textContent = "🎹"; const t = $("#rectxt"); if(t) t.textContent = `녹음 중 · ${LV.a}~${LV.b}마디를 쳐 봐!`; } };
+  tick();
+}
+function recStop(cancel){
+  clearTimeout(Rec.timer);
+  if(!Rec.stream){ return; }
+  try{ Rec.node.disconnect(); Rec.src.disconnect(); }catch(e){}
+  Rec.stream.getTracks().forEach(t => t.stop()); Rec.stream = null; try{ Rec.wake?.release(); }catch(e){} Rec.wake = null;
+  if(cancel){ if(LV.phase === "rec") LV.phase = "setup"; return; }
+  const len = Rec.chunks.reduce((a,c)=>a+c.length,0), all = new Float32Array(len); let o = 0; Rec.chunks.forEach(c => { all.set(c, o); o += c.length; }); Rec.chunks = [];
+  if(len < Rec.sr*3){ LV.phase = "setup"; LV.msg = "녹음이 너무 짧아요. 다시 해 볼까?"; return renderLab(); }
+  analyzeAudio(all, Rec.sr);
+}
+async function analyzeFile(file){
+  LV.phase = "busy"; LV.msg = "녹음 파일을 여는 중…"; renderLabAction();
+  try{ const buf = await audio().decodeAudioData(await file.arrayBuffer()), ch = buf.numberOfChannels, mono = new Float32Array(buf.length);
+    for(let c=0;c<ch;c++){ const d = buf.getChannelData(c); for(let i=0;i<d.length;i++) mono[i] += d[i]/ch; }
+    analyzeAudio(mono, buf.sampleRate);
+  }catch(e){ LV.phase = "setup"; LV.msg = "이 파일은 열 수 없어요. m4a, mp3, wav 녹음 파일을 올려 주세요."; renderLab(); }
+}
+async function to22k(data, sr){
+  const n = Math.ceil(data.length * 22050 / sr), oc = new OfflineAudioContext(1, n, 22050), b = oc.createBuffer(1, data.length, sr);
+  b.getChannelData(0).set(data); const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start(); return (await oc.startRendering()).getChannelData(0);
+}
+function wavUrl(f32){
+  const n = f32.length, buf = new ArrayBuffer(44 + n*2), v = new DataView(buf), w = (o, s) => [...s].forEach((ch,i) => v.setUint8(o+i, ch.charCodeAt(0)));
+  w(0,"RIFF"); v.setUint32(4, 36+n*2, true); w(8,"WAVEfmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,22050,true); v.setUint32(28,44100,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++) v.setInt16(44+i*2, Math.max(-1, Math.min(1, f32[i]))*32767, true);
+  return URL.createObjectURL(new Blob([buf], {type:"audio/wav"}));
+}
+async function analyzeAudio(data, sr){
+  LV.phase = "busy"; LV.msg = "솜이가 녹음을 듣는 중… (처음엔 준비하느라 조금 걸려)"; renderLabAction();
+  const prog = p => { const b = $("#busylv"); if(b) b.style.width = Math.round(p*100) + "%"; const t = $("#busytxt"); if(t) t.textContent = `솜이가 듣고 받아 적는 중… ${Math.round(p*100)}%`; };
+  try{
+    const [bp, a22] = await Promise.all([loadBP(), to22k(data, sr)]);
+    if(LV.take) URL.revokeObjectURL(LV.take); LV.take = wavUrl(a22);
+    const notes = await bp.transcribe(a22, "bp/model.json", prog);
+    const R = analyzeTake(LV.piece, LV.a, LV.b, LV.hand, notes); R.recOffset = 0;
+    if(R.pairs.every(([i,j]) => i < 0 || j < 0)){ LV.phase = "setup"; LV.msg = "피아노 소리를 거의 못 들었어요. 휴대폰을 피아노에 더 가까이 두고 다시 녹음해 볼까?"; return renderLab(); }
+    LV.result = R; LV.advice = adviseTake(LV.piece, R, LV.a, LV.b); LV.phase = "setup"; LV.msg = ""; LV.selBar = null;
+    saveTake(R);
+    renderLab(); $("#report")?.scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(e){ LV.phase = "setup"; LV.msg = "분석 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요."; renderLab(); }
+}
+function saveTake(R){
+  const k = dkey(), d = today(), rec = labRec(LV.piece.id), wasGoal = (d.xp||0) >= S.settings.goal, wasAll = allDone(k);
+  rec.takes.push({d:k, a:LV.a, b:LV.b, hand:LV.hand, score:R.score, acc:Math.round(R.acc*100), bpm:LV.bpm, bars:Object.fromEntries(R.bars.map(b=>[b.bar, b.score]))}); if(rec.takes.length > 40) rec.takes.shift();
+  d.sessions++; d.missions.lesson = true;
+  const xp = 15 + Math.round(R.score/10); d.xp = (d.xp||0) + xp; S.xp += xp; let gems = 2 + (R.score >= 90 ? 2 : 0);
+  if(!wasGoal && d.xp >= S.settings.goal) gems += 5; if(!wasAll && allDone(k)) gems += mood().chest; S.gems += gems;
+  ["first","recorder"].forEach(id => { if(!S.stickers.includes(id)) S.stickers.push(id); });
+  if(R.bars.every(b => b.color === "g") && !S.stickers.includes("allgreen")) S.stickers.push("allgreen");
+  S.log.push({d:k, t:`${LV.piece.title} ${LV.a}~${LV.b}마디 녹음`, s:R.score >= 90 ? 3 : R.score >= 70 ? 2 : 1, a:Math.round(R.acc*100)});
+  save(); toast(`⭐ +${xp} XP · 💎 +${gems}`);
 }
 
 /* ---------- 반짝이 효과 ---------- */
