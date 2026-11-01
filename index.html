@@ -758,7 +758,7 @@ function weeklyReport(){
   const pieces = Object.entries(S.lab).map(([id, r]) => ({id, p: LIB?.find(x => x.id === +id), tk: r.takes.filter(t => days.includes(t.d)), all: r.takes})).filter(x => x.tk.length);
   if(pieces.length){
     lines.push("", "🎼 곡 연습 (녹음 분석)");
-    pieces.forEach(({id, p, tk, all}) => { const title = p ? `${p.composer} ${p.title}` : `곡 ${id}`, best = Math.max(...tk.map(t=>t.score));
+    pieces.forEach(({id, p, tk, all}) => { const title = p ? [p.composer, p.title].filter(Boolean).join(" ") : `곡 ${id}`, best = Math.max(...tk.map(t=>t.score));
       const bars = [...new Set(tk.flatMap(t => Object.keys(t.bars)).map(Number))].sort((a,b)=>a-b);
       lines.push(`• ${title}: 녹음 ${tk.length}번, ${bars[0]}~${bars[bars.length-1]}마디, 최고 ${best}점, 빠르기 ♩=${tk[0].bpm}→${tk[tk.length-1].bpm}`);
       const h = barHistory(id), firstWeek = b => (h[b] || []).find(x => days.includes(x.d)), lastOf = b => (h[b] || []).slice(-1)[0];
@@ -795,6 +795,24 @@ function renderParent(){
      <div class="field"><span>디지털 피아노 연결 (USB 미디)</span><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="midi">${midiName?"연결됨: "+esc(midiName):"피아노 연결하기"}</button></div>
        <span class="muted" style="font-size:13px">크롬·엣지에서 index.html 파일을 직접 열었을 때 작동해요. claude.ai 링크 안에서는 브라우저가 막아요.</span><div id="midimsg" class="muted" role="status" style="font-size:14px"></div></div>
    </div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>내 악보 올리기</h3>
+     <p class="muted" style="margin:0;font-size:14px">조카가 배우는 곡의 <b>MusicXML</b>(.musicxml, .mxl) 또는 <b>MIDI</b>(.mid) 파일을 올리면 곡 연습실 '내 악보'에 들어가요. MusicXML이 마디 번호까지 악보와 똑같아서 가장 좋아요.</p>
+     <details class="help"><summary>악보 파일은 어디서 구하나요?</summary><div class="muted" style="font-size:13px;line-height:1.6">
+       · <b>MuseScore</b>(무료 프로그램·사이트): 곡을 열고 [파일 → 내보내기 → MusicXML]<br>
+       · 종이 악보나 PDF만 있다면: MuseScore의 [PDF 가져오기]로 MusicXML을 만들 수 있어요 (결과를 한 번 확인해 주세요)<br>
+       · PDF·사진 악보를 이 앱이 직접 읽지는 못해요<br>
+       · 올린 악보는 이 기기에만 저장되고, 백업 코드에는 들어가지 않아요</div></details>
+     <div class="field"><label for="scfile">악보 파일</label><input type="file" id="scfile" accept=".musicxml,.xml,.mxl,.mid,.midi"></div>
+     <div id="scform" hidden style="display:flex;flex-direction:column;gap:8px">
+       <div id="scinfo" class="pill" style="align-self:flex-start;flex-wrap:wrap"></div>
+       <div class="field"><label for="sctitle">곡 이름</label><input id="sctitle" maxlength="40"></div>
+       <div class="field"><label for="sccomp">작곡가 (없으면 비워 두세요)</label><input id="sccomp" maxlength="30"></div>
+       <div class="field" id="scpickrow"><label for="scpick">못갖춘마디 (MIDI만): 첫 마디가 짧으면 그 길이</label>
+         <select id="scpick" style="font:inherit;padding:8px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink)">${[[0,"없음"],[.5,"반 박"],[1,"1박"],[1.5,"1박 반"],[2,"2박"],[3,"3박"]].map(([v,t])=>`<option value="${v}">${t}</option>`).join("")}</select></div>
+       <button class="btn" id="scadd" style="align-self:flex-start">곡 연습실에 추가</button></div>
+     <div id="scmsg" class="muted" role="status"></div>
+     ${(() => { const mine = loadMine(); return mine.length ? `<div class="takes">${mine.map(p => `<div><span>${esc(p.title)}${p.composer?" · "+esc(p.composer):""} · ${p.bars.length}마디</span><button class="pill" data-delmine="${p.id}">지우기</button></div>`).join("")}</div>` : ""; })()}
+   </div>
    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>이번 주 연습 보고서</h3>
      <p class="muted" style="margin:0;font-size:14px">카카오톡 같은 곳에 붙여 넣어 가족에게 보낼 수 있게 글로 정리했어요.</p>
      <textarea id="wk" rows="9" readonly style="font:inherit;font-size:14px;padding:10px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box">${esc(weeklyReport())}</textarea>
@@ -824,6 +842,32 @@ function renderParent(){
     navigator.clipboard?.writeText(t.value).then(() => m.textContent = "복사했어요. 카톡 대화창에 붙여 넣으면 돼요.", () => { t.select(); m.textContent = "자동 복사가 안 돼서 글을 선택해 두었어요. 길게 눌러 복사하세요."; })
       ?? (t.select(), m.textContent = "글을 선택해 두었어요. 길게 눌러 복사하세요."); };
   if(!LIB && labMode()) loadLib().then(() => cur==="parent" && renderParent(), () => {});
+  // 내 악보 올리기
+  let pend = null; const scmsg = t => $("#scmsg").textContent = t;
+  const parse = async () => {
+    try{ const s = await scoreFromFile(pend.fname, pend.u8, +$("#scpick").value); pend.s = s;
+      const h = [0,1].map(x => s.notes.filter(n=>n[3]===x).length);
+      $("#scinfo").textContent = `${s.fmt} · ${s.bars.length}마디 · ${s.ts[0]}/${s.ts[1]}박자 · ♩=${s.tempo} · 오른손 ${h[0]}음 / 왼손 ${h[1]}음`;
+      $("#scpickrow").hidden = s.fmt !== "MIDI"; $("#scform").hidden = false; scmsg("");
+    }catch(err){ pend.s = null; $("#scform").hidden = true; scmsg(err.message || "이 파일은 읽지 못했어요"); }
+  };
+  $("#scfile").onchange = async e => { const f = e.target.files[0]; if(!f) return; scmsg("악보를 읽는 중…");
+    pend = {fname:f.name, u8:new Uint8Array(await f.arrayBuffer())}; await parse();
+    if(pend.s) $("#sctitle").value = (pend.s.name || f.name.replace(/\.[^.]+$/, "")).slice(0,40); };
+  $("#scpick").onchange = () => pend && parse();
+  $("#scadd").onclick = () => {
+    if(!pend?.s) return; const title = $("#sctitle").value.trim(); if(!title){ scmsg("곡 이름을 적어 주세요."); return; }
+    const mine = loadMine(), id = Math.max(1e6, ...mine.map(p=>p.id), ...Object.keys(S.lab).map(Number)) + 1;
+    const {name, ...data} = pend.s, piece = {...data, id, title, composer:$("#sccomp").value.trim()};
+    if(!saveMine([...mine, piece])){ scmsg("저장 공간이 부족해요. 안 쓰는 내 악보를 지우고 다시 해 주세요."); return; }
+    const added = loadMine().find(p => p.id === id); if(LIB) LIB.unshift(added);
+    renderParent(); $("#scmsg").innerHTML = `'${esc(title)}'을(를) 넣었어요. <button class="pill" id="scopen">곡 연습실에서 열기</button>`;
+    $("#scopen").onclick = () => { LV.level = 0; go("lab"); loadLib().then(() => { if(cur==="lab") openPiece(id); }); };
+  };
+  $("#s-parent").querySelectorAll("[data-delmine]").forEach(b => b.onclick = () => {
+    if(!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "정말 지울까요?"; setTimeout(() => { if(b.isConnected){ delete b.dataset.armed; b.textContent = "지우기"; } }, 3000); return; }
+    const id = +b.dataset.delmine; saveMine(loadMine().filter(p => p.id !== id)); delete S.lab[id]; save();
+    if(LIB) LIB = LIB.filter(p => p.id !== id); if(LV.piece?.id === id) LV.piece = null; renderParent(); scmsg("지웠어요."); });
   $("#cal").onclick = calibrate;
   $("#micon").onchange = async e => { if(e.target.checked && !(await micStart())){ e.target.checked = false; $("#calmsg").textContent = micErr; return; }
     S.settings.mic = e.target.checked; save(); if(!S.settings.micOffset && e.target.checked) $("#calmsg").textContent = "'소리 맞추기'도 한 번 해 주세요."; };
@@ -1033,6 +1077,139 @@ function adviseTake(piece, r, barA, barB){
   return {weak, best, plan, praise};
 }
 /*AN-END*/
+
+/*SC-START*/
+/* 어른 코너에서 올린 악보 파일을 곡 연습실 형식({tempo, ts, key, bars, notes:[[시작박, 길이박, 음, 손]]})으로 바꾼다.
+   MusicXML(.musicxml/.xml)과 압축 MusicXML(.mxl)은 마디가 악보 그대로라 가장 정확하고, MIDI(.mid)는 박자표로 마디를 나눈다. */
+function parseMidiBytes(u8){
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), str = (o,n) => String.fromCharCode(...u8.subarray(o,o+n));
+  if(str(0,4) !== "MThd") throw new Error("MIDI 파일이 아니에요");
+  const ntr = dv.getUint16(10), div = dv.getUint16(12); if(div & 0x8000) throw new Error("시간 단위가 SMPTE인 MIDI는 아직 못 읽어요");
+  let p = 8 + dv.getUint32(4); const tracks = [];
+  for(let t=0; t<ntr && p+8 <= u8.length; t++){
+    if(str(p,4) !== "MTrk"){ p += 8 + dv.getUint32(p+4); t--; continue; }
+    const len = dv.getUint32(p+4), end = Math.min(u8.length, p + 8 + len); p += 8;
+    let tick = 0, run = 0; const ev = [];
+    const vlq = () => { let v = 0, b; do { b = u8[p++]; v = v*128 + (b & 127); } while(b & 128 && p < end); return v; };
+    while(p < end){
+      tick += vlq(); let st = u8[p];
+      if(st & 128){ p++; if(st < 0xF0) run = st; } else st = run;
+      if(st === 0xFF){ const type = u8[p++], l = vlq(); ev.push({tick, meta:type, data:u8.subarray(p, p+l)}); p += l; }
+      else if(st === 0xF0 || st === 0xF7){ p += vlq(); }
+      else { const hi = st & 0xF0, a = u8[p++], b = (hi===0xC0||hi===0xD0) ? 0 : u8[p++]; ev.push({tick, st:hi, a, b}); }
+    }
+    p = end; tracks.push(ev);
+  }
+  return {div, tracks};
+}
+// MIDI의 트랙 이름은 'control track', 'up:'처럼 곡 제목이 아닌 경우가 많아 쓰지 않는다 (제목은 파일 이름으로)
+function scoreFromMidi(u8, pickupBeats){
+  const {div, tracks} = parseMidiBytes(u8);
+  let tempo = null, key = null; const name = "", tsList = [];
+  const per = tracks.map(ev => { const on = {}, notes = [];
+    ev.forEach(e => {
+      if(e.meta === 0x51 && tempo == null) tempo = Math.round(60e6 / ((e.data[0]<<16)|(e.data[1]<<8)|e.data[2]));
+      if(e.meta === 0x58) tsList.push({beat:e.tick/div, num:e.data[0], den:2**e.data[1]});
+      if(e.meta === 0x59 && key == null){ const sf = e.data[0] > 127 ? e.data[0]-256 : e.data[0]; key = {sf, minor:!!e.data[1]}; }
+      if(e.st === 0x90 && e.b > 0) (on[e.a] ||= []).push(e.tick);
+      else if(e.st === 0x80 || (e.st === 0x90 && e.b === 0)){ const s = on[e.a]?.shift(); if(s != null) notes.push([s/div, (e.tick-s)/div, e.a]); } });
+    return notes; }).filter(n => n.length);
+  if(!per.length) throw new Error("파일에 음표가 없어요");
+  const avg = n => n.reduce((a,x)=>a+x[2],0)/n.length, order = per.map((n,i)=>[i,avg(n)]).sort((a,b)=>b[1]-a[1]), notes = [];
+  per.forEach((n,i) => { const rank = order.findIndex(o=>o[0]===i);
+    n.forEach(([s,d,m]) => notes.push([s, d, m, per.length === 1 ? (m >= 60 ? 0 : 1) : rank === 0 ? 0 : rank === order.length-1 ? 1 : (avg(n) >= 60 ? 0 : 1)])); });
+  // 못갖춘마디: 첫 음이 0박이 아니면 그대로 두고(앞에 쉼표가 있는 악보), 사용자가 고른 짧은 첫 마디 길이를 반영한다
+  const t0 = Math.min(...notes.map(n=>n[0])); if(pickupBeats) notes.forEach(n => n[0] -= t0);
+  const changes = (tsList.length ? tsList : [{beat:0, num:4, den:4}]).map(x => ({beat:x.beat - (pickupBeats ? t0 : 0), len:x.num*4/x.den, ts:[x.num,x.den]})).sort((a,b)=>a.beat-b.beat);
+  return finishScore(notes, changes, pickupBeats || 0, tempo || 100, key, name);
+}
+function finishScore(notes, changes, pickup, tempo, key, name, barStarts){
+  notes = notes.filter(n => n[1] > 0 && n[2] >= 21 && n[2] <= 108).sort((a,b)=>a[0]-b[0] || b[2]-a[2]);
+  if(!notes.length) throw new Error("파일에 피아노 음표가 없어요");
+  if(notes.length > 20000) throw new Error("곡이 너무 길어요 (음표 2만 개 넘음)");
+  const total = Math.max(...notes.map(n=>n[0]+n[1]));
+  let bars = barStarts;
+  if(!bars){ bars = []; let b = 0, ci = 0;
+    if(pickup && pickup < changes[0].len - 1e-6){ bars.push(0); b = pickup; }
+    while(b < total - 1e-6 && bars.length < 2000){ while(ci+1 < changes.length && changes[ci+1].beat <= b + 1e-6) ci++; bars.push(+b.toFixed(4)); b += changes[ci].len; } }
+  const r4 = x => +(+x).toFixed(4);
+  return {name, tempo: Math.max(20, Math.min(300, tempo)), ts: changes[0].ts || [4,4], key, bars: bars.map(r4), notes: notes.map(n => [r4(n[0]), r4(n[1]), n[2], n[3]])};
+}
+function scoreFromMusicXml(text){
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if(doc.querySelector("parsererror")) throw new Error("MusicXML을 읽지 못했어요");
+  if(doc.documentElement.nodeName === "score-timewise") throw new Error("timewise 형식 MusicXML은 아직 못 읽어요. partwise로 내보내 주세요");
+  const parts = [...doc.querySelectorAll("score-partwise > part")]; if(!parts.length) throw new Error("악보 파트를 찾지 못했어요");
+  const STEP = {C:0,D:2,E:4,F:5,G:7,A:9,B:11}, kid = (el, n) => [...el.children].find(c => c.nodeName === n), num = (el, n, d=0) => { const c = el && kid(el, n); return c ? +c.textContent : d; };
+  const name = (doc.querySelector("work > work-title") || doc.querySelector("movement-title"))?.textContent.trim() || "";
+  let tempo = null, key = null, ts = null; const changes = [], barStarts = [], allNotes = [];
+  parts.forEach((part, pi) => {
+    let div = 1, pos = 0, last = 0, mStart = 0; const notes = [], ties = {};
+    [...part.children].filter(m => m.nodeName === "measure").forEach((m, mi) => {
+      pos = mStart; let maxPos = mStart, lastStart = mStart, nominal = null;
+      [...m.children].forEach(el => {
+        if(el.nodeName === "attributes"){
+          if(kid(el,"divisions")) div = num(el,"divisions",1);
+          const t = kid(el,"time"); if(t && kid(t,"beats")){ const tsv = [parseInt(kid(t,"beats").textContent), num(t,"beat-type",4)]; if(pi === 0) changes.push({beat:mStart, len:tsv[0]*4/tsv[1], ts:tsv}); ts ||= tsv; }
+          const k = kid(el,"key"); if(k && key == null) key = {sf:num(k,"fifths"), minor: kid(k,"mode")?.textContent === "minor"};
+        }
+        else if(el.nodeName === "direction" || el.nodeName === "sound"){ const s = el.nodeName === "sound" ? el : el.querySelector("sound"); if(s?.getAttribute("tempo") && tempo == null) tempo = Math.round(+s.getAttribute("tempo")); if(tempo == null){ const pm = el.querySelector("metronome per-minute"); if(pm) tempo = Math.round(+pm.textContent); } }
+        else if(el.nodeName === "backup") pos -= num(el,"duration")/div;
+        else if(el.nodeName === "forward") pos += num(el,"duration")/div;
+        else if(el.nodeName === "note"){
+          if(kid(el,"grace") || kid(el,"cue")) return;
+          const dur = num(el,"duration")/div, chord = !!kid(el,"chord"), start = chord ? lastStart : pos;
+          if(!chord){ lastStart = pos; pos += dur; } maxPos = Math.max(maxPos, pos);
+          const p = kid(el,"pitch"); if(!p) return;
+          const midi = 12*(num(p,"octave")+1) + STEP[kid(p,"step").textContent.trim()] + num(p,"alter");
+          const hand = kid(el,"staff") ? (+kid(el,"staff").textContent >= 2 ? 1 : 0) : null;
+          const tieStop = [...el.children].some(c => c.nodeName === "tie" && c.getAttribute("type") === "stop"), tieStart = [...el.children].some(c => c.nodeName === "tie" && c.getAttribute("type") === "start");
+          if(tieStop && ties[midi]){ ties[midi][1] += dur; if(!tieStart) delete ties[midi]; return; }
+          const n = [start, dur, midi, hand]; notes.push(n); if(tieStart) ties[midi] = n;
+        }
+      });
+      // 마디 길이: 실제로 채워진 길이(못갖춘마디 포함). 비어 있으면 박자표 길이.
+      const cur = changes.filter(c => c.beat <= mStart + 1e-6).pop(), full = cur ? cur.len : 4;
+      const len = maxPos - mStart > 1e-6 ? maxPos - mStart : full;
+      if(pi === 0) barStarts.push(mStart);
+      const pickup = (m.getAttribute("implicit") === "yes" || mi === 0) && len < full - 1e-6;
+      mStart += pickup ? len : Math.max(len, full);
+    });
+    allNotes.push(notes);
+  });
+  // 손: 한 파트에 두 단(staff)이면 1단=오른손, 2단=왼손. 파트가 여럿이면 평균 음높이로.
+  const avg = n => n.reduce((a,x)=>a+x[2],0)/Math.max(1,n.length), order = allNotes.map((n,i)=>[i,avg(n)]).sort((a,b)=>b[1]-a[1]), out = [];
+  allNotes.forEach((ns, i) => { const rank = order.findIndex(o=>o[0]===i);
+    ns.forEach(n => out.push([n[0], n[1], n[2], n[3] != null && allNotes.length === 1 ? n[3] : allNotes.length > 1 ? (rank === 0 ? 0 : rank === order.length-1 ? 1 : (avg(ns) >= 60 ? 0 : 1)) : (n[2] >= 60 ? 0 : 1)])); });
+  if(!changes.length) changes.push({beat:0, len:4, ts:ts||[4,4]});
+  return finishScore(out, changes, 0, tempo || 100, key, name, barStarts);
+}
+// .mxl = zip. 중앙 디렉터리에서 악보 파일을 찾아 deflate를 푼다 (DecompressionStream)
+async function unzipMusicXml(u8){
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); let e = u8.length - 22;
+  while(e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--; if(e < 0) throw new Error("압축 파일이 손상됐어요");
+  const n = dv.getUint16(e+10, true); let p = dv.getUint32(e+16, true); const files = [];
+  for(let i=0;i<n;i++){ if(dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p+10, true), csize = dv.getUint32(p+20, true), nl = dv.getUint16(p+28, true), xl = dv.getUint16(p+30, true), cl = dv.getUint16(p+32, true), off = dv.getUint32(p+42, true);
+    files.push({name:new TextDecoder().decode(u8.subarray(p+46, p+46+nl)), method, csize, off}); p += 46 + nl + xl + cl; }
+  const read = async f => { const lp = f.off, data = u8.subarray(lp + 30 + dv.getUint16(lp+26, true) + dv.getUint16(lp+28, true)).subarray(0, f.csize);
+    if(f.method === 0) return new TextDecoder().decode(data);
+    if(f.method !== 8 || typeof DecompressionStream === "undefined") throw new Error("이 압축 방식은 못 풀어요. .musicxml로 내보내 주세요");
+    return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text(); };
+  let target = null; const cont = files.find(f => f.name === "META-INF/container.xml");
+  if(cont){ const m = (await read(cont)).match(/full-path="([^"]+)"/); if(m) target = files.find(f => f.name === m[1]); }
+  target ||= files.find(f => /\.(musicxml|xml)$/i.test(f.name) && !f.name.startsWith("META-INF"));
+  if(!target) throw new Error("압축 안에 악보 파일이 없어요");
+  return read(target);
+}
+async function scoreFromFile(name, u8, pickupBeats){
+  if(u8.length > 5e6) throw new Error("파일이 너무 커요 (5MB까지)");
+  if(/\.midi?$/i.test(name) || (u8[0]===0x4D && u8[1]===0x54)) return {...scoreFromMidi(u8, pickupBeats), fmt:"MIDI"};
+  if(/\.mxl$/i.test(name) || (u8[0]===0x50 && u8[1]===0x4B)) return {...scoreFromMusicXml(await unzipMusicXml(u8)), fmt:"MusicXML(압축)"};
+  if(/\.(musicxml|xml)$/i.test(name)) return {...scoreFromMusicXml(new TextDecoder().decode(u8)), fmt:"MusicXML"};
+  throw new Error("MusicXML(.musicxml, .mxl) 또는 MIDI(.mid) 파일을 올려 주세요");
+}
+/*SC-END*/
 
 const Mic = {stream:null, an:null, buf:null, timer:0, tr:null, onRaw:null, heard:null, wake:null};
 async function micStart(){
@@ -1566,7 +1743,24 @@ function finish(){
    받아 적기: Spotify Basic Pitch(Apache-2.0)를 tools/build-bp.sh로 묶은 bp/basic-pitch.js — 양손·화음까지 찾는다 */
 let LIB = null, libLoading = null, BPload = null;
 const LV = {level:1, piece:null, a:1, b:4, hand:"both", bpm:80, phase:"setup", result:null, advice:null, take:null, selBar:null, msg:""};
-function loadLib(){ return libLoading ||= fetch("data/scores.json").then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))).then(j => (LIB = j.pieces)).catch(e => { libLoading = null; throw e; }); }
+// 기본 악보(data/scores.json) 앞에 어른 코너에서 올린 '내 악보'를 붙인다. 기본 악보를 못 불러와도 내 악보는 쓸 수 있다.
+function loadLib(){ return libLoading ||= fetch("data/scores.json").then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
+  .then(j => (LIB = [...loadMine(), ...j.pieces]))
+  .catch(e => { const mine = loadMine(); if(mine.length) return (LIB = mine); libLoading = null; throw e; }); }
+
+/* 내 악보: 어른 코너에서 올린 MusicXML/MIDI를 변환해 이 기기에 따로 저장한다 (백업 코드에는 넣지 않는다) */
+const MYKEY = "somi-piano-myscores";
+const okNum = v => typeof v === "number" && isFinite(v);
+function validMine(p){
+  return p && okNum(p.id) && p.id >= 1e6 && typeof p.title === "string" && Array.isArray(p.bars) && p.bars.length && p.bars.every(okNum)
+    && Array.isArray(p.notes) && p.notes.length && p.notes.every(n => Array.isArray(n) && n.length === 4 && n.every(okNum)) && Array.isArray(p.ts) && okNum(p.tempo);
+}
+function loadMine(){
+  try{ const a = JSON.parse(localStorage.getItem(MYKEY) || "[]");
+    return Array.isArray(a) ? a.filter(validMine).map(p => ({...p, mine:true, level:0, set:"내가 올린 악보", title:p.title.slice(0,40), composer:String(p.composer||"").slice(0,30), opus:"", license:"직접 올린 파일", source:"", repeats:false, fmt:String(p.fmt||"").slice(0,20)})) : []; }
+  catch(e){ return []; }
+}
+function saveMine(list){ try{ localStorage.setItem(MYKEY, JSON.stringify(list.map(({id,title,composer,fmt,tempo,ts,key,bars,notes}) => ({id,title,composer,fmt,tempo,ts,key,bars,notes})))); return true; }catch(e){ return false; } }
 function loadBP(){ return BPload ||= new Promise((res, rej) => {
   if(window.SomiBasicPitch) return res(window.SomiBasicPitch);
   const s = document.createElement("script"); s.src = "bp/basic-pitch.js";
@@ -1583,12 +1777,15 @@ function renderLab(){
   renderPiece(el);
 }
 function renderLibrary(el){
-  const lvName = {1:"쉬움", 2:"보통", 3:"도전"}, list = LIB.filter(p => p.level === LV.level), groups = {};
+  const lvName = {0:"내 악보", 1:"쉬움", 2:"보통", 3:"도전"}, mineN = LIB.filter(p => p.mine).length;
+  if(LV.level === 0 && !mineN) LV.level = 1;
+  const list = LIB.filter(p => LV.level === 0 ? p.mine : !p.mine && p.level === LV.level), groups = {};
   list.forEach(p => (groups[p.set || p.composer] ||= []).push(p));
   el.innerHTML = `<div class="hello">${bunny(72)}<div class="bubble"><b>곡 연습실</b>진짜 곡을 몇 마디씩 녹음하면, 솜이가 마디마다 잘된 곳과 연습할 곳을 알려 줄게.</div></div>
-    <div class="lvtabs" role="group" aria-label="단계">${[1,2,3].map(l => `<button class="btn ${l===LV.level?"":"ghost"}" data-lv="${l}">${lvName[l]} · ${LIB.filter(p=>p.level===l).length}곡</button>`).join("")}</div>
+    <div class="lvtabs" role="group" aria-label="단계">${(mineN ? [0,1,2,3] : [1,2,3]).map(l => `<button class="btn ${l===LV.level?"":"ghost"}" data-lv="${l}">${lvName[l]} · ${l === 0 ? mineN : LIB.filter(p=>!p.mine && p.level===l).length}곡</button>`).join("")}</div>
+    ${mineN ? "" : `<p class="muted" style="margin:0;font-size:13px">조카가 배우는 곡의 악보 파일(MusicXML, MIDI)이 있으면 어른 코너에서 올려 '내 악보'에 넣을 수 있어요.</p>`}
     ${Object.entries(groups).map(([g, ps]) => `<div class="setname">${esc(g)}</div><div class="pieces">${ps.map(p => { const t = S.lab[p.id]?.takes || [], last = t[t.length-1];
-      return `<button class="piece" data-pc="${p.id}"><b>${esc(p.title)}</b><span>${esc(p.composer)}${p.opus?" · "+esc(p.opus):""} · ${p.bars.length}마디</span>${last?`<span>최근 ${last.a}~${last.b}마디 ${last.score}점</span>`:""}</button>`; }).join("")}</div>`).join("")}
+      return `<button class="piece" data-pc="${p.id}"><b>${esc(p.title)}</b><span>${[p.composer, p.opus, `${p.bars.length}마디`].filter(Boolean).map(esc).join(" · ")}</span>${last?`<span>최근 ${last.a}~${last.b}마디 ${last.score}점</span>`:""}</button>`; }).join("")}</div>`).join("")}
     <p class="muted" style="font-size:12px">악보 데이터: The Mutopia Project (mutopiaproject.org) — 곡마다 퍼블릭 도메인 또는 CC BY-SA. 받아 적기: Spotify Basic Pitch (Apache-2.0).</p>`;
   el.querySelectorAll("[data-lv]").forEach(b => b.onclick = () => { LV.level = +b.dataset.lv; renderLab(); });
   el.querySelectorAll("[data-pc]").forEach(b => b.onclick = () => openPiece(+b.dataset.pc));
@@ -1603,7 +1800,7 @@ function openPiece(id){
 const stepper = (id, v, label) => `<span class="stepper"><button data-st="${id}" data-d="-1" aria-label="${label} 줄이기">−</button><output>${v}</output><button data-st="${id}" data-d="1" aria-label="${label} 늘리기">+</button></span>`;
 function renderPiece(el){
   const p = LV.piece, n = p.bars.length, rec = labRec(p.id), r = LV.result;
-  el.innerHTML = `<div class="labhead"><button class="x" id="labback" aria-label="곡 목록으로">←</button><div class="txt"><h2>${esc(p.title)}</h2><span class="muted" style="font-size:14px">${esc(p.composer)}${p.opus?" · "+esc(p.opus):""} · ${n}마디 · ${p.ts[0]}/${p.ts[1]}박자</span></div></div>
+  el.innerHTML = `<div class="labhead"><button class="x" id="labback" aria-label="곡 목록으로">←</button><div class="txt"><h2>${esc(p.title)}</h2><span class="muted" style="font-size:14px">${[p.composer, p.opus, `${n}마디`, `${p.ts[0]}/${p.ts[1]}박자`].filter(Boolean).map(esc).join(" · ")}</span></div></div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="ctrl"><label>마디</label><span class="row" style="gap:6px;flex-wrap:nowrap">${stepper("a", LV.a, "시작 마디")}<span>~</span>${stepper("b", LV.b, "끝 마디")}</span>
         <span class="row" style="gap:4px;flex-wrap:wrap">${[[1,4],[5,8],[1,8]].filter(([x,y]) => y <= n).map(([x,y]) => `<button class="pill" data-rg="${x}-${y}">${x}~${y}</button>`).join("")}</span></div>
@@ -1615,7 +1812,7 @@ function renderPiece(el){
     </div>
     ${r ? reportHtml() : ""}
     ${growthHtml(p)}
-    <p class="muted" style="font-size:12px">악보: <a href="${esc(p.source)}" target="_blank" rel="noopener">Mutopia Project에서 이 곡 악보 PDF 받기</a> · ${esc(p.license)}</p>`;
+    <p class="muted" style="font-size:12px">${p.mine ? `직접 올린 악보 (${esc(p.fmt)})` : `악보: <a href="${esc(p.source)}" target="_blank" rel="noopener">Mutopia Project에서 이 곡 악보 PDF 받기</a> · ${esc(p.license)}`}</p>`;
   $("#labback").onclick = () => { recStop(true); LV.piece = null; renderLab(); };
   el.querySelectorAll("[data-st]").forEach(b => b.onclick = () => { const d = +b.dataset.d, k = b.dataset.st;
     if(k==="a") LV.a = Math.max(1, Math.min(LV.b, LV.a + d)); if(k==="b") LV.b = Math.max(LV.a, Math.min(n, LV.b + d)); if(k==="bpm") LV.bpm = Math.max(30, Math.min(220, LV.bpm + d*4));
