@@ -1685,7 +1685,7 @@ async function analyzeAudio(data, sr){
     LV.result = R; LV.advice = adviseTake(LV.piece, R, LV.a, LV.b); LV.phase = "setup"; LV.msg = ""; LV.selBar = null;
     saveTake(R);
     renderLab(); $("#report")?.scrollIntoView({behavior:"smooth", block:"start"});
-  }catch(e){ LV.phase = "setup"; LV.msg = "분석 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요."; renderLab(); }
+  }catch(e){ LV.phase = "setup"; LV.msg = "분석 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요. claude.ai 링크에서는 녹음 분석이 안 되니 휴대폰 주소(johnjang125.github.io/somi-piano)에서 열어 주세요."; renderLab(); }
 }
 function saveTake(R){
   const k = dkey(), d = today(), rec = labRec(LV.piece.id), wasGoal = (d.xp||0) >= S.settings.goal, wasAll = allDone(k);
