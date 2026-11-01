@@ -185,6 +185,17 @@ body.playing .app{padding-block:12px 12px}
 .play-card .em{font-size:44px;flex:none}
 .play-card .txt{flex:1;min-width:0}
 .combo{font-family:var(--display);font-size:16px;color:#fff;background:var(--butter);padding:4px 12px;border-radius:99px;flex:none;animation:pop .3s}
+.compose{display:flex;flex-direction:column;gap:10px;align-items:center;width:100%;padding:12px 8px;box-sizing:border-box}
+.staffwrap{overflow-x:auto;max-width:100%;width:100%;scroll-behavior:smooth}
+.staffwrap svg{display:block}
+.compose input{font:inherit;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);min-width:0;width:12em;max-width:100%}
+.mysong{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:var(--bg2)}
+.mysong .txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.mysong .txt b{font-family:var(--display);font-weight:400;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mysong .txt span{font-size:13px;color:var(--ink2)}
+.dots{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%}
+.btn.sm{font-size:14px;padding:7px 12px;flex:none}
 .micpill{font-family:var(--display);font-size:15px;padding:4px 12px;border-radius:99px;background:var(--bg2);color:var(--ink2);flex:none;transition:background .1s}
 .micpill.hot{background:var(--mint);color:#fff}
 .meter{height:12px;border-radius:99px;background:var(--bg2);overflow:hidden}
@@ -285,6 +296,7 @@ const LI = Object.fromEntries(LESSONS.map((l,i)=>[l.id,i]));
 
 const STICKERS = [
   ["first","🎹","첫 연주","아무 연습이나 끝내기"],
+  ["composer","🎼","작곡가","내 노래 처음 저장하기"],
   ["mission1","🍓","미션 클리어","오늘의 미션 3개 모두 하기"],
   ["perfect","💖","실수 0개","한 번도 안 틀리고 끝내기"],
   ["s3","🌈","3일 연속","3일 연속 연습하기"],
@@ -298,7 +310,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -534,10 +546,22 @@ function renderHome(){
     <div class="card play-card"><div class="em">🎈</div><div class="txt"><h3>음표 풍선 터뜨리기</h3>
       <span class="muted" style="font-size:14px">${balloonOpen()?"올라가는 풍선과 같은 건반을 눌러 펑! 45초 동안 몇 개나 터뜨릴까?":"별나라 지도의 '파·솔 등장'을 깨면 열려"}</span></div>
       <button class="btn alt" id="balloon" ${balloonOpen()?"":"disabled"}>놀기</button></div>
-    <div class="chips"><div class="chip"><b>${totalStars()}</b><span>모은 별</span></div><div class="chip"><b>${S.stickers.length}</b><span>스티커</span></div><div class="chip"><b>${totalDays()}</b><span>연습한 날</span></div></div>
-    <button class="btn ghost" id="free" style="align-self:center">자유롭게 쳐 보기</button>`;
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap"><h3>🎼 내가 만든 노래</h3><button class="btn" id="free">새 노래 만들기</button></div>
+      ${S.songs.length ? S.songs.map((s,i)=>`<div class="mysong"><div class="txt"><b>${esc(s.title)}</b><span>${s.notes.length}음 · ${s.d.slice(5).replace("-","/")}</span>
+        <div class="dots">${s.notes.slice(0,16).map(o=>`<i style="background:${colorOf(o.n.replace("#",""))}"></i>`).join("")}</div></div>
+        <button class="btn ghost sm" data-play="${i}" aria-label="${esc(s.title)} 들어보기">▶</button><button class="btn alt sm" data-follow="${i}">따라 치기</button><button class="btn ghost sm" data-del="${i}" aria-label="${esc(s.title)} 지우기">✕</button></div>`).join("")
+        : `<span class="muted" style="font-size:14px">아직 없어. 피아노를 마음대로 치면 오선지에 음표가 그려지고, 나만의 노래로 저장할 수 있어!</span>`}
+    </div>
+    <div class="chips"><div class="chip"><b>${totalStars()}</b><span>모은 별</span></div><div class="chip"><b>${S.stickers.length}</b><span>스티커</span></div><div class="chip"><b>${totalDays()}</b><span>연습한 날</span></div></div>`;
   $("#s-home").querySelectorAll("[data-m]").forEach(b => b.onclick = () => startActivity(ms[+b.dataset.m].cfg));
-  $("#free").onclick = () => startActivity({kind:"free", title:"자유롭게 쳐 보기"});
+  $("#free").onclick = () => startActivity({kind:"free", title:"내 노래 만들기"});
+  $("#s-home").querySelectorAll("[data-play]").forEach(b => b.onclick = () => playNotes(S.songs[+b.dataset.play].notes));
+  $("#s-home").querySelectorAll("[data-follow]").forEach(b => b.onclick = () => { const s = S.songs[+b.dataset.follow];
+    startActivity({kind:"song", custom:s.notes.map(o=>`${o.n}:${o.b}`).join(" "), title:`${s.title} 따라 치기`, tip:"내가 만든 노래를 떨어지는 음표로 쳐 보자"}); });
+  $("#s-home").querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    if(b.dataset.armed){ S.songs.splice(+b.dataset.del,1); save(); renderHome(); return; }
+    b.dataset.armed = "1"; b.textContent = "지울까?"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent = "✕"; } }, 3000); });
   $("#place")?.addEventListener("click", startPlacement);
   $("#noplace")?.addEventListener("click", () => { S.placed = true; save(); renderHome(); });
   $("#balloon").onclick = () => startActivity({kind:"balloon", notes:learnedNotes(), title:"음표 풍선 터뜨리기"});
@@ -780,7 +804,16 @@ function startActivity(cfg){
   if(S.settings.mic) micStart().then(ok => { if(!ok) toast(micErr); micPill(); });
   $("#ptitle").textContent = cfg.title; $("#progbar").style.width = "0%";
   const st = $("#stage");
-  if(cfg.kind==="free"){ st.innerHTML = `<div class="prompt" id="fp">마음대로 쳐 봐! 무슨 음인지 솜이가 알려줄게</div>`; A.running = true; return; }
+  if(cfg.kind==="free"){ A.rec = []; A.saved = true; A.running = true;
+    st.innerHTML = `<div class="compose"><div class="prompt" id="fp">마음대로 쳐 봐! 치는 음이 오선지에 그려져</div>
+      <div class="staffwrap" id="staffwrap"></div>
+      <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="rlisten">▶ 들어보기</button><button class="btn ghost" id="rundo">한 음 지우기</button><button class="btn" id="rsave">저장하기</button></div>
+      <div class="row" id="savebox" hidden style="flex-wrap:wrap;justify-content:center"><label for="rtitle" class="muted">노래 제목</label><input id="rtitle" maxlength="16"><button class="btn alt" id="rok">이 제목으로 저장</button></div></div>`;
+    $("#rlisten").onclick = () => playNotes(recNotes(), true);
+    $("#rundo").onclick = () => { A.rec.pop(); A.saved = !A.rec.length; renderCompose(); };
+    $("#rsave").onclick = () => { $("#savebox").hidden = false; const t = $("#rtitle"); t.value = `내 노래 ${S.songs.length+1}`; t.focus(); t.select(); };
+    $("#rok").onclick = () => saveSong($("#rtitle").value.trim() || `내 노래 ${S.songs.length+1}`);
+    renderCompose(); return; }
   const intro = {find:"솜이가 보여주는 색깔 음을 건반에서 찾아 눌러 봐", ear:"소리를 잘 듣고, 같은 소리 건반을 눌러 봐", staff:"오선지 위 음표가 무슨 음인지 건반을 눌러 봐",
     song:"내려오는 음표가 선에 닿으면 그 건반을 눌러! 맞을 때까지 기다려 줄게", balloon:"풍선에 적힌 음과 같은 건반을 누르면 펑! 위로 날아가기 전에 터뜨려 봐"}[cfg.kind];
   st.innerHTML = `<div class="overlay">${bunny(80)}<div class="prompt">${cfg.intro||intro}</div>${S.settings.mic?`<div class="pill">🎤 진짜 피아노로 쳐도 돼. 솜이가 듣고 있어</div>`:""}${cfg.tip?`<div class="muted">${esc(cfg.tip)}</div>`:""}<button class="btn" id="go">준비됐어!</button></div>`;
@@ -789,7 +822,62 @@ function startActivity(cfg){
 function showCombo(){ const c = $("#combo"); if(A && A.combo >= 3){ c.hidden = false; c.textContent = `콤보 ${A.combo}!`; c.style.animation = "none"; void c.offsetWidth; c.style.animation = ""; } else c.hidden = true; }
 function hit(){ A.combo++; A.maxCombo = Math.max(A.maxCombo, A.combo); showCombo(); }
 function miss(){ A.combo = 0; showCombo(); }
-$("#quit").onclick = () => { cancelAnimationFrame(raf); A = null; glow(null); go("home"); };
+let quitArmed = false;
+$("#quit").onclick = () => {
+  if(A && A.kind==="free" && !A.saved && !quitArmed){ quitArmed = true; toast("저장 안 한 노래가 있어. 한 번 더 누르면 나가"); setTimeout(()=>quitArmed=false, 3000); return; }
+  quitArmed = false; cancelAnimationFrame(raf); A = null; glow(null); go("home"); };
+
+/* ---------- 내가 만든 노래 (RecogNotes처럼 연주를 악보로) ---------- */
+const STAFF_ORDER = ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5"];
+function staffSeqSvg(ids, hi=-1){
+  const gap = 14, base = 112, x0 = 84, dx = 36, w = Math.max(320, x0 + ids.length*dx + 16);
+  const lines = [0,1,2,3,4].map(i=>`<line x1="10" x2="${w-6}" y1="${base-i*gap}" y2="${base-i*gap}" stroke="var(--ink2)" stroke-width="2"/>`).join("");
+  const notes = ids.map((id,i) => { const x = x0 + i*dx, step = STAFF_ORDER.indexOf(id.replace("#","")) - 2, y = base - step*gap/2, up = step < 4;
+    return `${step<=-2?`<line x1="${x-17}" x2="${x+17}" y1="${base+gap}" y2="${base+gap}" stroke="var(--ink2)" stroke-width="2"/>`:""}
+      ${id.includes("#")?`<text x="${x-22}" y="${y+6}" font-size="20" fill="var(--ink)">♯</text>`:""}
+      <ellipse cx="${x}" cy="${y}" rx="10" ry="7.5" transform="rotate(-20 ${x} ${y})" fill="${colorOf(id.replace("#",""))}" stroke="${i===hi?"var(--pink)":"var(--ink)"}" stroke-width="${i===hi?4:1.5}"/>
+      <line x1="${up?x+9:x-9}" x2="${up?x+9:x-9}" y1="${y}" y2="${up?y-40:y+40}" stroke="var(--ink)" stroke-width="2.2"/>`; }).join("");
+  return `<svg width="${w}" height="170" viewBox="0 0 ${w} 170" role="img" aria-label="내가 친 음표 ${ids.length}개">${lines}
+    <text x="14" y="${base+10}" font-size="78" fill="var(--ink)" font-family="'Segoe UI Symbol','Noto Music','Apple Symbols',serif">𝄞</text>${notes}</svg>`;
+}
+/* 친 간격을 박자로 바꾼다: 가운데 간격을 한 박으로 보고 반 박·한 박·한 박 반·두 박 중 가까운 것으로 맞춘다 */
+function recNotes(){
+  const r = A.rec, gaps = r.slice(1).map((x,i)=>x.t - r[i].t), med = Math.min(1200, Math.max(250, gaps.slice().sort((a,b)=>a-b)[gaps.length>>1] || 600));
+  return r.map((x,i) => ({n:x.n, b: i < gaps.length ? [0.5,1,1.5,2].reduce((p,c)=>Math.abs(c-gaps[i]/med)<Math.abs(p-gaps[i]/med)?c:p) : 2}));
+}
+function renderCompose(hi=-1){
+  const w = $("#staffwrap"); if(!w || !A) return; const last = A.rec[A.rec.length-1];
+  w.innerHTML = staffSeqSvg(A.rec.map(x=>x.n), hi); if(hi<0) w.scrollLeft = w.scrollWidth;
+  $("#fp").innerHTML = last ? `<span class="pill" style="background:${colorOf(last.n.replace("#",""))};color:#fff;font-size:20px;padding:4px 16px">${N[last.n].name}</span> <span class="muted">${A.rec.length} / 32음</span>` : "마음대로 쳐 봐! 치는 음이 오선지에 그려져";
+  ["rlisten","rundo","rsave"].forEach(id => $("#"+id).disabled = !A.rec.length);
+  if(!A.rec.length) $("#savebox").hidden = true;
+}
+let playTimers = [];
+function playNotes(notes, onStaff){
+  playTimers.forEach(clearTimeout); playTimers = []; let t = 0;
+  notes.forEach((o,i) => { tone(N[o.n].midi, Math.max(.5, o.b*.6), .3, t);
+    playTimers.push(setTimeout(() => { const el = keyEls[o.n]; el?.classList.add("down"); setTimeout(()=>el?.classList.remove("down"),220); if(onStaff) renderCompose(i); }, t*1000));
+    t += o.b*.55; });
+  if(onStaff) playTimers.push(setTimeout(() => renderCompose(), t*1000 + 300));
+}
+function saveSong(title){
+  const notes = recNotes(), d = today(), k = dkey(), before = S.stickers.includes("composer"), wasGoal = (d.xp||0) >= S.settings.goal;
+  S.songs.unshift({id:Date.now(), title, notes, d:k}); if(S.songs.length > 30) S.songs.pop();
+  d.sessions++; d.minutes += (Date.now()-A.t0)/60000; d.xp = (d.xp||0) + 10; S.xp += 10; S.gems += 2;
+  const goalNow = !wasGoal && d.xp >= S.settings.goal; if(goalNow) S.gems += 5;
+  if(!before) S.stickers.push("composer"); if(!S.stickers.includes("first")) S.stickers.push("first");
+  S.log.push({d:k, t:`작곡: ${title}`, s:0, a:100}); A.saved = true; save();
+  const m = document.createElement("div"); m.className = "modal";
+  m.innerHTML = `<div class="card" role="dialog" aria-label="노래 저장">${bunny(84)}<h2>멋진 노래야!</h2>
+    <div><b style="font-family:var(--display);font-weight:400;font-size:20px">"${esc(title)}"</b><br>내 노래 상자에 넣었어</div>
+    <div class="staffwrap" style="max-width:100%">${staffSeqSvg(notes.map(o=>o.n))}</div>
+    <div class="reward"><span class="pill">⭐ +10 XP</span><span class="pill">💎 +${goalNow?7:2}</span></div>
+    ${!before ? `<div><b style="font-family:var(--display);font-weight:400">새 스티커!</b><div class="newstk"><span title="작곡가">🎼</span></div></div>` : ""}
+    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="snew">새로 만들기</button><button class="btn" id="sfollow">따라 쳐 보기</button></div></div>`;
+  document.body.appendChild(m); fanfare(); confetti();
+  m.querySelector("#snew").onclick = () => { m.remove(); startActivity({kind:"free", title:"내 노래 만들기"}); };
+  m.querySelector("#sfollow").onclick = () => { m.remove(); startActivity({kind:"song", custom:notes.map(o=>`${o.n}:${o.b}`).join(" "), title:`${title} 따라 치기`}); };
+}
 
 function setProg(f){ $("#progbar").style.width = Math.min(100,f*100)+"%"; }
 function nextRound(){
@@ -815,7 +903,9 @@ function stat(id, ok){ const s = noteStat(id); ok ? s.r++ : s.w++; s.last = Date
 
 function onKey(id, el, fromMic){
   if(!A || !A.running) return;
-  if(A.kind==="free"){ const f = $("#fp"); if(f) f.innerHTML = `<span class="target" style="display:inline-grid;background:${colorOf(id)};width:110px;height:110px;font-size:${N[id].white?40:26}px">${N[id].name}</span>`; return; }
+  if(A.kind==="free"){
+    if(A.rec.length >= 32){ toast("노래가 꽉 찼어! 저장하거나 한 음 지워 봐"); return; }
+    A.rec.push({n:id, t:performance.now()}); A.saved = false; renderCompose(); return; }
   if(A.kind==="song") return songKey(id, el, fromMic);
   if(A.kind==="balloon") return balloonKey(id, el);
   if(A.lock) return;
@@ -836,7 +926,7 @@ function onKey(id, el, fromMic){
 /* 노래: 음표가 위에서 떨어지고, 맞는 건반을 누를 때까지 기다려 준다 (Orfeo의 '한 음씩 따라가기' 방식) */
 const SPEEDS = [["거북이",.55],["토끼",.8],["치타",1.15]];
 function songSetup(){
-  const full = parseSong(SONGS[A.song].seq); A.phr = phrasesOf(full); A.pm = {};
+  const full = parseSong(A.custom || SONGS[A.song].seq); A.phr = phrasesOf(full); A.pm = {};
   A.offset = A.phrase!=null ? A.phr[A.phrase][0] : 0;
   A.seq = A.phrase!=null ? full.slice(...A.phr[A.phrase]).map(o=>({...o, start:o.start-full[A.offset].start})) : full;
   A.idx = 0; A.t = -3; A.miss = false; A.speed = A.speed ?? 0;
@@ -888,6 +978,7 @@ function songKey(id, el, fromMic){
 }
 /* 소절별 실수 기록: 틀린 소절은 올라가고, 깨끗하게 친 소절은 내려간다. 0이 되면 복습에서 빠진다. */
 function savePhrases(){
+  if(!A.song) return;
   const arr = S.phrases[A.song] = S.phrases[A.song] || A.phr.map(()=>0);
   A.phr.forEach(([a,b],p) => { if(a < A.offset || b > A.offset + A.seq.length) return; arr[p] = A.pm[p] ? Math.min(3,(arr[p]||0)+1) : Math.max(0,(arr[p]||0)-1); });
 }
