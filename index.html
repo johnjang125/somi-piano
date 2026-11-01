@@ -122,7 +122,9 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;l
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--card);border-top:2px solid var(--line);
   padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .tabs nav{max-width:780px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
-@media (max-width:420px){.tab{font-size:12px;padding:6px 2px}}
+@media (max-width:420px){.tab{font-size:12px;padding:6px 2px}.stepper button{width:30px}.stepper output{min-width:2.4em}}
+/* 키가 작은 휴대폰 화면에서도 연습 화면이 한 화면에 들어오게 */
+@media (max-height:840px){body.playing .kb{height:150px}body.playing #lane{height:210px}body.playing .stage{min-height:200px}body.playing .app{gap:10px}}
 
 /* 곡 연습실 */
 .lvtabs{display:flex;gap:6px;flex-wrap:wrap}
@@ -291,11 +293,11 @@ details.help summary{cursor:pointer;color:var(--ink2);font-size:14px}
 </div>
 <div class="tabs"><nav id="tabs">
   <button class="tab" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>오늘</button>
-  <button class="tab" data-go="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg>별나라 지도</button>
-  <button class="tab" data-go="stk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>스티커북</button>
-  <button class="tab" data-go="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18 3-18"/></svg>보석 상점</button>
-  <button class="tab" data-go="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>곡 연습실</button>
-  <button class="tab" data-go="parent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>어른 코너</button>
+  <button class="tab" data-go="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg>지도</button>
+  <button class="tab" data-go="stk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>스티커</button>
+  <button class="tab" data-go="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18 3-18"/></svg>상점</button>
+  <button class="tab" data-go="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>연습실</button>
+  <button class="tab" data-go="parent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>어른</button>
 </nav></div>
 <canvas id="fx"></canvas>
 
@@ -395,9 +397,9 @@ function merge(o){
   ["ribbon","hat","wand"].forEach(k => { if(s.outfit[k] && !SI[s.outfit[k]]) s.outfit[k] = f.outfit[k]; });
   s.settings.goal = [10,20,30].includes(+s.settings.goal) ? +s.settings.goal : 20;
   const days = {}; Object.entries(s.days && typeof s.days === "object" ? s.days : {}).forEach(([k,d]) => { if(!isDay(k) || !d || typeof d !== "object") return;
-    days[k] = {sessions:+d.sessions||0, minutes:+d.minutes||0, xp:+d.xp||0, missions:Object.fromEntries(["warm","lesson","review","sight"].map(x=>[x,!!d.missions?.[x]])),
+    days[k] = {sessions:+d.sessions||0, minutes:+d.minutes||0, xp:+d.xp||0, missions:Object.fromEntries(["warm","lesson","review","sight","piece"].map(x=>[x,!!d.missions?.[x]])),
       ...(d.frozen?{frozen:true}:{}), ...(["great","ok","tired"].includes(d.mood)?{mood:d.mood}:{}),
-      ...(Array.isArray(d.plan) && d.plan.length && d.plan.every(x=>["warm","lesson","review","sight"].includes(x)) ? {plan:d.plan.slice()} : {})}; });
+      ...(Array.isArray(d.plan) && d.plan.length && d.plan.every(x=>["warm","lesson","review","sight","piece"].includes(x)) ? {plan:d.plan.slice()} : {})}; });
   s.days = days;
   // 곡 연습실 기록: 숫자만 남긴다
   const num = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(+v || 0)));
@@ -427,7 +429,7 @@ const MOODS = {
   tired:{em:"😪", name:"졸려", plan:["warm","sight"], warm:3, review:4, chest:10, say:["졸린 날엔 짧게 하자.","미션 2개만 하면 오늘도 왕관이야. 연속 기록도 이어져!"]}
 };
 function mood(){ return MOODS[S.days[dkey()]?.mood] || MOODS.ok; }
-function setMood(key){ const d = today(); d.mood = key; d.plan = MOODS[key].plan; S.notice = MOODS[key].say; save(); renderHome(); }
+function setMood(key){ const d = today(); d.mood = key; d.plan = planFor(dkey(), key); S.notice = MOODS[key].say; save(); renderHome(); }
 function streak(){
   let d = new Date(), n = 0;
   if(!alive(dkey(d))) d = addDays(d,-1);
@@ -489,7 +491,43 @@ function missions(){
       : {key:"review", title:"솜이의 복습", sub:`${wk.map(n=>N[n].name).join(" · ")} 다시 보기`, cfg:{kind:"find", notes:wk, rounds:md.review, title:"솜이의 복습", mission:"review"}},
     sight:{key:"sight", title:"깜짝 악보", sub:"배운 음으로 만든 처음 보는 4마디", cfg:{kind:"sight", title:"솜이의 깜짝 악보", mission:"sight"}}
   };
-  return (S.days[dkey()]?.plan || md.plan).map(k => all[k]);
+  const pt = pieceTarget();
+  all.piece = pt ? {key:"piece", title:"오늘의 곡", sub:`${pt.p.title} · ${pt.a}~${pt.b}마디 녹음 · ${pt.why}`, go:() => openLabMission(pt)}
+    : {key:"piece", title:"오늘의 곡", sub:"곡 목록을 불러오는 중…", go:() => go("lab")};
+  return (S.days[dkey()]?.plan || planFor(dkey(), S.days[dkey()]?.mood || "ok")).map(k => all[k]);
+}
+
+/* 오늘의 곡: 곡 연습실 기록에서 약한 마디를 골라 다시 내 준다 (간격 복습).
+   점수가 낮을수록, 마지막으로 친 지 오래될수록 먼저. 약한 마디가 없으면 다음 4마디로 넘어가거나 빠르기를 올린다. */
+const labMode = () => Object.values(S.lab).some(r => r.takes.length);
+const daysSince = d => Math.round((new Date(dkey()) - new Date(d)) / 864e5);
+function barHistory(id){
+  const h = {}; (S.lab[id]?.takes || []).forEach(t => Object.entries(t.bars).forEach(([b,s]) => (h[b] ||= []).push({d:t.d, s, bpm:t.bpm}))); return h;
+}
+function pieceTarget(){
+  if(!LIB){ if(labMode()) loadLib().then(() => cur==="home" && renderHome(), () => {}); return null; }
+  let best = null, recent = null;
+  Object.entries(S.lab).forEach(([id, r]) => { const p = LIB.find(x => x.id === +id); if(!p || !r.takes.length) return;
+    const last = r.takes[r.takes.length-1]; if(!recent || last.d >= recent.t.d) recent = {p, t:last};
+    Object.entries(barHistory(id)).forEach(([b, hs]) => { const x = hs[hs.length-1], age = daysSince(x.d);
+      const pri = x.s < 90 ? (100 - x.s) + Math.min(age, 7)*6 : age >= 5 ? age*3 : 0;   // 초록 마디도 5일 지나면 한 번 확인
+      if(age >= 1 && pri > 0 && (!best || pri > best.pri)) best = {p, w:+b, s:x.s, bpm:last.bpm, pri, age}; }); });
+  if(best){ const n = best.p.bars.length;
+    return {p:best.p, a:Math.max(1, best.w-1), b:Math.min(n, best.w+1), bpm:best.bpm, why: best.s < 90 ? `지난번 ${best.w}마디 ${best.s}점` : `${best.age}일 만에 다시 확인`}; }
+  if(!recent) return null;
+  const {p, t} = recent, n = p.bars.length;
+  if(t.b < n) return {p, a:t.b+1, b:Math.min(n, t.b+4), bpm:t.bpm, why:"다음 마디로 넘어가기"};
+  return {p, a:1, b:n, bpm:t.bpm + 8, why:"빠르기를 올려서 전체"};
+}
+function openLabMission(t){
+  go("lab"); openPiece(t.p.id); Object.assign(LV, {a:t.a, b:t.b, bpm:t.bpm, result:null}); renderLab();
+}
+// 곡 연습실을 쓰기 시작하면 '오늘의 레슨' 대신 '오늘의 곡'을 낸다 (2년차에게 맞는 매일 연습)
+function planFor(k, moodKey){
+  const plan = MOODS[moodKey].plan.slice();
+  if(!labMode()) return plan;
+  if(moodKey === "tired") return ["piece", "sight"];
+  return plan.map(x => x === "lesson" ? "piece" : x);
 }
 const balloonOpen = () => (S.stars.l3||0) >= 1 || (S.placeLevel||0) >= 3;
 
@@ -618,7 +656,7 @@ function renderHome(){
   const week = Array.from({length:7},(_,i)=>{ const d = addDays(new Date(), i-6), key = dkey(d);
     const cls = allDone(key) ? "gold" : practiced(key) ? "on" : frozen(key) ? "on" : ""; const em = allDone(key) ? "👑" : practiced(key) ? "🌸" : frozen(key) ? "🛡️" : "";
     return `<div class="day"><div class="stamp ${cls} ${key===k?"today":""}">${em}</div>${key===k?"오늘":wd[d.getDay()]}</div>`; }).join("");
-  if(!d0.plan){ d0.plan = mood().plan; save(); }
+  if(!d0.plan){ d0.plan = planFor(k, d0.mood || "ok"); save(); }
   const ms = missions(), dm = d0.missions, md = mood(), askMood = !d0.mood && (S.placed || S.log.length);
   $("#s-home").innerHTML = `
     <div class="hello">${bunny(92)}<div class="bubble"><b>${S.name?`안녕, ${esc(S.name)}!`:"안녕, 피아노 친구!"}</b>${esc(l1)} ${esc(l2)}</div></div>
@@ -658,7 +696,7 @@ function renderHome(){
         : `<span class="muted" style="font-size:14px">아직 없어. 피아노를 마음대로 치면 오선지에 음표가 그려지고, 나만의 노래로 저장할 수 있어!</span>`}
     </div>
     <div class="chips"><div class="chip"><b>${totalStars()}</b><span>모은 별</span></div><div class="chip"><b>${S.stickers.length}</b><span>스티커</span></div><div class="chip"><b>${totalDays()}</b><span>연습한 날</span></div></div>`;
-  $("#s-home").querySelectorAll("[data-m]").forEach(b => b.onclick = () => startActivity(ms[+b.dataset.m].cfg));
+  $("#s-home").querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const m = ms[+b.dataset.m]; m.go ? m.go() : startActivity(m.cfg); });
   $("#free").onclick = () => startActivity({kind:"free", title:"내 노래 만들기"});
   $("#s-home").querySelectorAll("[data-play]").forEach(b => b.onclick = () => playNotes(S.songs[+b.dataset.play].notes));
   $("#s-home").querySelectorAll("[data-follow]").forEach(b => b.onclick = () => { const s = S.songs[+b.dataset.follow];
@@ -709,6 +747,30 @@ function renderStickers(){
      return `<div class="stk ${got?"got":"locked"}"><div class="em">${em}</div><b>${got?nm:"???"}</b><span>${how}</span></div>`; }).join("")}</div>`;
 }
 
+/* 이번 주(오늘 포함 7일) 연습을 가족에게 보낼 글로 정리한다 */
+function weeklyReport(){
+  const days = Array.from({length:7}, (_,i) => dkey(addDays(new Date(), i-6))), dd = days.map(k => S.days[k] || {});
+  const md = k => k.slice(5).replace("-","/"), name = S.name || "우리 아이";
+  const practicedN = days.filter(practiced).length, xp = dd.reduce((a,d)=>a+(d.xp||0),0), mins = Math.round(dd.reduce((a,d)=>a+(d.minutes||0),0));
+  const crowns = days.filter(allDone).length, logs = S.log.filter(e => days.includes(e.d));
+  const lines = [`🎹 ${name}의 이번 주 피아노 연습 (${md(days[0])}~${md(days[6])})`, "",
+    `• 연습한 날: ${practicedN}일 / 7일 (연속 ${streak()}일째)`, `• 미션 모두 완료(왕관): ${crowns}일`, `• 모은 XP: ${xp} · 연습 시간: 약 ${mins}분 · 끝낸 연습: ${logs.length}개`];
+  const pieces = Object.entries(S.lab).map(([id, r]) => ({id, p: LIB?.find(x => x.id === +id), tk: r.takes.filter(t => days.includes(t.d)), all: r.takes})).filter(x => x.tk.length);
+  if(pieces.length){
+    lines.push("", "🎼 곡 연습 (녹음 분석)");
+    pieces.forEach(({id, p, tk, all}) => { const title = p ? `${p.composer} ${p.title}` : `곡 ${id}`, best = Math.max(...tk.map(t=>t.score));
+      const bars = [...new Set(tk.flatMap(t => Object.keys(t.bars)).map(Number))].sort((a,b)=>a-b);
+      lines.push(`• ${title}: 녹음 ${tk.length}번, ${bars[0]}~${bars[bars.length-1]}마디, 최고 ${best}점, 빠르기 ♩=${tk[0].bpm}→${tk[tk.length-1].bpm}`);
+      const h = barHistory(id), firstWeek = b => (h[b] || []).find(x => days.includes(x.d)), lastOf = b => (h[b] || []).slice(-1)[0];
+      const up = bars.map(b => ({b, f:firstWeek(b)?.s, l:lastOf(b)?.s})).filter(x => x.f != null && x.l - x.f >= 10).sort((a,b)=>(b.l-b.f)-(a.l-a.f)).slice(0,3);
+      if(up.length) lines.push(`  ↗ 나아진 마디: ${up.map(x => `${x.b}마디 ${x.f}→${x.l}점`).join(", ")}`);
+      const weak = bars.filter(b => (lastOf(b)?.s ?? 100) < 70); if(weak.length) lines.push(`  ✎ 더 연습할 마디: ${weak.slice(0,4).join(", ")}마디`); });
+  }
+  const songs = S.songs.filter(s => days.includes(s.d)); if(songs.length) lines.push("", `🎵 직접 만든 노래: ${songs.map(s => `"${s.title}"`).join(", ")}`);
+  const newStk = STICKERS.filter(s => S.stickers.includes(s[0])).length; lines.push("", `⭐ 스티커 ${newStk}개 · 보석 ${S.gems}개 모음`);
+  lines.push(practicedN >= 5 ? "이번 주 정말 꾸준했어요! 칭찬 한마디 부탁드려요 😊" : practicedN >= 3 ? "꾸준히 하고 있어요. 응원 한마디가 큰 힘이 돼요 😊" : "이번 주는 조금 쉬었어요. 같이 한 곡 들어 주면 다시 신날 거예요 🎶");
+  return lines.join("\n");
+}
 function renderParent(){
   const days14 = Array.from({length:14},(_,i)=>{ const k = dkey(addDays(new Date(),i-13)); return `<div class="${allDone(k)?"g":practiced(k)?"p":""}" title="${k}"></div>`; }).join("");
   const mins = Object.values(S.days).reduce((a,d)=>a+(d.minutes||0),0);
@@ -733,6 +795,10 @@ function renderParent(){
      <div class="field"><span>디지털 피아노 연결 (USB 미디)</span><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="midi">${midiName?"연결됨: "+esc(midiName):"피아노 연결하기"}</button></div>
        <span class="muted" style="font-size:13px">크롬·엣지에서 index.html 파일을 직접 열었을 때 작동해요. claude.ai 링크 안에서는 브라우저가 막아요.</span><div id="midimsg" class="muted" role="status" style="font-size:14px"></div></div>
    </div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>이번 주 연습 보고서</h3>
+     <p class="muted" style="margin:0;font-size:14px">카카오톡 같은 곳에 붙여 넣어 가족에게 보낼 수 있게 글로 정리했어요.</p>
+     <textarea id="wk" rows="9" readonly style="font:inherit;font-size:14px;padding:10px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box">${esc(weeklyReport())}</textarea>
+     <button class="btn alt" id="wkcopy" style="align-self:flex-start">보고서 복사</button><div id="wkmsg" class="muted" role="status"></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>최근 7일 XP</h3>
      <div class="xpweek">${Array.from({length:7},(_,i)=>{ const d = addDays(new Date(),i-6), x = S.days[dkey(d)]?.xp||0, mx = Math.max(S.settings.goal, ...Array.from({length:7},(_,j)=>S.days[dkey(addDays(new Date(),j-6))]?.xp||0));
        return `<div class="${x>=S.settings.goal?"hit":""}"><span>${x}</span><i style="height:${Math.round(x/mx*70)}%"></i>${["일","월","화","수","목","금","토"][d.getDay()]}</div>`; }).join("")}</div>
@@ -754,6 +820,10 @@ function renderParent(){
   $("#s-parent").querySelectorAll("[data-goal]").forEach(b => b.onclick = () => { S.settings.goal = +b.dataset.goal; save(); renderParent(); });
   $("#midi").onclick = connectMidi;
   $("#pt").onclick = startPlacement;
+  $("#wkcopy").onclick = () => { const t = $("#wk"), m = $("#wkmsg");
+    navigator.clipboard?.writeText(t.value).then(() => m.textContent = "복사했어요. 카톡 대화창에 붙여 넣으면 돼요.", () => { t.select(); m.textContent = "자동 복사가 안 돼서 글을 선택해 두었어요. 길게 눌러 복사하세요."; })
+      ?? (t.select(), m.textContent = "글을 선택해 두었어요. 길게 눌러 복사하세요."); };
+  if(!LIB && labMode()) loadLib().then(() => cur==="parent" && renderParent(), () => {});
   $("#cal").onclick = calibrate;
   $("#micon").onchange = async e => { if(e.target.checked && !(await micStart())){ e.target.checked = false; $("#calmsg").textContent = micErr; return; }
     S.settings.mic = e.target.checked; save(); if(!S.settings.micOffset && e.target.checked) $("#calmsg").textContent = "'소리 맞추기'도 한 번 해 주세요."; };
@@ -926,7 +996,7 @@ function analyzeTake(piece, barA, barB, hand, played){
   });
   const totalN = list.reduce((a,b)=>a+b.total,0), okN = list.reduce((a,b)=>a+b.ok,0);
   const allDev = list.flatMap(b => b.dev), sd = allDev.length ? Math.sqrt(allDev.reduce((a,b)=>a+b*b,0)/allDev.length) : 0;
-  return {bars:list, acc: totalN ? okN/totalN : 0, bpm: Math.round(60/spb), steady: sd, events:E.length, heard:P.length, pairs, E, P, spb, t0,
+  return {hand, bars:list, acc: totalN ? okN/totalN : 0, bpm: Math.round(60/spb), steady: sd, events:E.length, heard:P.length, pairs, E, P, spb, t0,
     score: Math.round(list.reduce((a,b)=>a+b.score,0)/Math.max(1,list.length))};
 }
 /* 결과를 말로: 잘한 점 하나, 고칠 마디 둘(이유와 함께), 다음 연습 계획(끊어서 → 이어서 → 전체) */
@@ -951,6 +1021,10 @@ function adviseTake(piece, r, barA, barB){
   } else {
     const w = weak[0].bar, edge = r.bars.find(b=>b.bar===w)?.pauseAt === "edge" && w > barA;
     plan.push(edge ? `${w-1}마디 끝 박 → ${w}마디 첫 박만 이어서 5번 (넘어가는 곳 연습)` : `${w}마디만 ♩=${slow}로 천천히 3번`);
+    // 실수가 한 손에 몰려 있으면 그 손만 따로 먼저 (양손으로 녹음했을 때만)
+    const wb = r.bars.find(b => b.bar === w), errs = [...wb.wrong.map(x => x.want.h), ...wb.missed.map(n => n.h)];
+    const lh = errs.filter(h => h === 1).length, rh = errs.filter(h => h === 0).length;
+    if(r.hand === "both" && errs.length >= 2 && Math.max(lh, rh) >= errs.length*.75) plan.splice(1, 0, `${w}마디 ${lh > rh ? "왼손" : "오른손"}만 따로 2번 → 양손으로 1번`);
     plan.push(`${Math.max(barA,w-1)}~${Math.min(barB,w+1)}마디를 이어서 2번`);
     if(weak[1]) plan.push(`${weak[1].bar}마디도 같은 방법으로 한 번`);
     plan.push(`마지막으로 ${barA}~${barB}마디 전체를 다시 녹음하기`);
@@ -1292,8 +1366,9 @@ const MIC_LAT = 0.2;    // 마이크로 음을 알아듣기까지 걸리는 시�
 
 /* 박자 드럼 (PianoFun에서 딸이 맨 처음 부탁한 기능). 첫 박은 '쿵', 나머지는 '짝'. */
 let noiseBuf = null;
-function drum(strong){
-  if(!S.settings.sound) return; const a = audio(); if(!a) return; const t = a.currentTime;
+// force: 녹음 전 4박 세기처럼 소리를 꺼 두었어도 꼭 들려야 하는 박자
+function drum(strong, force){
+  if(!S.settings.sound && !force) return; const a = audio(); if(!a) return; const t = a.currentTime;
   if(Mic.tr) Mic.tr.st.gateUntil = Math.max(Mic.tr.st.gateUntil, performance.now() + 160);
   if(strong){ const o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(45,t+.12);
     g.gain.setValueAtTime(.5,t); g.gain.exponentialRampToValueAtTime(.001,t+.16); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+.17); }
@@ -1530,7 +1605,7 @@ function renderPiece(el){
   const p = LV.piece, n = p.bars.length, rec = labRec(p.id), r = LV.result;
   el.innerHTML = `<div class="labhead"><button class="x" id="labback" aria-label="곡 목록으로">←</button><div class="txt"><h2>${esc(p.title)}</h2><span class="muted" style="font-size:14px">${esc(p.composer)}${p.opus?" · "+esc(p.opus):""} · ${n}마디 · ${p.ts[0]}/${p.ts[1]}박자</span></div></div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="ctrl"><label>마디</label>${stepper("a", LV.a, "시작 마디")}<span>~</span>${stepper("b", LV.b, "끝 마디")}
+      <div class="ctrl"><label>마디</label><span class="row" style="gap:6px;flex-wrap:nowrap">${stepper("a", LV.a, "시작 마디")}<span>~</span>${stepper("b", LV.b, "끝 마디")}</span>
         <span class="row" style="gap:4px;flex-wrap:wrap">${[[1,4],[5,8],[1,8]].filter(([x,y]) => y <= n).map(([x,y]) => `<button class="pill" data-rg="${x}-${y}">${x}~${y}</button>`).join("")}</span></div>
       <div class="ctrl"><label>손</label><div class="seg" role="group" aria-label="손">${HANDS.map(([h,t]) => `<button data-hd="${h}" aria-pressed="${LV.hand===h}">${t}</button>`).join("")}</div></div>
       <div class="ctrl"><label>빠르기</label>${stepper("bpm", "♩="+LV.bpm, "빠르기")}<span class="muted" style="font-size:13px">녹음 전에 이 빠르기로 4박을 세 줘 (원래 ♩=${p.tempo})</span></div>
@@ -1539,7 +1614,7 @@ function renderPiece(el){
       <div id="labact"></div>
     </div>
     ${r ? reportHtml() : ""}
-    ${rec.takes.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px"><h3>이 곡 녹음 기록</h3><div class="takes">${rec.takes.slice(-8).reverse().map(t => `<div><span>${esc(t.d.slice(5).replace("-","/"))} · ${t.a}~${t.b}마디 · ${HANDS.find(h=>h[0]===t.hand)[1]} · ♩=${t.bpm}</span><span>${t.score}점</span></div>`).join("")}</div></div>` : ""}
+    ${growthHtml(p)}
     <p class="muted" style="font-size:12px">악보: <a href="${esc(p.source)}" target="_blank" rel="noopener">Mutopia Project에서 이 곡 악보 PDF 받기</a> · ${esc(p.license)}</p>`;
   $("#labback").onclick = () => { recStop(true); LV.piece = null; renderLab(); };
   el.querySelectorAll("[data-st]").forEach(b => b.onclick = () => { const d = +b.dataset.d, k = b.dataset.st;
@@ -1562,6 +1637,28 @@ function renderLabAction(){
   $("#labplay").onclick = () => playRange();
   $("#labrec").onclick = () => recStart();
   $("#labfile").onchange = e => { const f = e.target.files[0]; if(f) analyzeFile(f); e.target.value = ""; };
+}
+/* 이 곡에서 자란 모습: 마디마다 처음 점수 → 지금 점수, 빠르기 변화, 녹음 점수 흐름 */
+const barColor = s => s >= 90 ? "g" : s >= 70 ? "y" : "r";
+function sparkline(vals, label){
+  const W = 260, H = 56, n = vals.length, lo = Math.min(...vals), hi = Math.max(...vals), span = Math.max(1, hi - lo);
+  const pts = vals.map((v,i) => [8 + i*(W-16)/Math.max(1,n-1), H - 10 - (v-lo)/span*(H-22)]);
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto" role="img" aria-label="${label}">
+    <polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${pts.map((p,i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i===n-1?4.5:3}" fill="${i===n-1?"var(--pink)":"var(--card)"}" stroke="var(--pink)" stroke-width="2"/>`).join("")}
+    <text x="8" y="12" font-size="11" fill="var(--ink2)">${vals[0]}</text><text x="${W-8}" y="12" font-size="11" fill="var(--ink2)" text-anchor="end">${vals[n-1]}</text></svg>`;
+}
+function growthHtml(p){
+  const rec = S.lab[p.id]; if(!rec || !rec.takes.length) return "";
+  const h = barHistory(p.id), bars = Object.keys(h).map(Number).sort((a,b)=>a-b), tk = rec.takes;
+  const up = bars.map(b => ({b, from:h[b][0].s, to:h[b][h[b].length-1].s})).filter(x => h[x.b].length > 1 && x.to - x.from >= 10).sort((a,b)=>(b.to-b.from)-(a.to-a.from)).slice(0,3);
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>이 곡에서 자란 모습</h3>
+    <span class="muted" style="font-size:14px">녹음 ${tk.length}번 · ${esc(tk[0].d.slice(5).replace("-","/"))}부터 · 빠르기 ♩=${tk[0].bpm} → ♩=${tk[tk.length-1].bpm}</span>
+    ${up.length ? `<div>${up.map(x => `<span class="pill" style="margin:0 6px 6px 0">${x.b}마디 ${x.from}→${x.to}점 ▲</span>`).join("")}</div>` : ""}
+    <div><div class="muted" style="font-size:13px;margin-bottom:6px">마디별 지금 점수 (▲ 처음보다 오른 만큼)</div><div class="barmap">${bars.map(b => { const hs = h[b], d = hs[hs.length-1].s - hs[0].s;
+      return `<div class="barchip ${barColor(hs[hs.length-1].s)}" title="${b}마디: ${hs.map(x=>x.s).join(" → ")}">${b}마디<small>${hs[hs.length-1].s}${hs.length > 1 && d ? (d > 0 ? ` ▲${d}` : ` ▼${-d}`) : ""}</small></div>`; }).join("")}</div></div>
+    ${tk.length >= 2 ? `<div><div class="muted" style="font-size:13px">녹음 점수 흐름</div>${sparkline(tk.slice(-12).map(t=>t.score), "녹음 점수 흐름")}</div>` : ""}
+    <div class="takes">${tk.slice(-5).reverse().map(t => `<div><span>${esc(t.d.slice(5).replace("-","/"))} · ${t.a}~${t.b}마디 · ${HANDS.find(x=>x[0]===t.hand)[1]} · ♩=${t.bpm}</span><span>${t.score}점</span></div>`).join("")}</div></div>`;
 }
 // 고른 마디의 음을 빠르기에 맞춰 들려준다
 function playRange(){
@@ -1611,6 +1708,8 @@ function reportHtml(){
     <div class="hello">${bunny(64)}<div class="bubble"><b>${esc(A.praise)}</b>${A.weak.length ? `${A.weak.map(w=>w.bar+"마디").join(", ")}를 조금 더 연습하면 돼.` : "고칠 곳이 거의 없어!"}</div></div>
     <div class="chips"><div class="chip"><b>${Math.round(R.acc*100)}%</b><span>맞게 친 음</span></div><div class="chip"><b>♩=${R.bpm}</b><span>실제 빠르기</span></div><div class="chip"><b style="font-size:20px">${steady}</b><span>박자</span></div></div>
     <div><div class="muted" style="font-size:13px;margin-bottom:6px">마디를 누르면 자세히 볼 수 있어</div><div class="barmap">${R.bars.map(b => `<button class="barchip ${b.color}" data-bar="${b.bar}" aria-pressed="${LV.selBar===b.bar}">${b.bar}마디<small>${b.score}점</small></button>`).join("")}</div></div>
+    ${(() => { const h = barHistory(LV.piece.id), ch = R.bars.map(b => { const hs = h[b.bar] || []; return hs.length >= 2 ? {b:b.bar, from:hs[hs.length-2].s, to:hs[hs.length-1].s} : null; }).filter(x => x && Math.abs(x.to - x.from) >= 5);
+      return ch.length ? `<div><div class="muted" style="font-size:13px;margin-bottom:4px">지난번보다</div>${ch.map(x => `<span class="pill" style="margin:0 6px 6px 0">${x.b}마디 ${x.from}→${x.to} ${x.to > x.from ? "▲" : "▼"}</span>`).join("")}</div>` : ""; })()}
     ${sel ? `<div class="recbox" style="align-items:flex-start;text-align:left"><b style="font-family:var(--display);font-weight:400;font-size:18px">${sel.bar}마디 · ${sel.score}점</b>${(reasons(sel).length ? reasons(sel) : ["깔끔했어!"]).map(t=>`<span>· ${esc(t)}</span>`).join("")}</div>` : ""}
     ${A.weak.length ? `<div>${A.weak.map(w => `<p style="margin:4px 0"><b>${w.bar}마디</b>: ${esc(w.why.join(", ") || "조금 불안했어")}</p>`).join("")}</div>` : ""}
     <div><h3>다음 연습 계획</h3><ol class="plan">${A.plan.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
@@ -1642,7 +1741,7 @@ async function recStart(){
   // 4박 세기 (첫 박은 쿵)
   const spb = 60/LV.bpm; let k = 0;
   const tick = () => { if(LV.phase !== "rec") return; const big = $("#recbig");
-    if(k < 4){ drum(k === 0); if(big) big.textContent = 4 - k; k++; Rec.timer = setTimeout(tick, spb*1000); }
+    if(k < 4){ drum(k === 0, true); if(big) big.textContent = 4 - k; k++; Rec.timer = setTimeout(tick, spb*1000); }
     else { if(big) big.textContent = "🎹"; const t = $("#rectxt"); if(t) t.textContent = `녹음 중 · ${LV.a}~${LV.b}마디를 쳐 봐!`; } };
   tick();
 }
@@ -1690,7 +1789,7 @@ async function analyzeAudio(data, sr){
 function saveTake(R){
   const k = dkey(), d = today(), rec = labRec(LV.piece.id), wasGoal = (d.xp||0) >= S.settings.goal, wasAll = allDone(k);
   rec.takes.push({d:k, a:LV.a, b:LV.b, hand:LV.hand, score:R.score, acc:Math.round(R.acc*100), bpm:LV.bpm, bars:Object.fromEntries(R.bars.map(b=>[b.bar, b.score]))}); if(rec.takes.length > 40) rec.takes.shift();
-  d.sessions++; d.missions.lesson = true;
+  d.sessions++; d.missions.lesson = true; d.missions.piece = true;
   const xp = 15 + Math.round(R.score/10); d.xp = (d.xp||0) + xp; S.xp += xp; let gems = 2 + (R.score >= 90 ? 2 : 0);
   if(!wasGoal && d.xp >= S.settings.goal) gems += 5; if(!wasAll && allDone(k)) gems += mood().chest; S.gems += gems;
   ["first","recorder"].forEach(id => { if(!S.stickers.includes(id)) S.stickers.push(id); });
