@@ -327,7 +327,20 @@ function load(){
   try{ const r = localStorage.getItem(KEY); if(r) return merge(JSON.parse(r)); }catch(e){}
   return fresh();
 }
-function merge(o){ const f = fresh(); return Object.assign(f, o, {settings:Object.assign(f.settings, o.settings||{}), outfit:Object.assign(f.outfit, o.outfit||{})}); }
+function merge(o){
+  const f = fresh(), s = Object.assign(f, o, {settings:Object.assign(f.settings, o.settings||{}), outfit:Object.assign(f.outfit, o.outfit||{})});
+  // 백업 코드는 밖에서 붙여 넣는 값이라, 화면에 그리는 목록은 모양을 확인하고 이상한 항목은 버린다
+  const isDay = d => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
+  s.songs = (Array.isArray(s.songs) ? s.songs : []).filter(x => x && typeof x.title === "string" && isDay(x.d) && Array.isArray(x.notes) && x.notes.length
+    && x.notes.every(n => n && N[n.n] && [0.5,1,1.5,2].includes(n.b))).map(x => ({id:+x.id||0, title:x.title.slice(0,16), d:x.d, notes:x.notes.map(n=>({n:n.n, b:n.b}))}));
+  s.log = (Array.isArray(s.log) ? s.log : []).filter(e => e && isDay(e.d) && typeof e.t === "string").map(e => ({d:e.d, t:e.t.slice(0,40), s:Math.max(0,Math.min(3,+e.s||0)), a:Math.max(0,Math.min(100,Math.round(+e.a||0)))}));
+  s.stickers = (Array.isArray(s.stickers) ? s.stickers : []).filter(id => STICKERS.some(x=>x[0]===id));
+  s.owned = (Array.isArray(s.owned) ? s.owned : []).filter(id => SI[id]); if(!s.owned.includes("ribbon-pink")) s.owned.push("ribbon-pink");
+  ["ribbon","hat","wand"].forEach(k => { if(s.outfit[k] && !SI[s.outfit[k]]) s.outfit[k] = f.outfit[k]; });
+  s.settings.goal = [10,20,30].includes(+s.settings.goal) ? +s.settings.goal : 20;
+  ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
+  return s;
+}
 let S = load();
 function save(){ S.updatedAt = Date.now(); try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 const dkey = (d=new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -548,7 +561,7 @@ function renderHome(){
       <button class="btn alt" id="balloon" ${balloonOpen()?"":"disabled"}>놀기</button></div>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="row" style="justify-content:space-between;flex-wrap:wrap"><h3>🎼 내가 만든 노래</h3><button class="btn" id="free">새 노래 만들기</button></div>
-      ${S.songs.length ? S.songs.map((s,i)=>`<div class="mysong"><div class="txt"><b>${esc(s.title)}</b><span>${s.notes.length}음 · ${s.d.slice(5).replace("-","/")}</span>
+      ${S.songs.length ? S.songs.map((s,i)=>`<div class="mysong"><div class="txt"><b>${esc(s.title)}</b><span>${s.notes.length}음 · ${esc(s.d.slice(5).replace("-","/"))}</span>
         <div class="dots">${s.notes.slice(0,16).map(o=>`<i style="background:${colorOf(o.n.replace("#",""))}"></i>`).join("")}</div></div>
         <button class="btn ghost sm" data-play="${i}" aria-label="${esc(s.title)} 들어보기">▶</button><button class="btn alt sm" data-follow="${i}">따라 치기</button><button class="btn ghost sm" data-del="${i}" aria-label="${esc(s.title)} 지우기">✕</button></div>`).join("")
         : `<span class="muted" style="font-size:14px">아직 없어. 피아노를 마음대로 치면 오선지에 음표가 그려지고, 나만의 노래로 저장할 수 있어!</span>`}
@@ -607,7 +620,7 @@ function renderParent(){
   const notes = NOTES.filter(n=>n.white);
   const bars = notes.map(n => { const s = noteStat(n.id), t = s.r+s.w, p = t?Math.round(s.r/t*100):null;
     return `<div class="bar"><span>${n.name}</span><div class="track"><div class="fill" style="width:${p??0}%;background:${colorOf(n.id)}"></div></div><span class="v">${p===null?"아직 없음":`${p}% · ${t}회`}</span></div>`; }).join("");
-  const log = S.log.slice(-30).reverse().map(e=>`<div><span>${e.d.slice(5).replace("-","/")} ${esc(e.t)}</span><span>${"★".repeat(e.s)} ${e.a}%</span></div>`).join("") || `<div class="muted">아직 기록이 없어요.</div>`;
+  const log = S.log.slice(-30).reverse().map(e=>`<div><span>${esc(e.d.slice(5).replace("-","/"))} ${esc(e.t)}</span><span>${"★".repeat(e.s)} ${e.a}%</span></div>`).join("") || `<div class="muted">아직 기록이 없어요.</div>`;
   $("#s-parent").innerHTML = `
    <div class="card" style="display:flex;flex-direction:column;gap:12px"><h2>어른 코너</h2>
      <p class="muted" style="margin:0">아이의 연습 기록을 보고 설정을 바꾸는 곳이에요. 기록은 이 기기의 브라우저에만 저장됩니다.</p>
