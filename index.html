@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF4F9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="솜이 피아노">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>솜이 피아노 교실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 한 화면 앱. 위에는 화면 콘텐츠, 아래에는 탭 바. 연습 화면은 탭 바를 숨기고 건반을 화면 아래에 붙인다. */
+:root{
+  --bg:#FFF4F9; --bg2:#F6EEFF; --card:#FFFFFF; --ink:#4A2D5C; --ink2:#8A6A99; --line:#F0D9EA;
+  --pink:#FF6FAE; --pink-soft:#FFE0EE; --lilac:#A98BFF; --lilac-soft:#EEE6FF; --mint:#4FCFAE; --butter:#FFC93C;
+  --key:#FFFFFF; --key-edge:#E9D3E3; --black:#3B2547; --shadow:0 6px 0 rgba(169,139,255,.18);
+  --c-C:#FF5C7A; --c-D:#FF9640; --c-E:#F5C400; --c-F:#3FCB7A; --c-G:#3BAEF5; --c-A:#6E7BFF; --c-B:#B86CF5;
+  --display:"Jua","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#21162F; --bg2:#2A1D3D; --card:#33244A; --ink:#FBEFFF; --ink2:#C9B3D8; --line:#4A3863;
+  --pink-soft:#4E2944; --lilac-soft:#3B2E5C; --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; --shadow:0 6px 0 rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#21162F; --bg2:#2A1D3D; --card:#33244A; --ink:#FBEFFF; --ink2:#C9B3D8; --line:#4A3863;
+  --pink-soft:#4E2944; --lilac-soft:#3B2E5C; --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; --shadow:0 6px 0 rgba(0,0,0,.3); color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  background-image:radial-gradient(circle at 12% 8%,var(--pink-soft) 0 90px,transparent 91px),radial-gradient(circle at 92% 30%,var(--lilac-soft) 0 120px,transparent 121px);
+  background-attachment:fixed;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--lilac);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.25}
+.app{max-width:780px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 96px}
+.screen{display:flex;flex-direction:column;gap:18px}
+.card{background:var(--card);border-radius:24px;padding:18px;box-shadow:var(--shadow);border:2px solid var(--line)}
+.row{display:flex;gap:12px;align-items:center}
+.muted{color:var(--ink2)}
+.btn{font-family:var(--display);font-size:18px;padding:12px 22px;border-radius:999px;background:var(--pink);color:#fff;box-shadow:0 4px 0 #D9478A;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #D9478A}
+.btn.alt{background:var(--lilac);box-shadow:0 4px 0 #7D5FE0}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:default}
+
+/* 홈 */
+.hello{display:flex;gap:14px;align-items:flex-end}
+.bubble{position:relative;background:var(--card);border:2px solid var(--line);border-radius:22px 22px 22px 6px;padding:14px 16px;flex:1;min-width:0;box-shadow:var(--shadow)}
+.bubble b{font-family:var(--display);font-weight:400;font-size:20px;display:block;color:var(--pink)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.day{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:var(--ink2)}
+.stamp{width:38px;height:38px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-size:20px}
+.stamp.on{border:0;background:var(--pink-soft)}
+.stamp.gold{border:0;background:var(--butter)}
+.stamp.today{border-color:var(--pink)}
+.streak{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.streak .big{font-family:var(--display);font-size:30px;color:var(--pink)}
+.mission{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--bg2)}
+.mission .chk{width:34px;height:34px;flex:none;border-radius:50%;border:3px solid var(--lilac);display:grid;place-items:center;color:#fff;font-size:18px}
+.mission.done .chk{background:var(--mint);border-color:var(--mint)}
+.mission .txt{flex:1;min-width:0}
+.mission .txt b{font-family:var(--display);font-weight:400;font-size:18px;display:block}
+.mission .txt span{font-size:14px;color:var(--ink2)}
+.mission.done .txt b{text-decoration:line-through;text-decoration-color:var(--mint);text-decoration-thickness:3px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.chip{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:10px;text-align:center;box-shadow:var(--shadow)}
+.chip b{font-family:var(--display);font-weight:400;font-size:26px;display:block;font-variant-numeric:tabular-nums}
+.chip span{font-size:13px;color:var(--ink2)}
+.allclear{background:linear-gradient(135deg,var(--butter),var(--pink));color:#fff;text-align:center;font-family:var(--display);font-size:20px;border-radius:18px;padding:12px}
+
+/* 지도 */
+.path{position:relative;display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.path::before{content:"";position:absolute;left:50%;top:30px;bottom:30px;border-left:6px dotted var(--lilac);opacity:.5;transform:translateX(-3px)}
+.stop{position:relative;display:flex}
+.stop:nth-child(4n+1){justify-content:center}
+.stop:nth-child(4n+2){justify-content:flex-end;padding-right:8%}
+.stop:nth-child(4n+3){justify-content:center}
+.stop:nth-child(4n){justify-content:flex-start;padding-left:8%}
+.node{display:flex;flex-direction:column;align-items:center;gap:4px;width:150px;text-align:center}
+.disc{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:var(--card);border:4px solid var(--pink);box-shadow:0 6px 0 #E7559A;transition:transform .1s}
+.disc:active{transform:translateY(4px);box-shadow:0 2px 0 #E7559A}
+.node.locked .disc{border-color:var(--line);box-shadow:0 6px 0 var(--line);filter:grayscale(1);opacity:.6;cursor:default}
+.node.next .disc{animation:bob 1.6s ease-in-out infinite}
+.node .nm{font-family:var(--display);font-size:16px;line-height:1.2;background:var(--bg);padding:2px 8px;border-radius:10px}
+.stars{color:var(--butter);letter-spacing:2px;font-size:16px}
+.stars .off{color:var(--line)}
+.tag{font-size:12px;padding:1px 8px;border-radius:99px;background:var(--lilac-soft);color:var(--ink2)}
+@keyframes bob{50%{transform:translateY(-6px)}}
+
+/* 스티커 */
+.stickers{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
+.stk{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.stk .em{font-size:42px;line-height:1.2}
+.stk b{font-family:var(--display);font-weight:400;font-size:15px}
+.stk span{font-size:12px;color:var(--ink2);line-height:1.3}
+.stk.locked .em{filter:grayscale(1) brightness(1.4);opacity:.25}
+.stk.got{border-color:var(--pink);background:var(--pink-soft)}
+
+/* 어른 */
+.field{display:flex;flex-direction:column;gap:6px}
+.field input,.field textarea{font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.toggle input{width:22px;height:22px;accent-color:var(--pink)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:64px 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:14px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;border-radius:99px}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.cal{display:grid;grid-template-columns:repeat(14,1fr);gap:4px}
+.cal div{aspect-ratio:1;border-radius:6px;background:var(--bg2);max-width:100%}
+.cal .p{background:var(--pink-soft)} .cal .g{background:var(--pink)}
+.log{display:flex;flex-direction:column;gap:6px;font-size:14px;max-height:220px;overflow:auto}
+.log div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+
+/* 탭 바 */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--card);border-top:2px solid var(--line);
+  padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.tabs nav{max-width:780px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px;border-radius:16px;font-family:var(--display);font-size:14px;color:var(--ink2)}
+.tab svg{width:26px;height:26px}
+.tab[aria-current="page"]{background:var(--pink-soft);color:var(--pink)}
+
+/* 연습 화면 */
+body.playing .tabs{display:none}
+body.playing .app{padding-block:12px 12px}
+.playtop{display:flex;align-items:center;gap:10px}
+.x{width:44px;height:44px;border-radius:50%;background:var(--card);border:2px solid var(--line);font-size:22px;display:grid;place-items:center;flex:none}
+.prog{flex:1;height:18px;border-radius:99px;background:var(--bg2);overflow:hidden;border:2px solid var(--line)}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--lilac));border-radius:99px;transition:width .3s}
+.ptitle{font-family:var(--display);font-size:20px;text-align:center}
+.stage{position:relative;min-height:240px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:var(--card);border-radius:24px;border:2px solid var(--line);overflow:hidden}
+.target{width:140px;height:140px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:56px;color:#fff;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12);animation:pop .35s}
+.prompt{font-family:var(--display);font-size:20px;text-align:center;padding:0 12px}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+#lane{display:block;width:100%;height:260px}
+.songbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.speed{display:flex;gap:4px;background:var(--bg2);border-radius:99px;padding:4px}
+.speed button{padding:6px 12px;border-radius:99px;font-size:14px;font-family:var(--display)}
+.speed button[aria-pressed="true"]{background:var(--card);color:var(--pink);box-shadow:0 2px 0 var(--line)}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--card);z-index:2;text-align:center;padding:16px}
+.staff{width:min(320px,90%);height:auto}
+
+/* 건반 */
+.kbwrap{margin-top:auto;padding-top:14px}
+.kb{position:relative;display:flex;height:190px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.wk{flex:1;position:relative;background:var(--key);border:2px solid var(--key-edge);border-top:0;border-radius:0 0 14px 14px;margin:0 1px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:10px;gap:6px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.06);transition:background .1s}
+.wk .dot{width:22px;height:22px;border-radius:50%}
+.wk .lb{font-family:var(--display);font-size:17px;color:#5A3D69;line-height:1}
+.wk.hide-lb .lb{visibility:hidden}
+.bk{position:absolute;top:0;width:7%;height:60%;background:var(--black);border-radius:0 0 10px 10px;z-index:2;box-shadow:inset 0 -6px 0 rgba(255,255,255,.12)}
+.wk.down{background:var(--pink-soft);box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
+.bk.down{background:#6B4A7E}
+.wk.glow{animation:glow 1s ease-in-out infinite}
+.bk.glow{animation:glowb 1s ease-in-out infinite}
+@keyframes glow{50%{background:#FFF0A8;box-shadow:0 0 0 4px var(--butter) inset}}
+@keyframes glowb{50%{background:#C9A33A}}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* 결과 */
+.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(74,45,92,.45);padding:16px}
+.modal .card{max-width:380px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.bigstars{font-size:52px;letter-spacing:6px}
+.bigstars span{display:inline-block;color:var(--line);animation:none}
+.bigstars span.on{color:var(--butter);animation:pop .5s backwards}
+.newstk{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:40px}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%;height:100%}
+
+/* 오늘의 목표 (XP 링) */
+.goal{display:flex;gap:16px;align-items:center}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);line-height:1.1}
+.ring .num b{font-weight:400;font-size:26px;font-variant-numeric:tabular-nums}
+.ring .num span{font-size:12px;color:var(--ink2)}
+.goal .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;background:var(--bg2);font-size:14px;font-variant-numeric:tabular-nums}
+.play-card{display:flex;align-items:center;gap:14px}
+.play-card .em{font-size:44px;flex:none}
+.play-card .txt{flex:1;min-width:0}
+.combo{font-family:var(--display);font-size:16px;color:#fff;background:var(--butter);padding:4px 12px;border-radius:99px;flex:none;animation:pop .3s}
+.micpill{font-family:var(--display);font-size:15px;padding:4px 12px;border-radius:99px;background:var(--bg2);color:var(--ink2);flex:none;transition:background .1s}
+.micpill.hot{background:var(--mint);color:#fff}
+.meter{height:12px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--pink));transition:width .08s}
+.toast{position:fixed;left:50%;top:calc(80px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:25;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-family:var(--display);font-size:17px;max-width:calc(100% - 32px);text-align:center;animation:pop .3s}
+.reward{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* 상점 */
+.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.item{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.item .em{font-size:40px;line-height:1.2}
+.item b{font-family:var(--display);font-weight:400;font-size:17px}
+.item span{font-size:13px;color:var(--ink2);line-height:1.35}
+.item .btn{font-size:15px;padding:8px 16px;margin-top:auto}
+.item.on{border-color:var(--pink);background:var(--pink-soft)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--bg);font-family:var(--display)}
+.seg button[aria-pressed="true"]{border-color:var(--pink);background:var(--pink-soft);color:var(--pink)}
+.xpweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:110px}
+.xpweek div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;font-size:12px;color:var(--ink2)}
+.xpweek i{display:block;width:70%;border-radius:8px 8px 3px 3px;background:var(--lilac);min-height:3px}
+.xpweek .hit i{background:var(--pink)}
+@media (max-width:480px){.kb{height:150px}.wk .lb{font-size:14px}.wk .dot{width:16px;height:16px}.disc{width:70px;height:70px;font-size:28px}.node{width:120px}#lane{height:220px}.target{width:110px;height:110px;font-size:44px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app" id="app">
+  <section class="screen" id="s-home"></section>
+  <section class="screen" id="s-map" hidden></section>
+  <section class="screen" id="s-stk" hidden></section>
+  <section class="screen" id="s-shop" hidden></section>
+  <section class="screen" id="s-parent" hidden></section>
+  <section class="screen" id="s-play" hidden style="flex:1">
+    <div class="playtop">
+      <button class="x" id="quit" aria-label="그만하기">×</button>
+      <div class="prog"><i id="progbar"></i></div>
+      <span class="combo" id="combo" hidden></span>
+      <span class="micpill" id="micpill" hidden></span>
+    </div>
+    <div class="ptitle" id="ptitle"></div>
+    <div class="stage" id="stage"></div>
+    <div class="kbwrap"><div class="kb" id="kb" aria-label="피아노 건반"></div></div>
+  </section>
+</div>
+<div class="tabs"><nav id="tabs">
+  <button class="tab" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>오늘</button>
+  <button class="tab" data-go="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg>별나라 지도</button>
+  <button class="tab" data-go="stk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>스티커북</button>
+  <button class="tab" data-go="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18 3-18"/></svg>보석 상점</button>
+  <button class="tab" data-go="parent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>어른 코너</button>
+</nav></div>
+<canvas id="fx"></canvas>
+
+<script>
+(() => {
+"use strict";
+const KEY = "somi-piano-v1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- 음 ---------- */
+const NOTES = [
+  ["C4",60,"도","C"],["C#4",61,"도♯",null],["D4",62,"레","D"],["D#4",63,"레♯",null],["E4",64,"미","E"],
+  ["F4",65,"파","F"],["F#4",66,"파♯",null],["G4",67,"솔","G"],["G#4",68,"솔♯",null],["A4",69,"라","A"],
+  ["A#4",70,"시♭",null],["B4",71,"시","B"],["C5",72,"높은 도","C"],["C#5",73,"도♯",null],["D5",74,"높은 레","D"],
+  ["D#5",75,"레♯",null],["E5",76,"높은 미","E"]
+].map(([id,midi,name,letter]) => ({id,midi,name,letter,white:!!letter,short:letter?name.replace("높은 ",""):""}));
+const N = Object.fromEntries(NOTES.map(n => [n.id,n]));
+const colorOf = id => { const n = N[id]; return n.letter ? `var(--c-${n.letter})` : "var(--black)"; };
+const hasBatchim = w => { const c = w.charCodeAt(w.length-1); return c>=0xAC00 && c<=0xD7A3 && (c-0xAC00)%28!==0; };
+const eul = w => w + (hasBatchim(w) ? "을" : "를");
+const KEYMAP = {a:"C4",w:"C#4",s:"D4",e:"D#4",d:"E4",f:"F4",t:"F#4",g:"G4",y:"G#4",h:"A4",u:"A#4",j:"B4",k:"C5",o:"C#5",l:"D5",p:"D#5",";":"E5"};
+
+/* ---------- 노래 (모두 저작권이 끝난 전래·고전 선율) ---------- */
+const SONGS = {
+  plane:  {name:"떴다 떴다 비행기", tempo:1, seq:"E4 D4 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4 D4 C4 D4 E4 E4 E4:2 D4 D4 E4 D4 C4:4"},
+  nabi:   {name:"나비야", tempo:1, seq:"G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 E4 E4 E4:2"},
+  twinkle:{name:"반짝반짝 작은 별", tempo:1, seq:"C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2"},
+  joy:    {name:"환희의 송가", tempo:1, seq:"E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2"},
+  bday:   {name:"생일 축하 노래", tempo:1, seq:"C4:.75 C4:.25 D4 C4 F4 E4:2 C4:.75 C4:.25 D4 C4 G4 F4:2 C4:.75 C4:.25 C5 A4 F4 E4 D4:2 A#4:.75 A#4:.25 A4 F4 G4 F4:2"}
+};
+function parseSong(s){ let t=0; return s.split(/\s+/).map(tok => { const [id,d] = tok.split(":"); const dur = d?parseFloat(d):1; const o = {note:id,start:t,dur}; t+=dur; return o; }); }
+
+/* ---------- 레슨 길 (DeepTutor의 '숙달 경로'처럼 한 단계씩 열림) ---------- */
+const LESSONS = [
+  {id:"l1", icon:"🌷", title:"도·레·미 친구들", kind:"find", notes:["C4","D4","E4"], rounds:8, tip:"건반 색깔을 잘 봐!"},
+  {id:"l2", icon:"✈️", title:"떴다 떴다 비행기", kind:"song", song:"plane"},
+  {id:"l3", icon:"🐣", title:"파·솔 등장", kind:"find", notes:["C4","D4","E4","F4","G4"], rounds:10},
+  {id:"l4", icon:"🦋", title:"나비야", kind:"song", song:"nabi"},
+  {id:"l5", icon:"🐰", title:"귀 쫑긋 소리 찾기", kind:"ear", notes:["C4","E4","G4"], rounds:6, tip:"소리를 듣고 같은 건반을 찾아봐"},
+  {id:"l6", icon:"🌙", title:"라·시·높은 도", kind:"find", notes:["C4","D4","E4","F4","G4","A4","B4","C5"], rounds:10},
+  {id:"l7", icon:"⭐", title:"반짝반짝 작은 별", kind:"song", song:"twinkle"},
+  {id:"l8", icon:"🎀", title:"오선지 읽기", kind:"staff", notes:["C4","D4","E4","F4","G4","A4","B4","C5"], rounds:10, tip:"음표가 높이 있을수록 높은 소리야"},
+  {id:"l9", icon:"🎻", title:"환희의 송가", kind:"song", song:"joy"},
+  {id:"l10",icon:"🎂", title:"생일 축하 노래", kind:"song", song:"bday", tip:"검은 건반이 처음 나와!"}
+];
+const LI = Object.fromEntries(LESSONS.map((l,i)=>[l.id,i]));
+
+const STICKERS = [
+  ["first","🎹","첫 연주","아무 연습이나 끝내기"],
+  ["mission1","🍓","미션 클리어","오늘의 미션 3개 모두 하기"],
+  ["perfect","💖","실수 0개","한 번도 안 틀리고 끝내기"],
+  ["s3","🌈","3일 연속","3일 연속 연습하기"],
+  ["s7","🦄","7일 연속","7일 연속 연습하기"],
+  ["s14","👑","14일 연속","14일 연속 연습하기"],
+  ["s30","🏰","30일 연속","30일 연속 연습하기"],
+  ["d5","🍰","5일 연습","연습한 날 5일 모으기"],
+  ["d15","💎","15일 연습","연습한 날 15일 모으기"],
+  ...LESSONS.map(l => [l.id, l.icon, l.title, "별 3개 받기"])
+];
+
+/* ---------- 저장 ---------- */
+function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
+  placed:false,placeLevel:0,xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+
+/* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
+const SHOP = [
+  {id:"freeze", em:"🛡️", name:"연속 기록 방패", price:20, desc:"하루 쉬어도 연속 기록을 지켜 줘요. 최대 2개"},
+  {id:"ribbon-pink", slot:"ribbon", val:"#FF6FAE", em:"🎀", name:"분홍 리본", price:0, desc:"솜이가 처음 매고 온 리본"},
+  {id:"ribbon-lilac", slot:"ribbon", val:"#A98BFF", em:"💜", name:"보라 리본", price:15, desc:"솜이 귀에 보라 리본"},
+  {id:"ribbon-mint", slot:"ribbon", val:"#4FCFAE", em:"💚", name:"민트 리본", price:15, desc:"솜이 귀에 민트 리본"},
+  {id:"hat-flower", slot:"hat", val:"flower", em:"🌸", name:"꽃 화관", price:30, desc:"알록달록 꽃으로 만든 화관"},
+  {id:"hat-crown", slot:"hat", val:"crown", em:"👑", name:"반짝 왕관", price:50, desc:"피아노 공주님의 왕관"},
+  {id:"wand", slot:"wand", val:true, em:"🪄", name:"별 요술봉", price:40, desc:"솜이가 별 요술봉을 들어요"}
+];
+const SI = Object.fromEntries(SHOP.map(s=>[s.id,s]));
+function load(){
+  try{ const r = localStorage.getItem(KEY); if(r) return merge(JSON.parse(r)); }catch(e){}
+  return fresh();
+}
+function merge(o){ const f = fresh(); return Object.assign(f, o, {settings:Object.assign(f.settings, o.settings||{}), outfit:Object.assign(f.outfit, o.outfit||{})}); }
+let S = load();
+function save(){ S.updatedAt = Date.now(); try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const dkey = (d=new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+function today(){ const k = dkey(); if(!S.days[k]) S.days[k] = {sessions:0,minutes:0,missions:{}}; return S.days[k]; }
+const practiced = k => (S.days[k]?.sessions||0) > 0;
+const frozen = k => !!S.days[k]?.frozen;
+const alive = k => practiced(k) || frozen(k);
+const allDone = k => { const m = S.days[k]?.missions||{}; return m.warm && m.lesson && m.review; };
+function streak(){
+  let d = new Date(), n = 0;
+  if(!alive(dkey(d))) d = addDays(d,-1);
+  while(alive(dkey(d))){ if(practiced(dkey(d))) n++; d = addDays(d,-1); }
+  return n;
+}
+/* 앱을 열 때, 쉬었던 날을 방패로 메운다. 방패가 모자라면 기록은 새로 시작된다. */
+function applyFreeze(){
+  if(alive(dkey())) return;
+  const gap = []; let d = addDays(new Date(),-1);
+  while(!alive(dkey(d)) && gap.length < 60){ gap.push(dkey(d)); d = addDays(d,-1); }
+  if(!gap.length || !alive(dkey(d))) return;
+  if(gap.length <= S.freezes){
+    gap.forEach(k => S.days[k] = Object.assign(S.days[k]||{sessions:0,minutes:0,missions:{}}, {frozen:true}));
+    S.freezes -= gap.length;
+    S.notice = ["방패가 연속 기록을 지켜 줬어!", `쉬었던 ${gap.length}일을 방패로 막았어. 오늘은 같이 쳐 보자!`];
+  } else if(gap.length === 1 || streakBefore(d) >= 3) {
+    S.notice = ["어제는 쉬었구나. 괜찮아!", "오늘부터 다시 하면 돼. 방패를 사 두면 쉬는 날도 기록이 지켜져."];
+  }
+  save();
+}
+function streakBefore(d){ let n = 0; while(alive(dkey(d))){ if(practiced(dkey(d))) n++; d = addDays(d,-1); } return n; }
+const totalDays = () => Object.keys(S.days).filter(practiced).length;
+const totalStars = () => Object.values(S.stars).reduce((a,b)=>a+b,0);
+const unlocked = i => i===0 || i <= (S.placeLevel||0) || (S.stars[LESSONS[i-1].id]||0) >= 1;
+
+/* ---------- 맞춤 학습: 음별 정답률로 약한 음 찾기 ---------- */
+function noteStat(id){ return S.notes[id] || {r:0,w:0,last:0}; }
+function weakness(id){ const s = noteStat(id); const days = s.last ? (Date.now()-s.last)/864e5 : 3; return (s.w+1)/(s.r+s.w+2) + Math.min(days,7)*0.04; }
+function learnedNotes(){
+  const set = new Set(["C4","D4","E4"]);
+  LESSONS.forEach((l,i) => { if(((S.stars[l.id]||0)>=1 || i < (S.placeLevel||0)) && l.notes) l.notes.forEach(n=>set.add(n)); });
+  return [...set].sort((a,b)=>N[a].midi-N[b].midi);
+}
+function weakest(k){ return learnedNotes().sort((a,b)=>weakness(b)-weakness(a)).slice(0,k); }
+function pickWeighted(pool, avoid){
+  const c = pool.length>1 ? pool.filter(n=>n!==avoid) : pool;
+  const w = c.map(n => 0.5 + weakness(n)); let r = Math.random()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<c.length;i++){ r-=w[i]; if(r<=0) return c[i]; } return c[c.length-1];
+}
+function nextLesson(){
+  for(let i=Math.min(S.placeLevel||0, LESSONS.length-1);i<LESSONS.length;i++){ if(unlocked(i) && (S.stars[LESSONS[i].id]||0)<3) return LESSONS[i]; }
+  for(let i=0;i<LESSONS.length;i++){ if(unlocked(i) && (S.stars[LESSONS[i].id]||0)<3) return LESSONS[i]; } return LESSONS[LESSONS.length-1]; }
+/* 노래를 소절로 자르기 (Cut Up and Practice처럼 어려운 조각만 따로 연습) */
+function phrasesOf(seq){ const out = []; let a = 0;
+  seq.forEach((o,i) => { if(o.dur >= 2 || i-a+1 >= 8 || i === seq.length-1){ out.push([a,i+1]); a = i+1; } }); return out; }
+function hardestPhrase(){
+  let best = null;
+  LESSONS.forEach((l,i) => { if(l.kind!=="song" || !unlocked(i)) return; (S.phrases[l.song]||[]).forEach((c,p) => { if(c>0 && (!best || c>best.c)) best = {song:l.song, p, c}; }); });
+  return best;
+}
+function missions(){
+  const nl = nextLesson(), wk = weakest(3), hp = hardestPhrase();
+  const review = hp
+    ? {key:"review", title:"솜이의 복습", sub:`${SONGS[hp.song].name} ${hp.p+1}번째 소절 다시 치기`, cfg:{kind:"song", song:hp.song, phrase:hp.p, title:`${SONGS[hp.song].name} · ${hp.p+1}번째 소절`, mission:"review", tip:"자주 틀린 부분만 잘라 왔어. 천천히 해 보자"}}
+    : {key:"review", title:"솜이의 복습", sub:`${wk.map(n=>N[n].name).join(" · ")} 다시 보기`, cfg:{kind:"find", notes:wk, rounds:6, title:"솜이의 복습", mission:"review"}};
+  return [
+    {key:"warm", title:"손가락 풀기", sub:"배운 음 5개 빨리 찾기", cfg:{kind:"find", notes:learnedNotes(), rounds:5, title:"손가락 풀기", mission:"warm"}},
+    {key:"lesson", title:"오늘의 레슨", sub:`${nl.icon} ${nl.title}`, cfg:{...lessonCfg(nl), mission:"lesson"}},
+    review
+  ];
+}
+const balloonOpen = () => (S.stars.l3||0) >= 1 || (S.placeLevel||0) >= 3;
+
+/* 실력 알아보기 (듀오링고의 레벨 테스트). 쉬운 단계부터 묻고, 한 단계를 못 넘으면 거기서 멈춘다.
+   level은 '통과한 것으로 치는 레슨 수'이고, 결과에 맞는 섬부터 지도가 열린다. */
+const PLACEMENT = [
+  {kind:"find", notes:["C4","D4","E4"], rounds:3, level:1, label:"도·레·미 찾기"},
+  {kind:"find", notes:["C4","D4","E4","F4","G4"], rounds:4, level:3, label:"도부터 솔까지 찾기"},
+  {kind:"find", notes:["C4","D4","E4","F4","G4","A4","B4","C5"], rounds:4, level:6, label:"라·시·높은 도까지 찾기"},
+  {kind:"staff", notes:["C4","D4","E4","F4","G4","A4","B4","C5"], rounds:4, level:8, label:"오선지 음표 읽기"}
+];
+const PLACE_TOTAL = PLACEMENT.reduce((a,s)=>a+s.rounds,0);
+const RANKS = {0:["새싹 피아니스트","🌱"],1:["꽃봉오리 피아니스트","🌷"],3:["꽃 피아니스트","🌸"],6:["무지개 피아니스트","🌈"],8:["별 피아니스트","⭐"]};
+function startPlacement(){
+  startActivity({...PLACEMENT[0], title:"솜이의 실력 알아보기", place:{si:0, done:0, base:0, level:0},
+    intro:"솜이가 몇 가지 물어볼게. 모르는 건 틀려도 괜찮아! 실력에 맞는 섬부터 시작하게 해 줄게", tip:"4단계, 2분쯤 걸려"});
+}
+function placeStep(){
+  const p = A.place, stg = PLACEMENT[p.si], pass = A.right - p.base >= stg.rounds - 1;
+  p.done += stg.rounds; if(pass) p.level = stg.level;
+  if(!pass || p.si === PLACEMENT.length-1) return placeDone();
+  p.si++; const n = PLACEMENT[p.si];
+  Object.assign(A, {kind:n.kind, notes:n.notes, rounds:n.rounds, round:0, target:null, lock:true}); p.base = A.right;
+  glow(null); setProg(p.done/PLACE_TOTAL); ding();
+  $("#stage").innerHTML = `<div class="target" style="background:var(--mint)">✓</div><div class="prompt">${p.si}단계 통과! 이번엔 ${n.label}</div>`;
+  setTimeout(() => { if(A && A.place === p) nextRound(); }, 1500);
+}
+function placeDone(){
+  A.running = false; glow(null); $("#combo").hidden = true; setProg(1);
+  const lvl = A.place.level, [rank, em] = RANKS[lvl], start = LESSONS[Math.min(lvl, LESSONS.length-1)], d = today(), k = dkey();
+  S.placed = true; S.placeLevel = Math.max(S.placeLevel||0, lvl);
+  d.sessions++; d.minutes += (Date.now()-A.t0)/60000; d.xp = (d.xp||0) + 10; S.xp += 10;
+  S.log.push({d:k, t:"실력 알아보기", s:0, a:Math.round(A.right/A.place.done*100)});
+  if(!S.stickers.includes("first")) S.stickers.push("first");
+  save();
+  const known = learnedNotes().map(id=>`<span class="pill" style="background:${colorOf(id)};color:#fff">${N[id].short}</span>`).join("");
+  const m = document.createElement("div"); m.className = "modal";
+  m.innerHTML = `<div class="card" role="dialog" aria-label="실력 알아보기 결과">${bunny(84)}<div style="font-size:48px;line-height:1">${em}</div>
+    <h2>${S.name?esc(S.name)+(hasBatchim(S.name)?"은 ":"는 "):""}${rank}!</h2>
+    <div class="muted">${A.place.done}문제 중 ${A.right}개를 한 번에 맞혔어</div>
+    <div class="row" style="flex-wrap:wrap;justify-content:center;gap:6px">${known}</div>
+    <div>${lvl ? `앞의 섬 ${lvl}개는 열어 뒀어.<br><b style="font-family:var(--display);font-weight:400;font-size:19px">${start.icon} ${start.title}</b>부터 시작하자!` : `<b style="font-family:var(--display);font-weight:400;font-size:19px">${start.icon} ${start.title}</b>부터 차근차근 시작하자!`}</div>
+    <div class="reward"><span class="pill">⭐ +10 XP</span></div>
+    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="pmap">지도 보기</button><button class="btn" id="phome">오늘의 미션 하기</button></div></div>`;
+  document.body.appendChild(m); fanfare(); confetti();
+  m.querySelector("#pmap").onclick = () => { m.remove(); go("map"); };
+  m.querySelector("#phome").onclick = () => { m.remove(); go("home"); };
+}
+function lessonCfg(l){ return {kind:l.kind, notes:l.notes, rounds:l.rounds, song:l.song, title:l.title, lessonId:l.id, tip:l.tip}; }
+
+function somiSays(){
+  const k = dkey(), st = streak();
+  if(!S.log.length) return ["안녕! 나는 피아노 요정 토끼 솜이야.","오늘의 미션 첫 번째부터 같이 해 볼까?"];
+  if(allDone(k)) return ["오늘 미션 완료! 정말 멋져.","내일도 만나서 스탬프를 하나 더 찍자."];
+  const weak = learnedNotes().map(id=>({id,s:noteStat(id)})).filter(o=>o.s.r+o.s.w>=3).sort((a,b)=>(a.s.r/(a.s.r+a.s.w))-(b.s.r/(b.s.r+b.s.w)))[0];
+  if(weak && weak.s.r/(weak.s.r+weak.s.w) < .75) { const nm = N[weak.id].name; return [`${eul(nm)} 가끔 헷갈리더라.`,`복습 미션에서 ${eul(nm)} 꼭 다시 찾아보자!`]; }
+  if(!practiced(k) && st>0) return [`벌써 ${st}일 연속이야!`,"오늘도 조금만 치면 기록이 이어져."];
+  const lines = [["건반을 칠 때마다 손가락이 튼튼해져.","천천히 해도 괜찮아!"],["틀려도 괜찮아.","틀린 음은 솜이가 기억했다가 다시 알려줄게."],["하루 10분이면 충분해.","매일 조금씩이 제일 좋아."]];
+  return lines[new Date().getDate()%lines.length];
+}
+
+/* ---------- 소리 ---------- */
+let ac = null;
+function audio(){
+  if(!ac){ try{ ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+  if(ac.state==="suspended") ac.resume();
+  return ac;
+}
+function tone(midi, dur=1.3, vol=.3, when=0){
+  if(!S.settings.sound) return; const a = audio(); if(!a) return;
+  const t = a.currentTime + when, f = 440*Math.pow(2,(midi-69)/12);
+  // 앱이 내는 소리를 마이크가 피아노 소리로 착각하지 않게 그동안은 듣지 않는다
+  if(Mic.tr) Mic.tr.st.gateUntil = Math.max(Mic.tr.st.gateUntil, performance.now() + (when + Math.min(dur,.8))*1000 + 150);
+  const g = a.createGain(); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.008); g.gain.exponentialRampToValueAtTime(.0001,t+dur); g.connect(a.destination);
+  [[1,"triangle",1],[2,"sine",.3],[3,"sine",.1],[4,"sine",.05]].forEach(([m,type,amp]) => {
+    const o = a.createOscillator(), og = a.createGain(); o.type=type; o.frequency.value=f*m; og.gain.value=amp; o.connect(og); og.connect(g); o.start(t); o.stop(t+dur+.05);
+  });
+}
+const ding = () => { tone(88,.25,.12,.05); tone(91,.35,.12,.13); };
+const fanfare = () => [72,76,79,84].forEach((m,i)=>tone(m,.6,.18,i*.12));
+
+/* ---------- 솜이 그림 ---------- */
+function bunny(size=96, outfit=S.outfit){
+  const rib = SI[outfit.ribbon]?.val || "#FF6FAE", hat = outfit.hat ? SI[outfit.hat].val : null;
+  const hatSvg = hat==="crown" ? `<path d="M37 37 L39 23 L45 31 L50 20 L55 31 L61 23 L63 37 Z" fill="#FFC93C" stroke="#E0A400" stroke-width="1.5" stroke-linejoin="round"/><circle cx="50" cy="31" r="2.4" fill="#FF6FAE"/>`
+    : hat==="flower" ? [[34,38,"#FF6FAE"],[41,34,"#FFC93C"],[50,32.5,"#A98BFF"],[59,34,"#4FCFAE"],[66,38,"#FF6FAE"]].map(([x,y,c])=>`<circle cx="${x}" cy="${y}" r="5" fill="${c}"/><circle cx="${x}" cy="${y}" r="1.8" fill="#fff"/>`).join("")
+    : `<path d="M60 30 l6 -6 l2 8 z M60 30 l-7 -5 l-1 8z" fill="${rib}"/><circle cx="60" cy="30" r="3" fill="#FFC93C"/>`;
+  const wand = outfit.wand ? `<line x1="80" y1="86" x2="91" y2="62" stroke="#A98BFF" stroke-width="3" stroke-linecap="round"/><path d="M92 50 l2.6 5.4 5.4 .6 -4 3.8 1 5.6 -5 -2.8 -5 2.8 1 -5.6 -4 -3.8 5.4 -.6z" fill="#FFC93C"/>` : "";
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true" style="flex:none;overflow:visible">
+  <ellipse cx="35" cy="24" rx="9" ry="22" fill="#fff" stroke="#E9C9DD" stroke-width="2" transform="rotate(-10 35 24)"/>
+  <ellipse cx="35" cy="26" rx="4" ry="14" fill="#FFC2DC" transform="rotate(-10 35 26)"/>
+  <ellipse cx="64" cy="24" rx="9" ry="22" fill="#fff" stroke="#E9C9DD" stroke-width="2" transform="rotate(12 64 24)"/>
+  <ellipse cx="64" cy="26" rx="4" ry="14" fill="#FFC2DC" transform="rotate(12 64 26)"/>
+  <circle cx="50" cy="62" r="30" fill="#fff" stroke="#E9C9DD" stroke-width="2"/>
+  ${hatSvg}${wand}
+  <circle cx="40" cy="60" r="4" fill="#4A2D5C"/><circle cx="60" cy="60" r="4" fill="#4A2D5C"/>
+  <circle cx="41.5" cy="58.5" r="1.4" fill="#fff"/><circle cx="61.5" cy="58.5" r="1.4" fill="#fff"/>
+  <ellipse cx="32" cy="70" rx="6" ry="3.5" fill="#FFB3D1"/><ellipse cx="68" cy="70" rx="6" ry="3.5" fill="#FFB3D1"/>
+  <path d="M46 68 q4 4 8 0" fill="none" stroke="#4A2D5C" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+}
+
+/* ---------- 화면 전환 ---------- */
+let cur = "home";
+function go(name){
+  cur = name;
+  ["home","map","stk","shop","parent","play"].forEach(s => $("#s-"+s).hidden = s!==name);
+  document.body.classList.toggle("playing", name==="play");
+  if(name!=="play") micStop();
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-current", t.dataset.go===name ? "page" : "false"));
+  if(name==="home") renderHome(); if(name==="map") renderMap(); if(name==="stk") renderStickers(); if(name==="shop") renderShop(); if(name==="parent") renderParent();
+  window.scrollTo(0,0);
+}
+$("#tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if(b) go(b.dataset.go); });
+
+function ring(xp, goal){
+  const r = 40, c = 2*Math.PI*r, f = Math.min(1, xp/goal);
+  return `<div class="ring" role="img" aria-label="오늘 ${xp} / ${goal} XP"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="${r}" fill="none" stroke="var(--bg2)" stroke-width="10"/>
+    <circle cx="48" cy="48" r="${r}" fill="none" stroke="${f>=1?"var(--butter)":"var(--pink)"}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c*f} ${c}"/></svg>
+    <div class="num"><b>${xp}</b><span>/ ${goal} XP</span></div></div>`;
+}
+function renderHome(){
+  let [l1,l2] = somiSays(); const k = dkey(), st = streak();
+  if(S.notice){ [l1,l2] = S.notice; S.notice = null; save(); }
+  const wd = ["일","월","화","수","목","금","토"], d0 = today(), goal = S.settings.goal;
+  const week = Array.from({length:7},(_,i)=>{ const d = addDays(new Date(), i-6), key = dkey(d);
+    const cls = allDone(key) ? "gold" : practiced(key) ? "on" : frozen(key) ? "on" : ""; const em = allDone(key) ? "👑" : practiced(key) ? "🌸" : frozen(key) ? "🛡️" : "";
+    return `<div class="day"><div class="stamp ${cls} ${key===k?"today":""}">${em}</div>${key===k?"오늘":wd[d.getDay()]}</div>`; }).join("");
+  const ms = missions(), dm = today().missions;
+  $("#s-home").innerHTML = `
+    <div class="hello">${bunny(92)}<div class="bubble"><b>${S.name?`안녕, ${esc(S.name)}!`:"안녕, 피아노 친구!"}</b>${esc(l1)} ${esc(l2)}</div></div>
+    ${!S.placed && !S.log.length ? `<div class="card" style="display:flex;flex-direction:column;gap:10px;border-color:var(--pink)">
+      <h2>처음 왔구나! 실력부터 알아볼까?</h2>
+      <span class="muted">건반 찾기와 악보 읽기를 조금씩 물어봐. 2분이면 끝나고, 잘하는 만큼 앞의 섬을 건너뛸 수 있어.</span>
+      <div class="row" style="flex-wrap:wrap"><button class="btn" id="place">실력 알아보기</button><button class="btn ghost" id="noplace">처음부터 배울래</button></div></div>` : ""}
+    <div class="card goal">${ring(d0.xp||0, goal)}<div class="info"><h2>${(d0.xp||0)>=goal?"오늘 목표 달성!":"오늘의 목표"}</h2>
+      <span class="muted" style="font-size:14px">${(d0.xp||0)>=goal?"내일도 이 동그라미를 채워 보자":`연습 하나에 10 XP 넘게 받아. ${goal-(d0.xp||0)} XP 남았어`}</span>
+      <div class="row" style="flex-wrap:wrap;gap:6px"><span class="pill">💎 ${S.gems}</span><span class="pill">🛡️ 방패 ${S.freezes}</span><span class="pill">⭐ ${S.xp} XP</span></div></div></div>
+    <div class="card"><div class="streak"><h2>연속 연습</h2><span><span class="big">${st}</span> 일째</span></div>
+      <div class="week">${week}</div></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h2>오늘의 미션</h2>
+      ${ms.map((m,i)=>`<div class="mission ${dm[m.key]?"done":""}"><div class="chk">${dm[m.key]?"✓":i+1}</div>
+        <div class="txt"><b>${m.title}</b><span>${esc(m.sub)}</span></div>
+        <button class="btn ${dm[m.key]?"ghost":""}" data-m="${i}">${dm[m.key]?"또 하기":"시작"}</button></div>`).join("")}
+      ${allDone(k)?`<div class="allclear">오늘 미션 모두 완료! 왕관 스탬프와 보석 10개를 받았어</div>`:`<div class="muted" style="font-size:14px;text-align:center">3개를 모두 하면 보석 상자 💎10</div>`}
+    </div>
+    <div class="card play-card"><div class="em">🎈</div><div class="txt"><h3>음표 풍선 터뜨리기</h3>
+      <span class="muted" style="font-size:14px">${balloonOpen()?"올라가는 풍선과 같은 건반을 눌러 펑! 45초 동안 몇 개나 터뜨릴까?":"별나라 지도의 '파·솔 등장'을 깨면 열려"}</span></div>
+      <button class="btn alt" id="balloon" ${balloonOpen()?"":"disabled"}>놀기</button></div>
+    <div class="chips"><div class="chip"><b>${totalStars()}</b><span>모은 별</span></div><div class="chip"><b>${S.stickers.length}</b><span>스티커</span></div><div class="chip"><b>${totalDays()}</b><span>연습한 날</span></div></div>
+    <button class="btn ghost" id="free" style="align-self:center">자유롭게 쳐 보기</button>`;
+  $("#s-home").querySelectorAll("[data-m]").forEach(b => b.onclick = () => startActivity(ms[+b.dataset.m].cfg));
+  $("#free").onclick = () => startActivity({kind:"free", title:"자유롭게 쳐 보기"});
+  $("#place")?.addEventListener("click", startPlacement);
+  $("#noplace")?.addEventListener("click", () => { S.placed = true; save(); renderHome(); });
+  $("#balloon").onclick = () => startActivity({kind:"balloon", notes:learnedNotes(), title:"음표 풍선 터뜨리기"});
+}
+
+function renderShop(){
+  $("#s-shop").innerHTML = `<div class="hello">${bunny(92)}<div class="bubble"><b>보석 상점</b>지금 보석 💎 <b style="display:inline;font-size:inherit;color:inherit">${S.gems}</b>개. 연습하면 별 수만큼, 미션을 다 하면 10개를 더 받아!</div></div>
+   <div class="shop">${SHOP.map(it => {
+     const own = it.slot ? S.owned.includes(it.id) : false, on = it.slot && S.outfit[it.slot]===it.id;
+     let btn;
+     if(it.id==="freeze") btn = `<button class="btn" data-buy="${it.id}" ${S.freezes>=2||S.gems<it.price?"disabled":""}>${S.freezes>=2?"가득 찼어":`💎 ${it.price}`}</button>`;
+     else if(on) btn = it.slot==="ribbon" ? `<button class="btn ghost" disabled>쓰는 중</button>` : `<button class="btn ghost" data-off="${it.id}">벗기</button>`;
+     else if(own) btn = `<button class="btn alt" data-wear="${it.id}">입히기</button>`;
+     else btn = `<button class="btn" data-buy="${it.id}" ${S.gems<it.price?"disabled":""}>💎 ${it.price}</button>`;
+     return `<div class="item ${on?"on":""}">${it.slot?bunny(64,{...S.outfit,[it.slot]:it.id}):`<div class="em">${it.em}</div>`}<b>${it.name}</b><span>${it.id==="freeze"?`${it.desc} (지금 ${S.freezes}개)`:it.desc}</span>${btn}</div>`; }).join("")}</div>`;
+  const el = $("#s-shop");
+  el.querySelectorAll("[data-buy]").forEach(b => b.onclick = () => { const it = SI[b.dataset.buy]; if(S.gems < it.price) return;
+    S.gems -= it.price; if(it.id==="freeze") S.freezes++; else { S.owned.push(it.id); S.outfit[it.slot] = it.id; } save(); ding(); confetti(); renderShop(); });
+  el.querySelectorAll("[data-wear]").forEach(b => b.onclick = () => { const it = SI[b.dataset.wear]; S.outfit[it.slot] = it.id; save(); renderShop(); });
+  el.querySelectorAll("[data-off]").forEach(b => b.onclick = () => { const it = SI[b.dataset.off]; S.outfit[it.slot] = null; save(); renderShop(); });
+}
+
+function renderMap(){
+  const nl = nextLesson();
+  $("#s-map").innerHTML = `<div class="hello">${bunny(72)}<div class="bubble"><b>별나라 지도</b>별을 1개 이상 받으면 다음 섬이 열려. 별 3개를 받으면 스티커도 생겨!</div></div>
+   <div class="path">${LESSONS.map((l,i)=>{ const s = S.stars[l.id]||0, lock = !unlocked(i);
+     const kind = {find:"건반 찾기",song:"노래",ear:"귀로 듣기",staff:"악보 읽기"}[l.kind];
+     return `<div class="stop"><div class="node ${lock?"locked":""} ${l===nl&&!lock?"next":""}">
+       <button class="disc" data-l="${i}" ${lock?"disabled aria-label='잠겨 있음'":`aria-label="${l.title} 시작"`}>${lock?"🔒":l.icon}</button>
+       <div class="nm">${l.title}</div><div class="stars">${[1,2,3].map(n=>n<=s?"★":`<span class="off">★</span>`).join("")}</div><span class="tag">${kind}${i < (S.placeLevel||0) && !s ? " · 테스트 통과" : ""}</span></div></div>`; }).join("")}</div>`;
+  $("#s-map").querySelectorAll("[data-l]").forEach(b => b.onclick = () => { const l = LESSONS[+b.dataset.l]; startActivity(lessonCfg(l)); });
+}
+
+function renderStickers(){
+  $("#s-stk").innerHTML = `<div class="hello">${bunny(72)}<div class="bubble"><b>스티커북</b>${S.stickers.length} / ${STICKERS.length}개 모았어. 매일 연습하면 특별한 스티커가 나와!</div></div>
+   <div class="stickers">${STICKERS.map(([id,em,nm,how])=>{ const got = S.stickers.includes(id);
+     return `<div class="stk ${got?"got":"locked"}"><div class="em">${em}</div><b>${got?nm:"???"}</b><span>${how}</span></div>`; }).join("")}</div>`;
+}
+
+function renderParent(){
+  const days14 = Array.from({length:14},(_,i)=>{ const k = dkey(addDays(new Date(),i-13)); return `<div class="${allDone(k)?"g":practiced(k)?"p":""}" title="${k}"></div>`; }).join("");
+  const mins = Object.values(S.days).reduce((a,d)=>a+(d.minutes||0),0);
+  const notes = NOTES.filter(n=>n.white);
+  const bars = notes.map(n => { const s = noteStat(n.id), t = s.r+s.w, p = t?Math.round(s.r/t*100):null;
+    return `<div class="bar"><span>${n.name}</span><div class="track"><div class="fill" style="width:${p??0}%;background:${colorOf(n.id)}"></div></div><span class="v">${p===null?"아직 없음":`${p}% · ${t}회`}</span></div>`; }).join("");
+  const log = S.log.slice(-30).reverse().map(e=>`<div><span>${e.d.slice(5).replace("-","/")} ${esc(e.t)}</span><span>${"★".repeat(e.s)} ${e.a}%</span></div>`).join("") || `<div class="muted">아직 기록이 없어요.</div>`;
+  $("#s-parent").innerHTML = `
+   <div class="card" style="display:flex;flex-direction:column;gap:12px"><h2>어른 코너</h2>
+     <p class="muted" style="margin:0">아이의 연습 기록을 보고 설정을 바꾸는 곳이에요. 기록은 이 기기의 브라우저에만 저장됩니다.</p>
+     <div class="field"><label for="nm">아이 이름 (인사말에 나와요)</label><input id="nm" maxlength="12" value="${esc(S.name)}" placeholder="예: 서윤"></div>
+     <div class="toggle"><label for="lb">건반에 계이름 보이기</label><input type="checkbox" id="lb" ${S.settings.labels?"checked":""}></div>
+     <div class="toggle"><label for="snd">소리 켜기</label><input type="checkbox" id="snd" ${S.settings.sound?"checked":""}></div>
+     <div class="field"><span>하루 목표</span><div class="seg" role="group" aria-label="하루 목표">${[[10,"가볍게 · 10 XP"],[20,"보통 · 20 XP"],[30,"열심히 · 30 XP"]].map(([v,t])=>`<button data-goal="${v}" aria-pressed="${S.settings.goal===v}">${t}</button>`).join("")}</div>
+       <span class="muted" style="font-size:13px">연습 하나가 10~25 XP예요. 8살이면 하루 10~15분, '보통'을 추천해요.</span></div>
+     <div class="field"><span>🎤 진짜 피아노로 하기 (업라이트·그랜드 피아노)</span>
+       <span class="muted" style="font-size:13px">휴대폰을 보면대에 세워 두면 마이크로 피아노 소리를 듣고 채점해요. 처음 한 번 '소리 맞추기'를 해 주세요. 조용한 방에서 가장 잘 돼요.</span>
+       <div class="row" style="flex-wrap:wrap"><button class="btn alt" id="cal">소리 맞추기</button>
+         <label class="toggle" style="border:0;padding:0;gap:8px"><input type="checkbox" id="micon" ${S.settings.mic?"checked":""}>연습할 때 마이크 쓰기</label></div>
+       <div class="meter" id="calmeter" hidden><i></i></div><div id="calmsg" role="status" style="font-family:var(--display);font-size:17px"></div></div>
+     <div class="field"><span>디지털 피아노 연결 (USB 미디)</span><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="midi">${midiName?"연결됨: "+esc(midiName):"피아노 연결하기"}</button></div>
+       <span class="muted" style="font-size:13px">크롬·엣지에서 index.html 파일을 직접 열었을 때 작동해요. claude.ai 링크 안에서는 브라우저가 막아요.</span><div id="midimsg" class="muted" role="status" style="font-size:14px"></div></div>
+   </div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>최근 7일 XP</h3>
+     <div class="xpweek">${Array.from({length:7},(_,i)=>{ const d = addDays(new Date(),i-6), x = S.days[dkey(d)]?.xp||0, mx = Math.max(S.settings.goal, ...Array.from({length:7},(_,j)=>S.days[dkey(addDays(new Date(),j-6))]?.xp||0));
+       return `<div class="${x>=S.settings.goal?"hit":""}"><span>${x}</span><i style="height:${Math.round(x/mx*70)}%"></i>${["일","월","화","수","목","금","토"][d.getDay()]}</div>`; }).join("")}</div>
+     <div class="muted" style="font-size:13px">분홍 막대 = 하루 목표를 채운 날 · 보석 ${S.gems}개 · 방패 ${S.freezes}개</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>최근 14일</h3><div class="cal">${days14}</div>
+     <div class="muted" style="font-size:13px">연한 분홍 = 연습한 날, 진한 분홍 = 미션 3개 모두 완료</div>
+     <div class="chips"><div class="chip"><b>${streak()}</b><span>연속 일수</span></div><div class="chip"><b>${Math.round(mins)}</b><span>총 연습 분</span></div><div class="chip"><b>${S.log.length}</b><span>끝낸 연습</span></div></div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>음별 첫 시도 정답률</h3><div class="bars">${bars}</div>
+     <div class="muted" style="font-size:13px">정답률이 낮거나 오래 안 본 음이 '솜이의 복습' 미션에 자주 나옵니다.</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>연습 일지</h3><div class="log">${log}</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>기록 옮기기</h3>
+     <p class="muted" style="margin:0;font-size:14px">다른 기기로 옮기거나 백업하려면 코드를 복사해 두세요. 새 기기에서 붙여 넣고 불러오면 됩니다.</p>
+     <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="cp">백업 코드 복사</button><button class="btn ghost" id="pt">실력 테스트 다시 하기</button><button class="btn ghost" id="rs">처음부터 다시</button></div>
+     <div class="field"><label for="bk">백업 코드</label><textarea id="bk" rows="3" placeholder="여기에 백업 코드를 붙여 넣으세요"></textarea></div>
+     <button class="btn alt" id="im" style="align-self:flex-start">불러오기</button><div id="msg" class="muted" role="status"></div></div>`;
+  $("#nm").oninput = e => { S.name = e.target.value.trim(); save(); };
+  $("#lb").onchange = e => { S.settings.labels = e.target.checked; save(); buildKb(); };
+  $("#snd").onchange = e => { S.settings.sound = e.target.checked; save(); };
+  $("#s-parent").querySelectorAll("[data-goal]").forEach(b => b.onclick = () => { S.settings.goal = +b.dataset.goal; save(); renderParent(); });
+  $("#midi").onclick = connectMidi;
+  $("#pt").onclick = startPlacement;
+  $("#cal").onclick = calibrate;
+  $("#micon").onchange = async e => { if(e.target.checked && !(await micStart())){ e.target.checked = false; $("#calmsg").textContent = micErr; return; }
+    S.settings.mic = e.target.checked; save(); if(!S.settings.micOffset && e.target.checked) $("#calmsg").textContent = "'소리 맞추기'도 한 번 해 주세요."; };
+  const msg = t => $("#msg").textContent = t;
+  $("#cp").onclick = () => { const code = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $("#bk").value = code;
+    navigator.clipboard?.writeText(code).then(()=>msg("복사했어요. 메모장 같은 곳에 붙여 넣어 보관하세요."), ()=>{ $("#bk").select(); msg("자동 복사가 안 돼서 코드를 선택해 두었어요. Ctrl+C로 복사하세요."); }) ?? ($("#bk").select(), msg("코드를 선택해 두었어요. Ctrl+C로 복사하세요.")); };
+  $("#im").onclick = () => { try{ const o = JSON.parse(decodeURIComponent(escape(atob($("#bk").value.trim())))); if(!o || o.v!==1) throw 0;
+      S = merge(o); save(); buildKb(); renderParent(); $("#msg").textContent = "기록을 불러왔어요."; }catch(e){ msg("코드를 읽지 못했어요. 처음부터 끝까지 빠짐없이 붙여 넣었는지 확인하세요."); } };
+  let armed = false;
+  $("#rs").onclick = e => { if(!armed){ armed = true; e.target.textContent = "정말 지울까요? 한 번 더 누르기"; setTimeout(()=>{ armed=false; if(e.target.isConnected) e.target.textContent="처음부터 다시"; },4000); return; }
+    S = fresh(); save(); buildKb(); renderParent(); $("#msg").textContent = "모든 기록을 지웠어요."; };
+}
+
+/* ---------- 건반 ---------- */
+const keyEls = {};
+function buildKb(){
+  const kb = $("#kb"); kb.innerHTML = "";
+  const whites = NOTES.filter(n=>n.white), ww = 100/whites.length;
+  whites.forEach(n => { const el = document.createElement("div"); el.className = "wk"+(S.settings.labels?"":" hide-lb"); el.dataset.n = n.id;
+    el.innerHTML = `<span class="dot" style="background:${colorOf(n.id)}"></span><span class="lb">${n.short}</span>`; kb.appendChild(el); keyEls[n.id]=el; });
+  let wi = 0; NOTES.forEach(n => { if(n.white){ wi++; return; } const el = document.createElement("div"); el.className="bk"; el.dataset.n=n.id;
+    el.style.left = `calc(${wi*ww}% - 3.5%)`; kb.appendChild(el); keyEls[n.id]=el; });
+}
+function press(id, fromPiano, fromMic){
+  const el = keyEls[id]; if(!el) return; if(!fromPiano) tone(N[id].midi);
+  el.classList.add("down"); setTimeout(()=>el.classList.remove("down"),160);
+  onKey(id, el, fromMic);
+}
+$("#kb").addEventListener("pointerdown", e => { const k = e.target.closest("[data-n]"); if(!k) return; e.preventDefault(); press(k.dataset.n); });
+document.addEventListener("keydown", e => { if(cur!=="play" || e.repeat || e.target.matches("input,textarea")) return; const id = KEYMAP[e.key.toLowerCase()]; if(id){ e.preventDefault(); press(id); } });
+function glow(id,on){ Object.values(keyEls).forEach(el=>el.classList.remove("glow")); if(on && keyEls[id]) keyEls[id].classList.add("glow"); }
+function shake(el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+function toast(t){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role","status"); el.textContent = t; document.body.appendChild(el); setTimeout(()=>el.remove(), 1800); }
+
+/*PT-START*/
+/* 마이크로 진짜 피아노 소리 듣기.
+   음 높이: McLeod 방식(NSDF)으로 기본 주기를 찾는다. 피아노처럼 배음이 많은 소리에서 옥타브 실수가 적다.
+   새로 친 음: 소리 크기가 갑자기 커지면(건반을 친 순간) 같은 음이 또 나와도 한 번 더 센다. */
+function pitchOf(buf, sr, minF, maxF){
+  const W = buf.length >> 1, maxT = Math.min(W-1, Math.ceil(sr/minF)), minT = Math.floor(sr/maxF);
+  const n = new Float32Array(maxT+2);
+  for(let t=1; t<=maxT+1; t++){ let ac = 0, m = 0; for(let i=0;i<W;i++){ const a = buf[i], b = buf[i+t]; ac += a*b; m += a*a + b*b; } n[t] = m > 0 ? 2*ac/m : 0; }
+  let t = 1; while(t <= maxT && n[t] > 0) t++;
+  const peaks = []; let top = 0;
+  while(t <= maxT){
+    while(t <= maxT && n[t] <= 0) t++;
+    let bt = -1, bv = -1; while(t <= maxT && n[t] > 0){ if(n[t] > bv){ bv = n[t]; bt = t; } t++; }
+    if(bt >= minT && bt > 0){ peaks.push([bt,bv]); top = Math.max(top,bv); }
+  }
+  const pk = peaks.find(p => p[1] >= top*0.9); if(!pk) return null;
+  const [b0, v] = pk, a = n[b0-1], c = n[b0+1], d = a - 2*v + c, sh = d ? (a - c)/(2*d) : 0;
+  return {freq: sr/(b0 + sh), clarity: v};
+}
+function makeTracker(opt){
+  const st = {hist:[], armed:true, last:null, cand:null, candN:0, peak:0, rms:0, floor:opt.floor||0.002, offset:opt.offset||0, gateUntil:0};
+  return {st, feed(buf, sr, now){
+    let s = 0; for(let i=0;i<buf.length;i++) s += buf[i]*buf[i]; const rms = st.rms = Math.sqrt(s/buf.length);
+    st.hist.push(rms); if(st.hist.length > 6) st.hist.shift();
+    const ref = Math.min(...st.hist.slice(0,3));
+    if(st.hist.length >= 5 && rms > st.floor*4 && rms > ref*1.6){ st.armed = true; st.cand = null; st.candN = 0; st.peak = rms; }
+    st.peak = Math.max(st.peak, rms);
+    if(rms < st.floor*2.5){ st.last = null; st.armed = true; st.cand = null; st.peak = 0; return null; }
+    if(now < st.gateUntil) return null;
+    const p = pitchOf(buf, sr, 100, 1500); if(!p || p.clarity < 0.85) return null;
+    const midiF = 69 + 12*Math.log2(p.freq/440) - st.offset/100, m = Math.round(midiF);
+    if(Math.abs(midiF - m) > 0.4) return null;
+    if(m === st.cand) st.candN++; else { st.cand = m; st.candN = 1; }
+    if(st.armed ? st.candN >= 2 : (m !== st.last && st.candN >= 4 && rms > st.peak*0.35)){ st.armed = false; st.last = m; return {m, f:p.freq, midiF}; }
+    return null;
+  }};
+}
+/*PT-END*/
+
+const Mic = {stream:null, an:null, buf:null, timer:0, tr:null, onRaw:null, heard:null, wake:null};
+async function micStart(){
+  if(Mic.stream) return true;
+  const a = audio(); if(!a || !navigator.mediaDevices?.getUserMedia) return false;
+  try{
+    Mic.stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
+    Mic.an = a.createAnalyser(); Mic.an.fftSize = 2048; a.createMediaStreamSource(Mic.stream).connect(Mic.an);
+    Mic.buf = new Float32Array(2048); Mic.tr = makeTracker({floor:S.settings.micFloor||0.002, offset:S.settings.micOffset||0});
+    Mic.timer = setInterval(micTick, 25);
+    try{ Mic.wake = await navigator.wakeLock?.request("screen"); }catch(e){}
+    return true;
+  }catch(e){ micStop(); return false; }
+}
+function micStop(){
+  clearInterval(Mic.timer); Mic.stream?.getTracks().forEach(t=>t.stop()); Mic.stream = Mic.an = Mic.tr = null; Mic.onRaw = null;
+  try{ Mic.wake?.release(); }catch(e){} Mic.wake = null; micPill();
+}
+const foldId = m => { while(m < 60) m += 12; while(m > 76) m -= 12; return NOTES.find(x=>x.midi===m)?.id; };
+function micTick(){
+  if(!Mic.an) return; Mic.an.getFloatTimeDomainData(Mic.buf);
+  const r = Mic.tr.feed(Mic.buf, ac.sampleRate, performance.now());
+  if(r){ Mic.heard = foldId(r.m); if(Mic.onRaw) Mic.onRaw(r); else if(cur==="play" && Mic.heard) press(Mic.heard, true, true); }
+  micPill();
+}
+function micPill(){
+  const p = $("#micpill"); if(!p) return; p.hidden = !Mic.stream || cur!=="play"; if(p.hidden) return;
+  p.classList.toggle("hot", Mic.tr && Mic.tr.st.rms > Mic.tr.st.floor*4);
+  p.textContent = "🎤 " + (Mic.heard ? N[Mic.heard].short || N[Mic.heard].name : "듣는 중");
+}
+/* 소리 맞추기: 조용할 때 잡음 크기를 재고, 가운데 도를 3번 들어 피아노 조율이 얼마나 어긋났는지 잰다 */
+let calTimer = 0;
+async function calibrate(){
+  const msg = t => { const m = $("#calmsg"); if(m) m.textContent = t; }, meter = $("#calmeter");
+  clearTimeout(calTimer); micStop();
+  if(!(await micStart())){ msg(micErr); return; }
+  Mic.tr.st.offset = 0; meter.hidden = false;
+  const levels = [], sh = setInterval(() => { if(!Mic.tr){ clearInterval(sh); return; } meter.firstElementChild.style.width = Math.min(100, Mic.tr.st.rms*800) + "%"; levels.push(Mic.tr.st.rms); }, 50);
+  msg("1. 잠깐 조용히 해 주세요…");
+  await new Promise(r => setTimeout(r, 1500));
+  if(!Mic.tr) return;
+  const sorted = levels.slice().sort((a,b)=>a-b), floor = Math.max(0.0005, sorted[Math.floor(sorted.length/2)]*1.5);
+  Mic.tr.st.floor = floor;
+  msg("2. 피아노 가운데 '도'를 천천히 3번 쳐 주세요 (0 / 3)");
+  const cents = [];
+  Mic.onRaw = r => { if(N[foldId(r.m)]?.letter !== "C") return;
+    const x = 1200*Math.log2(r.f/261.6256); cents.push(x - 1200*Math.round(x/1200)); ding();
+    msg(`2. 피아노 가운데 '도'를 천천히 3번 쳐 주세요 (${cents.length} / 3)`);
+    if(cents.length < 3) return;
+    clearTimeout(calTimer); cents.sort((a,b)=>a-b);
+    S.settings.micOffset = Math.round(cents[1]); S.settings.micFloor = floor; S.settings.mic = true; save();
+    Mic.tr.st.offset = S.settings.micOffset; const c = S.settings.micOffset;
+    msg(`다 맞췄어요! ${Math.abs(c) < 10 ? "피아노 조율이 잘 돼 있어요." : `피아노가 ${Math.abs(c)}센트 ${c<0?"낮게":"높게"} 조율돼 있어서 그만큼 맞춰 둘게요.`} 아무 건반이나 쳐서 확인해 보세요.`);
+    const box = $("#micon"); if(box) box.checked = true;
+    Mic.onRaw = r2 => { const id = foldId(r2.m); if(id) msg(`들린 음: ${N[id].name}`); };
+  };
+  calTimer = setTimeout(() => { if(cents.length < 3 && Mic.tr){ msg("도 소리가 잘 안 들려요. 휴대폰을 피아노 가까이 두고 '소리 맞추기'를 다시 눌러 주세요."); micStop(); meter.hidden = true; } }, 25000);
+}
+const micErr ="마이크를 쓸 수 없어요. claude.ai 링크 안에서는 막혀 있어서, 따로 올린 https 주소로 열어야 해요.";
+
+/* 진짜 디지털 피아노 (Sonata, Piano Master처럼 Web MIDI로 연결). 건반 범위 밖의 음은 옥타브를 옮겨 맞춘다. */
+let midiName = "";
+function connectMidi(){
+  const say = t => { const m = $("#midimsg"); if(m) m.textContent = t; };
+  if(!navigator.requestMIDIAccess){ say("이 브라우저는 미디 연결을 지원하지 않아요. 크롬이나 엣지를 써 주세요."); return; }
+  navigator.requestMIDIAccess().then(acc => {
+    const hook = () => { const ins = [...acc.inputs.values()]; ins.forEach(i => i.onmidimessage = onMidi); midiName = ins.map(i=>i.name).join(", ");
+      say(ins.length ? `${midiName} 연결됐어요. 연습 화면에서 피아노를 치면 바로 인식해요.` : "연결된 피아노가 없어요. USB 선을 꽂고 다시 눌러 주세요.");
+      const b = $("#midi"); if(b && midiName) b.textContent = "연결됨: " + midiName; };
+    acc.onstatechange = hook; hook();
+  }, () => say("브라우저가 연결을 막았어요. claude.ai 링크 말고 index.html 파일을 크롬에서 직접 열어 주세요."));
+}
+function onMidi(e){
+  const [st, note, vel] = e.data; if((st & 0xf0) !== 0x90 || !vel) return;
+  let m = note; while(m < 60) m += 12; while(m > 76) m -= 12;
+  const n = NOTES.find(x=>x.midi===m); if(n && cur==="play") press(n.id, true);
+}
+
+/* ---------- 연습 엔진 ---------- */
+let A = null, raf = 0;
+function startActivity(cfg){
+  cancelAnimationFrame(raf);
+  A = {...cfg, round:0, right:0, wrong:0, wrongThis:0, combo:0, maxCombo:0, running:false, lock:false, t0:Date.now(), isNext:!!cfg.lessonId && cfg.lessonId===nextLesson().id};
+  go("play"); glow(null); showCombo();
+  if(S.settings.mic) micStart().then(ok => { if(!ok) toast(micErr); micPill(); });
+  $("#ptitle").textContent = cfg.title; $("#progbar").style.width = "0%";
+  const st = $("#stage");
+  if(cfg.kind==="free"){ st.innerHTML = `<div class="prompt" id="fp">마음대로 쳐 봐! 무슨 음인지 솜이가 알려줄게</div>`; A.running = true; return; }
+  const intro = {find:"솜이가 보여주는 색깔 음을 건반에서 찾아 눌러 봐", ear:"소리를 잘 듣고, 같은 소리 건반을 눌러 봐", staff:"오선지 위 음표가 무슨 음인지 건반을 눌러 봐",
+    song:"내려오는 음표가 선에 닿으면 그 건반을 눌러! 맞을 때까지 기다려 줄게", balloon:"풍선에 적힌 음과 같은 건반을 누르면 펑! 위로 날아가기 전에 터뜨려 봐"}[cfg.kind];
+  st.innerHTML = `<div class="overlay">${bunny(80)}<div class="prompt">${cfg.intro||intro}</div>${S.settings.mic?`<div class="pill">🎤 진짜 피아노로 쳐도 돼. 솜이가 듣고 있어</div>`:""}${cfg.tip?`<div class="muted">${esc(cfg.tip)}</div>`:""}<button class="btn" id="go">준비됐어!</button></div>`;
+  $("#go").onclick = () => { audio(); A.running = true; cfg.kind==="song" ? songSetup() : cfg.kind==="balloon" ? balloonSetup() : nextRound(); };
+}
+function showCombo(){ const c = $("#combo"); if(A && A.combo >= 3){ c.hidden = false; c.textContent = `콤보 ${A.combo}!`; c.style.animation = "none"; void c.offsetWidth; c.style.animation = ""; } else c.hidden = true; }
+function hit(){ A.combo++; A.maxCombo = Math.max(A.maxCombo, A.combo); showCombo(); }
+function miss(){ A.combo = 0; showCombo(); }
+$("#quit").onclick = () => { cancelAnimationFrame(raf); A = null; glow(null); go("home"); };
+
+function setProg(f){ $("#progbar").style.width = Math.min(100,f*100)+"%"; }
+function nextRound(){
+  if(A.round >= A.rounds) return A.place ? placeStep() : finish();
+  A.target = pickWeighted(A.notes, A.target); A.wrongThis = 0; A.lock = false; glow(null);
+  const n = N[A.target], st = $("#stage");
+  if(A.kind==="find") st.innerHTML = `<div class="target" style="background:${colorOf(n.id)}">${n.short}</div><div class="prompt">${eul(n.short)} 찾아 눌러 봐!</div>`;
+  if(A.kind==="ear"){ st.innerHTML = `<button class="target" id="rep" style="background:var(--lilac)" aria-label="다시 듣기"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button><div class="prompt">눌러서 다시 들어도 돼</div><div class="muted">${A.notes.map(x=>N[x].name).join(" · ")} 중에 하나야</div>`;
+    $("#rep").onclick = () => tone(n.midi); setTimeout(()=>tone(n.midi),350); }
+  if(A.kind==="staff") st.innerHTML = staffSvg(n.id) + `<div class="prompt">이 음표는 무슨 음일까?</div>`;
+}
+function staffSvg(id){
+  const order = ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5"], step = order.indexOf(id) - 2, gap = 14, base = 120;
+  const y = base - step*gap/2, x = 190;
+  const lines = [0,1,2,3,4].map(i=>`<line x1="20" x2="300" y1="${base-i*gap}" y2="${base-i*gap}" stroke="var(--ink2)" stroke-width="2"/>`).join("");
+  const ledger = step<=-2 ? `<line x1="${x-20}" x2="${x+20}" y1="${base+gap}" y2="${base+gap}" stroke="var(--ink2)" stroke-width="2"/>` : "";
+  return `<svg class="staff" viewBox="0 0 320 160" role="img" aria-label="오선 악보 음표">${lines}${ledger}
+    <text x="26" y="${base+10}" font-size="78" fill="var(--ink)" font-family="'Segoe UI Symbol','Noto Music','Apple Symbols',serif">𝄞</text>
+    <ellipse cx="${x}" cy="${y}" rx="11" ry="8" transform="rotate(-20 ${x} ${y})" fill="${colorOf(id)}" stroke="var(--ink)" stroke-width="1.5"/>
+    <line x1="${x+10}" x2="${x+10}" y1="${y}" y2="${y-44}" stroke="var(--ink)" stroke-width="2.4"/></svg>`;
+}
+function stat(id, ok){ const s = noteStat(id); ok ? s.r++ : s.w++; s.last = Date.now(); S.notes[id] = s; }
+
+function onKey(id, el, fromMic){
+  if(!A || !A.running) return;
+  if(A.kind==="free"){ const f = $("#fp"); if(f) f.innerHTML = `<span class="target" style="display:inline-grid;background:${colorOf(id)};width:110px;height:110px;font-size:${N[id].white?40:26}px">${N[id].name}</span>`; return; }
+  if(A.kind==="song") return songKey(id, el, fromMic);
+  if(A.kind==="balloon") return balloonKey(id, el);
+  if(A.lock) return;
+  // 건반 찾기는 '도'면 어느 도든 정답. 소리·악보 문제는 높이까지 맞아야 한다 (Piano Master의 '옥타브만 다름' 알림).
+  const sameName = N[id].letter && N[id].letter===N[A.target].letter;
+  // 진짜 피아노 소리는 옥타브를 헷갈릴 수 있어서, 마이크로 들은 음은 이름만 맞으면 정답으로 친다
+  if(id===A.target || (A.kind==="find" || fromMic) && sameName){
+    stat(A.target, A.wrongThis===0); if(A.wrongThis===0){ A.right++; hit(); }
+    A.round++; A.lock = true; setProg(A.place ? (A.place.done+A.round)/PLACE_TOTAL : A.round/A.rounds); glow(null); ding(); burst(el, colorOf(id));
+    setTimeout(nextRound, 700);
+  } else {
+    A.wrongThis++; if(A.wrongThis===1) A.wrong++; shake(el); miss();
+    if(sameName) toast(N[id].midi < N[A.target].midi ? "이름은 맞았어! 조금 더 높은 쪽이야" : "이름은 맞았어! 조금 더 낮은 쪽이야");
+    if(A.wrongThis>=2 || A.kind==="ear" && A.wrongThis>=1) setTimeout(()=>{ if(A.kind==="ear") tone(N[A.target].midi); if(A.wrongThis>=2) glow(A.target,true); }, 450);
+  }
+}
+
+/* 노래: 음표가 위에서 떨어지고, 맞는 건반을 누를 때까지 기다려 준다 (Orfeo의 '한 음씩 따라가기' 방식) */
+const SPEEDS = [["거북이",.55],["토끼",.8],["치타",1.15]];
+function songSetup(){
+  const full = parseSong(SONGS[A.song].seq); A.phr = phrasesOf(full); A.pm = {};
+  A.offset = A.phrase!=null ? A.phr[A.phrase][0] : 0;
+  A.seq = A.phrase!=null ? full.slice(...A.phr[A.phrase]).map(o=>({...o, start:o.start-full[A.offset].start})) : full;
+  A.idx = 0; A.t = -3; A.miss = false; A.speed = A.speed ?? 0;
+  $("#stage").innerHTML = `<canvas id="lane"></canvas><div class="songbar" style="padding:8px 8px 12px"><div class="speed" role="group" aria-label="빠르기">${SPEEDS.map((s,i)=>`<button data-sp="${i}" aria-pressed="${i===A.speed}">${s[0]}</button>`).join("")}</div><button class="btn ghost" id="listen" style="padding:6px 16px;font-size:15px">먼저 들어보기</button></div>`;
+  $("#stage").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{ A.speed=+b.dataset.sp; $("#stage").querySelectorAll("[data-sp]").forEach(x=>x.setAttribute("aria-pressed", x===b)); });
+  $("#listen").onclick = () => { const bps = SPEEDS[A.speed][1]*1.6; A.seq.forEach(o => { tone(N[o.note].midi, Math.max(.4,o.dur/bps), .28, o.start/bps); setTimeout(()=>{ const el=keyEls[o.note]; el.classList.add("down"); setTimeout(()=>el.classList.remove("down"),220); }, o.start/bps*1000); }); };
+  let last = performance.now();
+  const loop = now => { const dt = Math.min(.05,(now-last)/1000); last = now;
+    if(A && A.kind==="song" && A.idx < A.seq.length){
+      const tgt = A.seq[A.idx]; A.t = Math.min(tgt.start, A.t + dt*SPEEDS[A.speed][1]*1.6);
+      if(A.t >= tgt.start - .02) glow(tgt.note, true);
+      drawLane(); raf = requestAnimationFrame(loop);
+    } };
+  raf = requestAnimationFrame(loop);
+}
+function drawLane(){
+  const cv = $("#lane"); if(!cv) return; const dpr = window.devicePixelRatio||1, w = cv.clientWidth, h = cv.clientHeight;
+  if(cv.width !== Math.round(w*dpr)){ cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr); }
+  const c = cv.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const css = getComputedStyle(document.documentElement), kb = $("#kb").getBoundingClientRect(), cr = cv.getBoundingClientRect();
+  const ppb = 62, hitY = h - 16;
+  c.strokeStyle = css.getPropertyValue("--pink").trim(); c.lineWidth = 4; c.setLineDash([10,8]); c.beginPath(); c.moveTo(0,hitY); c.lineTo(w,hitY); c.stroke(); c.setLineDash([]);
+  c.font = `18px ${css.getPropertyValue("--display")}`; c.textAlign = "center"; c.textBaseline = "middle";
+  A.seq.forEach((o,i) => {
+    if(i < A.idx - 1) return;
+    const el = keyEls[o.note], r = el.getBoundingClientRect(), x = r.left - cr.left + r.width/2, bw = Math.max(18, r.width*.78);
+    const yBottom = hitY - (o.start - A.t)*ppb, hh = Math.max(20, o.dur*ppb - 8), yTop = yBottom - hh;
+    if(yBottom < -10 || yTop > h) return;
+    const col = N[o.note].letter ? css.getPropertyValue("--c-"+N[o.note].letter).trim() : css.getPropertyValue("--black").trim();
+    c.globalAlpha = i < A.idx ? .25 : 1; c.fillStyle = col; roundRect(c, x-bw/2, yTop, bw, hh, 10); c.fill();
+    if(i===A.idx){ c.lineWidth = 3; c.strokeStyle = css.getPropertyValue("--ink").trim(); c.stroke(); }
+    c.fillStyle = "#fff"; const label = N[o.note].white ? N[o.note].short : "♭"; if(hh>=22) c.fillText(label, x, yTop + Math.min(hh/2, 16));
+    c.globalAlpha = 1;
+  });
+  void kb;
+}
+function roundRect(c,x,y,w,h,r){ r=Math.min(r,h/2,w/2); c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function songKey(id, el, fromMic){
+  if(A.idx >= A.seq.length) return;
+  const tgt = A.seq[A.idx];
+  if(id===tgt.note || fromMic && N[id].letter && N[id].letter===N[tgt.note].letter){
+    stat(id, !A.miss); if(!A.miss){ A.right++; hit(); }
+    A.idx++; A.t = Math.max(A.t, tgt.start); A.miss = false; glow(null); burst(el, colorOf(id)); setProg(A.idx/A.seq.length);
+    if(A.idx >= A.seq.length){ drawLane(); setTimeout(finish, 700); }
+  } else {
+    if(!A.miss){ A.miss = true; A.wrong++; const p = A.phr.findIndex(([a,b]) => A.offset+A.idx >= a && A.offset+A.idx < b); A.pm[p] = (A.pm[p]||0)+1; }
+    shake(el); glow(tgt.note, true); miss();
+  }
+}
+/* 소절별 실수 기록: 틀린 소절은 올라가고, 깨끗하게 친 소절은 내려간다. 0이 되면 복습에서 빠진다. */
+function savePhrases(){
+  const arr = S.phrases[A.song] = S.phrases[A.song] || A.phr.map(()=>0);
+  A.phr.forEach(([a,b],p) => { if(a < A.offset || b > A.offset + A.seq.length) return; arr[p] = A.pm[p] ? Math.min(3,(arr[p]||0)+1) : Math.max(0,(arr[p]||0)-1); });
+}
+
+/* 음표 풍선 (Piano Drills의 Note Invaders 같은 놀이) */
+const BALLOON_SECS = 45;
+function balloonSetup(){
+  A.balloons = []; A.left = BALLOON_SECS; A.spawn = 0; A.escaped = 0;
+  $("#stage").innerHTML = `<canvas id="lane"></canvas><div class="prompt" style="padding-bottom:10px" id="bs">터뜨린 풍선 0개</div>`;
+  let last = performance.now();
+  const loop = now => { const dt = Math.min(.05,(now-last)/1000); last = now; if(!A || A.kind!=="balloon" || !A.running) return;
+    const cv = $("#lane"), h = cv.clientHeight, el = BALLOON_SECS - A.left;
+    A.left -= dt; A.spawn -= dt; setProg(el/BALLOON_SECS);
+    if(A.spawn <= 0 && A.left > 2){ A.spawn = Math.max(.9, 1.9 - el*.025); A.balloons.push({note:pickWeighted(A.notes), x:.1+Math.random()*.8, y:h+40, v:h/(6.5 - Math.min(2, el*.04)), wob:Math.random()*6}); }
+    A.balloons.forEach(b => { b.y -= b.v*dt; b.wob += dt*2; });
+    const gone = A.balloons.filter(b => b.y < -40); if(gone.length){ A.escaped += gone.length; miss(); }
+    A.balloons = A.balloons.filter(b => b.y >= -40);
+    drawBalloons();
+    if(A.left <= 0) return finish();
+    raf = requestAnimationFrame(loop); };
+  raf = requestAnimationFrame(loop);
+}
+function drawBalloons(){
+  const cv = $("#lane"); if(!cv) return; const dpr = devicePixelRatio||1, w = cv.clientWidth, h = cv.clientHeight;
+  if(cv.width !== Math.round(w*dpr)){ cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr); }
+  const c = cv.getContext("2d"), css = getComputedStyle(document.documentElement); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  c.font = `22px ${css.getPropertyValue("--display")}`; c.textAlign = "center"; c.textBaseline = "middle";
+  A.balloons.forEach(b => { const x = b.x*w + Math.sin(b.wob)*8, y = b.y, col = css.getPropertyValue("--c-"+N[b.note].letter).trim();
+    c.strokeStyle = css.getPropertyValue("--ink2").trim(); c.lineWidth = 1.5; c.beginPath(); c.moveTo(x,y+30); c.quadraticCurveTo(x+6,y+45,x,y+60); c.stroke();
+    c.fillStyle = col; c.beginPath(); c.ellipse(x,y,25,30,0,0,Math.PI*2); c.fill();
+    c.beginPath(); c.moveTo(x-5,y+33); c.lineTo(x+5,y+33); c.lineTo(x,y+28); c.fill();
+    c.fillStyle = "rgba(255,255,255,.45)"; c.beginPath(); c.ellipse(x-9,y-11,6,9,-.5,0,Math.PI*2); c.fill();
+    c.fillStyle = "#fff"; c.fillText(N[b.note].short, x, y+2); });
+}
+function balloonKey(id, el){
+  const cv = $("#lane"), w = cv.clientWidth, r = cv.getBoundingClientRect();
+  const match = A.balloons.filter(b => N[b.note].letter && N[b.note].letter===N[id].letter).sort((a,b)=>a.y-b.y)[0];
+  if(match){
+    A.balloons = A.balloons.filter(b => b!==match); A.right++; hit(); stat(match.note, true); ding();
+    const css = getComputedStyle(document.documentElement); spawn(r.left + match.x*w, r.top + match.y, 16, [css.getPropertyValue("--c-"+N[match.note].letter).trim(), "#fff"], 5);
+    $("#bs").textContent = `터뜨린 풍선 ${A.right}개`;
+  } else { A.wrong++; shake(el); miss(); }
+}
+
+/* ---------- 끝, 보상 ---------- */
+function finish(){
+  cancelAnimationFrame(raf); glow(null); A.running = false; $("#combo").hidden = true;
+  const total = A.kind==="song" ? A.seq.length : A.kind==="balloon" ? Math.max(1, A.right+A.escaped+A.wrong) : A.rounds, acc = A.right/total;
+  const stars = A.kind==="balloon" ? (A.right>=18 ? 3 : A.right>=11 ? 2 : 1) : acc>=.9 ? 3 : acc>=.7 ? 2 : 1;
+  const d = today(), k = dkey(), wasAll = allDone(k), before = new Set(S.stickers), goal = S.settings.goal, wasGoal = (d.xp||0) >= goal;
+  d.sessions++; d.minutes += (Date.now()-A.t0)/60000;
+  if(A.lessonId) S.stars[A.lessonId] = Math.max(S.stars[A.lessonId]||0, stars);
+  if(A.mission) d.missions[A.mission] = true;
+  if(!A.mission && A.isNext) d.missions.lesson = true;
+  if(A.kind==="song") savePhrases();
+  // 듀오링고식 보상: 기본 10 XP + 별 3개 5 + 실수 0개 5 + 콤보 5마다 1. 보석은 별 수만큼, 미션 상자 10, 하루 목표 5.
+  const xp = 10 + (stars===3?5:0) + (A.wrong===0?5:0) + Math.floor(A.maxCombo/5);
+  d.xp = (d.xp||0) + xp; S.xp += xp;
+  let gems = stars; const goalNow = !wasGoal && d.xp >= goal, chest = !wasAll && allDone(k);
+  if(goalNow) gems += 5; if(chest) gems += 10; S.gems += gems;
+  S.log.push({d:k, t:A.title, s:stars, a:Math.round(acc*100)}); if(S.log.length>300) S.log.shift();
+  const give = id => { if(!S.stickers.includes(id)) S.stickers.push(id); };
+  give("first"); if(A.wrong===0) give("perfect"); if(A.lessonId && stars===3) give(A.lessonId);
+  if(allDone(k)) give("mission1");
+  const st = streak(); [[3,"s3"],[7,"s7"],[14,"s14"],[30,"s30"]].forEach(([n,id])=>{ if(st>=n) give(id); });
+  const td = totalDays(); if(td>=5) give("d5"); if(td>=15) give("d15");
+  save();
+  const fresh = S.stickers.filter(s=>!before.has(s)).map(id=>STICKERS.find(x=>x[0]===id));
+  const msg = stars===3 ? "완벽해! 솜이가 깜짝 놀랐어" : stars===2 ? "아주 잘했어! 조금만 더 하면 별 3개!" : "끝까지 해낸 게 제일 멋져. 다시 하면 더 잘할 거야";
+  const m = document.createElement("div"); m.className = "modal";
+  m.innerHTML = `<div class="card" role="dialog" aria-label="결과">${bunny(84)}<h2>${msg}</h2>
+    <div class="bigstars">${[1,2,3].map(n=>`<span class="${n<=stars?"on":""}" style="animation-delay:${n*.18}s">★</span>`).join("")}</div>
+    <div class="muted">${A.kind==="balloon" ? `풍선 ${A.right}개를 터뜨렸어!` : `${total}개 중 ${A.right}개를 한 번에 맞혔어`}${A.maxCombo>=3?` · 최고 콤보 ${A.maxCombo}`:""}</div>
+    <div class="reward"><span class="pill">⭐ +${xp} XP</span><span class="pill">💎 +${gems}</span></div>
+    ${goalNow ? `<div class="allclear" style="width:100%;background:linear-gradient(135deg,var(--mint),var(--lilac))">오늘 목표 ${goal} XP 달성! 보석 5개 더</div>` : ""}
+    ${chest ? `<div class="allclear" style="width:100%">오늘 미션 모두 완료! 왕관 스탬프와 보석 상자 💎10</div>` : ""}
+    ${fresh.length ? `<div><b style="font-family:var(--display);font-weight:400">새 스티커!</b><div class="newstk">${fresh.map(s=>`<span title="${s[2]}">${s[1]}</span>`).join("")}</div></div>` : ""}
+    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="again">한 번 더</button><button class="btn" id="home">좋아!</button></div></div>`;
+  document.body.appendChild(m); fanfare(); confetti();
+  const cfg = {...A}; ["round","right","wrong","wrongThis","combo","maxCombo","running","lock","seq","idx","t","miss","target","phr","pm","offset","balloons","left","spawn","escaped"].forEach(x=>delete cfg[x]);
+  m.querySelector("#again").onclick = () => { m.remove(); startActivity(cfg); };
+  m.querySelector("#home").onclick = () => { m.remove(); go(A && A.lessonId && !A.mission ? "map" : "home"); };
+}
+
+/* ---------- 반짝이 효과 ---------- */
+const fx = $("#fx"), fc = fx.getContext("2d"); let parts = [], fxOn = false;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+function spawn(x,y,n,colors,spread){ if(reduce.matches) return; for(let i=0;i<n;i++){ const a = Math.random()*Math.PI*2, v = spread*(.4+Math.random());
+  parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v - spread*.6,life:1,c:colors[i%colors.length],r:4+Math.random()*5,rot:Math.random()*6}); } if(!fxOn){ fxOn = true; requestAnimationFrame(tick); } }
+function burst(el,col){ const r = el.getBoundingClientRect(); const css = getComputedStyle(document.documentElement); spawn(r.left+r.width/2, r.top+20, 12, [resolve(col,css), css.getPropertyValue("--butter").trim()], 4); }
+function resolve(col,css){ const m = /var\((--[\w-]+)\)/.exec(col); return m ? css.getPropertyValue(m[1]).trim() : col; }
+function confetti(){ const css = getComputedStyle(document.documentElement); spawn(innerWidth/2, innerHeight*.4, 70, ["--pink","--lilac","--butter","--mint","--c-G"].map(v=>css.getPropertyValue(v).trim()), 9); }
+function star(c,r){ c.beginPath(); for(let i=0;i<10;i++){ const rr = i%2 ? r*.45 : r, a = i*Math.PI/5 - Math.PI/2; c.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); } c.closePath(); c.fill(); }
+function tick(){
+  const dpr = devicePixelRatio||1; if(fx.width!==innerWidth*dpr){ fx.width = innerWidth*dpr; fx.height = innerHeight*dpr; }
+  fc.setTransform(dpr,0,0,dpr,0,0); fc.clearRect(0,0,innerWidth,innerHeight);
+  parts = parts.filter(p => (p.life -= .016) > 0);
+  parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .22; p.rot += .1; fc.save(); fc.translate(p.x,p.y); fc.rotate(p.rot); fc.globalAlpha = Math.min(1,p.life*1.5); fc.fillStyle = p.c; star(fc,p.r); fc.restore(); });
+  if(parts.length) requestAnimationFrame(tick); else { fxOn = false; fc.clearRect(0,0,innerWidth,innerHeight); }
+}
+
+applyFreeze(); buildKb(); go("home");
+})();
+</script>
+</body>
+</html>
