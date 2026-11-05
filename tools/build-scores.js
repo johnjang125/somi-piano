@@ -64,6 +64,9 @@ function convert(file, lyText){
   return {tempo: tempo || 90, ts, key, bars, notes: notes.map(n => [+n[0].toFixed(4), +n[1].toFixed(4), n[2], n[3]])};
 }
 
+module.exports = {convert};
+if(require.main !== module) return;
+
 /* ---------- 곡 정보 (한국어 제목, 단계) ---------- */
 const KO = {
   // 체르니
