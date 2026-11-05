@@ -23,7 +23,7 @@
   --bg:#FFF5F9; --bg2:#FCE8F1; --card:#FFFFFF; --ink:#3A2340; --ink2:#7A6080; --line:#F2D8E5;
   --pink:#C93374; --pink-ink:#B02A66; --pink-soft:#FFE1EE; --berry-edge:#8C1D50;
   --sky:#1F72B5; --sky-soft:#E1F1FC; --sky-edge:#155487;
-  --mint:#15805D; --mint-edge:#0E5C43; --mint-soft:#DDF5EA; --butter-soft:#FFF2CC; --butter:#FFBE2E; --butter-edge:#A97200;
+  --mint:#15805D; --mint-edge:#0E5C43; --mint-soft:#DDF5EA; --butter-soft:#FFF2CC; --peach-soft:#FFE6D6; --lilac-soft:#ECE4FF; --butter:#FFBE2E; --butter-edge:#A97200;
   --tile-1:#176BA6; --tile-2:#147A52; --tile-3:#B04E0C; --tile-4:#C02C60;
   --key:#FFFFFF; --key-edge:#E9D3E3; --black:#3B2547; --shadow:none;
   --c-C:#FF5C7A; --c-D:#FF9640; --c-E:#F5C400; --c-F:#3FCB7A; --c-G:#3BAEF5; --c-A:#6E7BFF; --c-B:#B86CF5;
@@ -32,11 +32,11 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#1A1420; --bg2:#2A2130; --card:#241C2B; --ink:#FFF0F6; --ink2:#C9B2CF; --line:#3B2F43;
-  --pink-ink:#FF8CBE; --mint-soft:#173A2E; --butter-soft:#3A3016; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
+  --pink-ink:#FF8CBE; --mint-soft:#173A2E; --butter-soft:#3A3016; --peach-soft:#3D2A20; --lilac-soft:#2C2648; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
   --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1A1420; --bg2:#2A2130; --card:#241C2B; --ink:#FFF0F6; --ink2:#C9B2CF; --line:#3B2F43;
-  --pink-ink:#FF8CBE; --mint-soft:#173A2E; --butter-soft:#3A3016; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
+  --pink-ink:#FF8CBE; --mint-soft:#173A2E; --butter-soft:#3A3016; --peach-soft:#3D2A20; --lilac-soft:#2C2648; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
   --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;word-break:keep-all;overflow-wrap:break-word}
@@ -141,6 +141,15 @@ a{color:var(--sky);text-underline-offset:3px}
 /* 지도: 구역마다 바탕색 한 면, 가운데 하얀 길, 정거장(섬) 원판. 지금 갈 곳만 살짝 움직인다 */
 .region{border-radius:28px;padding:16px 12px 8px;display:flex;flex-direction:column;gap:4px}
 .region.r1{background:var(--mint-soft)} .region.r4{background:var(--butter-soft)} .region.r2{background:var(--sky-soft)} .region.r3{background:var(--pink-soft)}
+.region.r5{background:var(--peach-soft)} .region.r6{background:var(--lilac-soft)} .region.r7{background:var(--sky-soft)} .region.r8{background:var(--mint-soft)} .region.r9{background:var(--pink-soft)}
+.zch{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:460px;padding:0 12px 4px;box-sizing:border-box}
+.zch button{min-height:56px;padding:8px 10px;border-radius:18px;background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);font-family:var(--display);font-size:17px;line-height:1.3}
+.zch button:active:not([disabled]){transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.zch button.ok{background:var(--mint);color:#fff;border-color:var(--mint-edge);box-shadow:0 4px 0 var(--mint-edge)}
+.zch button.no{opacity:.45;text-decoration:line-through}
+.zdots{font-size:28px;letter-spacing:8px;color:var(--pink-ink)}
+.tap{width:112px;height:112px;border-radius:50%;background:var(--butter);color:#3A2340;font-family:var(--display);font-size:30px;box-shadow:0 7px 0 var(--butter-edge);touch-action:manipulation;margin-bottom:8px}
+.tap.down{transform:translateY(5px);box-shadow:0 2px 0 var(--butter-edge)}
 .region .rhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 6px;flex-wrap:wrap}
 .region .rhead span{font-family:var(--display);font-size:16px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .path{position:relative;display:flex;flex-direction:column;gap:6px;padding:8px 0}
@@ -414,6 +423,11 @@ const STICKERS = [
   ["sight","🔮","악보 탐정","깜짝 악보를 실수 없이 치기"],
   ["reader","📜","악보 읽는 눈","악보 읽기 「색 없이 읽기」 별 3개"],
   ["grand","🎓","양손 악보 박사","악보 읽기 「양손 악보」 별 3개"],
+  ["rhythm","🥁","리듬 박사","리듬 언덕 마지막 단계 별 3개"],
+  ["keysig","🗼","조표 마법사","조표 탑 마지막 단계 별 3개"],
+  ["interval","🌉","음정 건축가","음정 다리 마지막 단계 별 3개"],
+  ["chord","🔦","화음 탐험가","화음 동굴 마지막 단계 별 3개"],
+  ["symbol","🪧","기호 해독가","음악 기호 마을 마지막 단계 별 3개"],
   ["stage","🎤","연주회 스타","연주회 모드로 노래 별 3개"],
   ["dyn","🦁","셈여림 박사","셈여림 놀이 별 3개"],
   ["recorder","🎙️","녹음 연주가","곡 연습실에서 처음 녹음하기"],
@@ -431,7 +445,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -471,6 +485,7 @@ function merge(o){
       bars:Object.fromEntries(Object.entries(t.bars && typeof t.bars === "object" ? t.bars : {}).filter(([b]) => /^\d+$/.test(b)).map(([b,x]) => [b, num(x,0,100)]))}))}]));
   s.lab = cleanLab(s.lab); s.adultLab = cleanLab(s.adultLab);   // 어른 연습실 기록도 같은 규칙으로
   s.read = Object.fromEntries(Object.entries(s.read && typeof s.read === "object" ? s.read : {}).filter(([k,v]) => /^r\d+$/.test(k) && [0,1,2,3].includes(v)));
+  s.zone = Object.fromEntries(Object.entries(s.zone && typeof s.zone === "object" ? s.zone : {}).filter(([k,v]) => /^(rh|ks|iv|ch|sy)\d+$/.test(k) && [0,1,2,3].includes(v)));
   s.perf = Object.fromEntries(Object.keys(s.perf && typeof s.perf === "object" ? s.perf : {}).filter(k => SONGS[k] && s.perf[k] === true).map(k => [k, true]));
   s.speed = Object.fromEntries(Object.entries(s.speed && typeof s.speed === "object" ? s.speed : {}).filter(([k,v]) => SONGS[k] && [0,1,2].includes(v)));
   ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
@@ -550,7 +565,10 @@ function hardestPhrase(){
 function missions(){
   const md = mood(), nl = nextLesson(), wk = weakest(3), hp = hardestPhrase();
   const all = {
-    warm:(() => { const r = nextRead(); return {key:"warm", title:"악보 읽기", sub:r.title, cfg:{...readCfg(r), rounds:Math.min(r.rounds, md.warm + 4), mission:"warm"}}; })(),
+    warm:(() => { const dn = Math.floor(new Date(dkey()) / 864e5);
+      if((S.read.r1||0) >= 1 && dn % 2){ const z = ZONES[Math.floor(dn/2) % ZONES.length], st = nextZoneStage(z);
+        return {key:"warm", title:z.name, sub:st.title, cfg:{...zoneCfg(st), rounds:Math.min(st.rounds, md.warm + 4), mission:"warm"}}; }
+      const r = nextRead(); return {key:"warm", title:"악보 읽기", sub:r.title, cfg:{...readCfg(r), rounds:Math.min(r.rounds, md.warm + 4), mission:"warm"}}; })(),
     lesson:{key:"lesson", title:"오늘의 레슨", sub:nl.title, cfg:{...lessonCfg(nl), mission:"lesson"}},
     review: hp
       ? {key:"review", title:"솜이의 복습", sub:`${SONGS[hp.song].name} ${hp.p+1}번째 소절 다시 치기`, cfg:{kind:"song", song:hp.song, phrase:hp.p, title:`${SONGS[hp.song].name} · ${hp.p+1}번째 소절`, mission:"review", tip:"자주 틀린 부분만 잘라 왔어. 천천히 해 보자"}}
@@ -694,6 +712,11 @@ const ICONS = {
   map:"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14",
   chest:"M3 10h18v10H3z M3 10c0-3.3 4-6 9-6s9 2.7 9 6 M3 13.5h18 M10.5 12h3v3.5h-3z",
   lock:"M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3",
+  drum:"M4 10c0-2 3.6-3.5 8-3.5s8 1.5 8 3.5v7c0 2-3.6 3.5-8 3.5S4 19 4 17z M4 10c0 2 3.6 3.5 8 3.5s8-1.5 8-3.5 M8 2.5l3 5 M16 2.5l-3 5",
+  sharp:"M9.5 4v17 M14.5 3v17 M5 10.5l14-3 M5 17l14-3",
+  bridge:"M2 18h20 M4 18v-5 M20 18v-5 M2 11c3 0 6-4 10-4s7 4 10 4 M8 18v-6.5 M12 18v-8 M16 18v-6.5",
+  chord:"M5 18a2.6 2 0 1 0 5.2 0a2.6 2 0 1 0-5.2 0 M5 12a2.6 2 0 1 0 5.2 0a2.6 2 0 1 0-5.2 0 M5 6a2.6 2 0 1 0 5.2 0a2.6 2 0 1 0-5.2 0 M10.2 18V3 M14 9h6 M14 13h6",
+  sign:"M12 3v18 M5 6h12l3 3-3 3H5z M8 21h8",
   check:"M5 12.5l4.5 4.5L19 7",
   mic:"M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
   folder:"M3 6h6l2 2h10v11H3z",
@@ -897,7 +920,16 @@ function renderMap(){
         <button class="disc" data-r="${i}" ${lock?`disabled aria-label="${r.title}: 잠겨 있음"`:`aria-label="${r.title} 시작"`}>${ic(lock?"lock":"sheet", 34)}</button>
         <div class="nm">${r.title}</div><div class="stars" aria-label="별 ${st}개">${[1,2,3].map(n=>n<=st?"★":`<span class="off">★</span>`).join("")}</div><span class="tag">${hint}</span></div></div>`; }).join("")}</div></section>`);
   $("#s-map").querySelectorAll("[data-l]").forEach(b => b.onclick = () => { const l = LESSONS[+b.dataset.l]; startActivity(lessonCfg(l)); });
+  // 새 구역 다섯: 구역마다 처음 단계는 바로 열려 있고, 안에서는 한 단계씩 열린다
+  $("#s-map").insertAdjacentHTML("beforeend", ZONES.map(z => { const got = z.stages.reduce((x,st)=>x+(S.zone[st.id]||0),0), nz = nextZoneStage(z);
+    return `<section class="region ${z.cls}" aria-label="${z.name}"><div class="rhead"><h2>${z.name}</h2><span>별 ${got} / ${z.stages.length*3}</span></div>
+    <p class="muted" style="margin:0 6px;font-size:14px">${z.desc}</p>
+    <div class="path">${z.stages.map((st,i) => { const s = S.zone[st.id]||0, lock = !zoneUnlocked(z, i), next = st === nz && !lock;
+      return `<div class="stop"><div class="node ${lock?"locked":next?"next":s?"cleared":""}">
+        <button class="disc" data-z="${st.id}" ${lock?`disabled aria-label="${st.title}: 잠겨 있음"`:`aria-label="${st.title} 시작"`}>${ic(lock?"lock":z.ic, 34)}</button>
+        <div class="nm">${st.title}</div><div class="stars" aria-label="별 ${s}개">${[1,2,3].map(n=>n<=s?"★":`<span class="off">★</span>`).join("")}</div></div></div>`; }).join("")}</div></section>`; }).join(""));
   $("#s-map").querySelectorAll("[data-r]").forEach(b => b.onclick = () => startActivity(readCfg(READ[+b.dataset.r])));
+  $("#s-map").querySelectorAll("[data-z]").forEach(b => b.onclick = () => startActivity(zoneCfg(ZST[b.dataset.z].st)));
 }
 
 function renderStickers(){
@@ -1456,7 +1488,7 @@ function startActivity(cfg){
   A = {...cfg, round:0, right:0, wrong:0, wrongThis:0, combo:0, maxCombo:0, running:false, lock:false, t0:Date.now(), isNext:!!cfg.lessonId && cfg.lessonId===nextLesson().id};
   // 악보를 보고 치게: 악보 읽기 단계가 오르면 건반 이름(계이름)을 숨긴다
   A.readHint = cfg.kind === "read" ? READ.find(x => x.id === cfg.readId).hint : readHint();
-  A.hideLabels = ["read","find","staff","sight","song"].includes(cfg.kind) && A.readHint !== "name";
+  A.hideLabels = ["read","find","staff","sight","song","zone"].includes(cfg.kind) && A.readHint !== "name";
   buildKb();
   go("play"); glow(null); showCombo();
   if(S.settings.mic) micStart().then(ok => { if(!ok) toast(micErr); micPill(); });
@@ -1478,7 +1510,7 @@ function startActivity(cfg){
     dyn:"피아노는 작게도 크게도 칠 수 있어! 🐭가 나오면 살금살금 작게, 🦁가 나오면 쾅 크게 쳐 봐. 건반은 아무거나 괜찮아"}[cfg.kind];
   st.innerHTML = `<div class="overlay">${bunny(80)}<div class="prompt">${cfg.intro||intro}</div>${cfg.introSvg||""}${A.hideLabels ? `<div class="muted" style="font-size:14px">건반 이름은 숨겼어. 악보를 보고 찾아 봐!</div>` : ""}${S.settings.mic?`<div class="pill">${ic("mic",16)} 진짜 피아노로 쳐도 돼. 솜이가 듣고 있어</div>
     ${cfg.kind!=="dyn"?`<details class="help"${cfg.lessonId==="l1"||cfg.place?" open":""}><summary>진짜 피아노에서 가운데 도는 어디?</summary>${middleCSvg()}</details>`:""}`:""}${cfg.tip?`<div class="muted">${esc(cfg.tip)}</div>`:""}<button class="btn" id="go">준비됐어!</button></div>`;
-  $("#go").onclick = () => { audio(); A.running = true; cfg.kind==="song" ? songSetup() : cfg.kind==="balloon" ? balloonSetup() : cfg.kind==="sight" ? sightSetup() : cfg.kind==="dyn" ? dynSetup() : cfg.kind==="read" ? readSetup() : nextRound(); };
+  $("#go").onclick = () => { audio(); A.running = true; cfg.kind==="song" ? songSetup() : cfg.kind==="balloon" ? balloonSetup() : cfg.kind==="sight" ? sightSetup() : cfg.kind==="dyn" ? dynSetup() : cfg.kind==="read" ? readSetup() : cfg.kind==="zone" ? zoneSetup() : nextRound(); };
 }
 function showCombo(){ const c = $("#combo"); if(A && A.combo >= 3){ c.hidden = false; c.textContent = `콤보 ${A.combo}!`; c.style.animation = "none"; void c.offsetWidth; c.style.animation = ""; } else c.hidden = true; }
 function hit(){ A.combo++; A.maxCombo = Math.max(A.maxCombo, A.combo); showCombo(); }
@@ -1673,26 +1705,41 @@ const LETTER = ["C","D","E","F","G","A","B"];
 const pcOf = m => ((m%12)+12)%12, stepOf = m => (Math.floor(m/12)-1)*7 + PC_STEP[pcOf(m)][0];
 const noteColor = m => `var(--c-${LETTER[PC_STEP[pcOf(m)][0]]})`;
 const CLEFS = {treble:{bottom:30, glyph:"𝄞", size:76, dy:12}, bass:{bottom:18, glyph:"𝄢", size:50, dy:-17}};
-// notes: [{m, label?, mark?}]  opt: {clef:"treble"|"bass"|"grand", color}
+const isBlack = m => !!PC_STEP[pcOf(m)][1];
+const ACC_GLYPH = {"#":"♯", b:"♭", n:"♮"};
+// 음표 한 개의 오선 위치: 내림표로 읽는 음(sp:"b")은 위 글자 자리에 놓는다 (시♭ = 시 자리)
+const stepFor = (m, sp) => sp === "b" && isBlack(m) ? stepOf(m+1) : stepOf(m);
+// notes: [{m | ms:[...], label?, mark?, acc?:"#"|"b"|"n"|"", sp?:"b", fill?}]
+// acc를 주지 않으면 검은 건반에 ♯을 붙인다. acc:""는 조표가 대신하니 붙이지 않는다는 뜻.
+// opt: {clef:"treble"|"bass"|"grand", color, keysig:[{m, acc}]}
 function readStaffSvg(notes, opt = {}){
-  const gap = 14, grand = opt.clef === "grand", W = Math.max(300, 120 + notes.length*52);
+  const gap = 14, grand = opt.clef === "grand", ks = opt.keysig || [], xs = 110 + ks.length*14;
+  const W = Math.max(300, xs + 10 + notes.length*52);
   const staves = grand ? [["treble", 34], ["bass", 34 + 4*gap + 3*gap]] : [[opt.clef || "treble", 40]];
   const H = staves[staves.length-1][1] + 4*gap + 58, fill = m => opt.color ? noteColor(m) : "var(--ink)";
+  const accText = (x, y, a) => `<text x="${x}" y="${y + (a === "b" ? 5 : 9)}" text-anchor="middle" font-size="${a === "b" ? 32 : 28}" fill="var(--ink)" font-family="'Segoe UI Symbol','Noto Music',serif">${ACC_GLYPH[a]}</text>`;
   let out = "";
   staves.forEach(([clef, top]) => { const bot = top + 4*gap, c = CLEFS[clef];
     for(let i=0;i<5;i++) out += `<line x1="10" x2="${W-8}" y1="${top+i*gap}" y2="${top+i*gap}" stroke="var(--ink2)" stroke-width="2"/>`;
-    out += `<text x="14" y="${clef==="treble" ? bot+c.dy : top+gap*2+c.dy+gap*2}" font-size="${c.size}" fill="var(--ink)" font-family="'Segoe UI Symbol','Noto Music','Apple Symbols',serif">${c.glyph}</text>`; });
+    out += `<text x="14" y="${clef==="treble" ? bot+c.dy : top+gap*2+c.dy+gap*2}" font-size="${c.size}" fill="var(--ink)" font-family="'Segoe UI Symbol','Noto Music','Apple Symbols',serif">${c.glyph}</text>`;
+    if(clef === "treble") ks.forEach((k, i) => out += accText(64 + i*14, bot - (stepFor(k.m, k.acc) - c.bottom)*gap/2, k.acc)); });
   if(grand) out += `<line x1="10" x2="10" y1="${staves[0][1]}" y2="${staves[1][1]+4*gap}" stroke="var(--ink2)" stroke-width="3"/>`;
-  const x0 = notes.length === 1 ? W/2 + 30 : 110;
+  const x0 = notes.length === 1 ? Math.max(W/2 + 30, xs + 20) : xs;
   notes.forEach((n, i) => {
-    const [clef, top] = grand ? (n.m >= 60 ? staves[0] : staves[1]) : staves[0], c = CLEFS[clef], bot = top + 4*gap;
-    const st = stepOf(n.m), y = bot - (st - c.bottom)*gap/2, x = x0 + i*52, up = st < c.bottom + 4;
-    for(let s = c.bottom - 2; s >= st; s -= 2) out += `<line x1="${x-17}" x2="${x+17}" y1="${bot-(s-c.bottom)*gap/2}" y2="${bot-(s-c.bottom)*gap/2}" stroke="var(--ink2)" stroke-width="2"/>`;
-    for(let s = c.bottom + 10; s <= st; s += 2) out += `<line x1="${x-17}" x2="${x+17}" y1="${bot-(s-c.bottom)*gap/2}" y2="${bot-(s-c.bottom)*gap/2}" stroke="var(--ink2)" stroke-width="2"/>`;
-    if(n.mark) out += `<ellipse cx="${x}" cy="${y}" rx="18" ry="15" fill="none" stroke="var(--pink)" stroke-width="3"/>`;
-    if(PC_STEP[pcOf(n.m)][1]) out += `<text x="${x-24}" y="${y+6}" font-size="20" fill="var(--ink)">♯</text>`;
-    out += `<ellipse cx="${x}" cy="${y}" rx="10.5" ry="7.8" transform="rotate(-20 ${x} ${y})" fill="${fill(n.m)}" stroke="var(--ink)" stroke-width="1.5"/>`;
-    out += `<line x1="${up?x+9.5:x-9.5}" x2="${up?x+9.5:x-9.5}" y1="${y}" y2="${up?y-42:y+42}" stroke="var(--ink)" stroke-width="2.2"/>`;
+    const heads = (n.ms || [n.m]).slice().sort((a,b) => a-b), sp = n.sp || (n.acc === "b" ? "b" : "");
+    const [clef, top] = grand ? (heads[0] >= 60 ? staves[0] : staves[1]) : staves[0], c = CLEFS[clef], bot = top + 4*gap;
+    const steps = heads.map(m => stepFor(m, n.ms ? "" : sp)), yOf = s => bot - (s - c.bottom)*gap/2, x = x0 + i*52;
+    const lo = Math.min(...steps), hi = Math.max(...steps), up = (lo + hi)/2 < c.bottom + 4;
+    for(let s = c.bottom - 2; s >= lo; s -= 2) out += `<line x1="${x-17}" x2="${x+17}" y1="${yOf(s)}" y2="${yOf(s)}" stroke="var(--ink2)" stroke-width="2"/>`;
+    for(let s = c.bottom + 10; s <= hi; s += 2) out += `<line x1="${x-17}" x2="${x+17}" y1="${yOf(s)}" y2="${yOf(s)}" stroke="var(--ink2)" stroke-width="2"/>`;
+    if(n.mark) out += `<ellipse cx="${x}" cy="${yOf((lo+hi)/2)}" rx="19" ry="${15 + (hi-lo)*gap/4}" fill="none" stroke="var(--pink)" stroke-width="3"/>`;
+    // 2도로 붙은 음은 머리를 옆으로 비켜 그린다
+    heads.forEach((m, j) => { const y = yOf(steps[j]), hx = j && steps[j] - steps[j-1] === 1 && !heads._off ? (heads._off = 1, x + (up ? 19 : -19)) : (heads._off = 0, x);
+      const a = n.ms ? (isBlack(m) ? "#" : "") : (n.acc !== undefined ? n.acc : isBlack(m) ? "#" : "");
+      if(a) out += accText(x - 25 - (heads.length > 1 && j % 2 ? 12 : 0), y, a);
+      out += `<ellipse cx="${hx}" cy="${y}" rx="10.5" ry="7.8" transform="rotate(-20 ${hx} ${y})" fill="${n.fill || fill(m)}" stroke="var(--ink)" stroke-width="1.5"/>`; });
+    const sx = up ? x + 9.5 : x - 9.5;
+    out += `<line x1="${sx}" x2="${sx}" y1="${up ? yOf(lo) : yOf(hi)}" y2="${up ? yOf(hi) - 42 : yOf(lo) + 42}" stroke="var(--ink)" stroke-width="2.2"/>`;
     if(n.label) out += `<text x="${x}" y="${H-10}" text-anchor="middle" font-size="18" fill="var(--ink)" font-family="var(--display)">${n.label}</text>`;
   });
   return `<svg class="staff" viewBox="0 0 ${W} ${H}" style="max-width:${Math.min(W,520)}px" role="img" aria-label="오선 악보">${out}</svg>`;
@@ -1738,6 +1785,327 @@ function readKey(id, el, fromMic){
     } else if(exact && sameName) toast(km < t ? "이름은 맞았어! 조금 더 높은 쪽이야" : "이름은 맞았어! 조금 더 낮은 쪽이야");
   }
 }
+/* ---------- 새 구역: 리듬 언덕 · 조표 탑 · 음정 다리 · 화음 동굴 · 음악 기호 마을 ----------
+   모두 한 엔진(kind:"zone")으로 돈다. 단계마다 q()가 문제 하나를 만든다.
+   문제 종류: key(건반 하나) · chord(건반 여럿) · choice(보기 고르기) · rhythm(박자에 맞춰 치기) */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const KO = ["도","레","미","파","솔","라","시"];
+const spellName = (m, sp) => { const s = stepFor(m, sp); return KO[((s%7)+7)%7] + (isBlack(m) ? (sp === "b" ? "♭" : "♯") : ""); };
+const keyOfMidi = m => NOTES.find(x => x.midi === m)?.id;
+const WHITE = [60,62,64,65,67,69,71,72,74,76];
+
+/* 리듬: 박을 채우는 조각(cell)을 골라 한 마디를 만든다. 음수는 쉼표 */
+function rhythmPattern(st){
+  const bar = () => { const out = []; let pos = 0;
+    while(pos < st.beats - 1e-6){ const ok = st.cells.filter(c => { const L = c.reduce((a,d)=>a+Math.abs(d),0);
+        return L <= st.beats - pos + 1e-6 && (L < 2 || st.beats !== 4 || pos % 2 === 0); });
+      const c = pick(ok); out.push(...c); pos += c.reduce((a,d)=>a+Math.abs(d),0); }
+    return out; };
+  let p; do { p = []; for(let b=0;b<st.bars;b++) p.push(...bar()); } while(p.filter(d=>d>0).length < 2 || p[0] < 0);
+  return p;
+}
+// 리듬 악보: 한 줄 오선. 박마다 같은 간격이라 커서가 고르게 지나간다.
+function rhythmSvg(q, opt = {}){
+  const U = q.len > 4 ? 52 : 68, L = 54, W = L + q.len*U + 24, Y = 58, H = 112;
+  let out = `<line x1="8" x2="${W-8}" y1="${Y}" y2="${Y}" stroke="var(--ink2)" stroke-width="2"/>
+    <text x="28" y="${Y-6}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)" font-family="Georgia,serif">${q.beats}</text>
+    <text x="28" y="${Y+20}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)" font-family="Georgia,serif">4</text>`;
+  for(let b=1;b<=q.bars;b++){ const bx = L + b*q.beats*U - 6; out += `<line x1="${bx}" x2="${bx}" y1="${Y-22}" y2="${Y+22}" stroke="var(--ink2)" stroke-width="${b===q.bars?4:2}"/>`; }
+  let t = 0;
+  q.pat.forEach((d, i) => { const x = L + t*U + 14, a = Math.abs(d), col = opt.marks?.[i] === "ok" ? "var(--mint)" : opt.marks?.[i] === "miss" ? "var(--pink)" : "var(--ink)";
+    if(d < 0){
+      if(a === 1) out += `<path d="M${x-3} ${Y-18} l7 8 l-6 7 l7 8 q-9-4-7 6" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>`;
+      else out += `<rect x="${x-9}" y="${a >= 4 ? Y : Y-7}" width="18" height="7" fill="${col}"/>`;
+    } else {
+      const hollow = a >= 2, sx = x + 9.5;
+      out += `<ellipse cx="${x}" cy="${Y}" rx="10.5" ry="7.8" transform="rotate(-20 ${x} ${Y})" fill="${hollow ? "var(--card)" : col}" stroke="${col}" stroke-width="${hollow ? 2.6 : 1.5}"/>`;
+      if(a < 4) out += `<line x1="${sx}" x2="${sx}" y1="${Y}" y2="${Y-44}" stroke="${col}" stroke-width="2.2"/>`;
+      if(a === 1.5 || a === 3) out += `<circle cx="${x+19}" cy="${Y-4}" r="3.2" fill="${col}"/>`;
+      if(a === .5){ const beamNext = q.pat[i+1] === .5 && t % 1 === 0, beamPrev = q.pat[i-1] === .5 && t % 1 === .5;
+        if(beamNext) out += `<rect x="${sx-1}" y="${Y-46}" width="${U/2+2}" height="7" fill="${col}"/>`;
+        else if(!beamPrev) out += `<path d="M${sx} ${Y-44} q4 10 12 14 q-2 6 -4 10" fill="none" stroke="${col}" stroke-width="2.6"/>`; }
+    }
+    t += a; });
+  if(q.counts) for(let b=0;b<q.len;b++) out += `<text x="${L + b*U + 14}" y="${Y+44}" text-anchor="middle" font-size="16" fill="var(--ink2)" font-family="var(--display)">${b % q.beats + 1}</text>`;
+  (opt.taps || []).forEach(x => { const tx = L + x*U + 14; if(tx > 0 && tx < W) out += `<path d="M${tx} ${Y+26} l-6 10 h12z" fill="var(--sky)"/>`; });
+  out += `<line id="rcur" x1="${L}" x2="${L}" y1="10" y2="${Y+24}" stroke="var(--pink)" stroke-width="3" stroke-linecap="round" visibility="hidden"/>`;
+  return `<svg class="staff" id="rsvg" data-l="${L}" data-u="${U}" viewBox="0 0 ${W} ${H}" style="max-width:${Math.min(W,560)}px" role="img" aria-label="리듬 악보">${out}</svg>`;
+}
+
+/* 음악 기호 그림: 작은 오선 한 칸에 기호 하나 */
+function symSvg(k){
+  const S5 = [35,45,55,65,75].map(y => `<line x1="10" x2="210" y1="${y}" y2="${y}" stroke="var(--ink2)" stroke-width="1.6"/>`).join("");
+  const nh = (x, y, down) => `<ellipse cx="${x}" cy="${y}" rx="8" ry="6" transform="rotate(-20 ${x} ${y})" fill="var(--ink)"/><line x1="${down?x-7.5:x+7.5}" x2="${down?x-7.5:x+7.5}" y1="${y}" y2="${down?y+32:y-32}" stroke="var(--ink)" stroke-width="2"/>`;
+  const word = (t, size = 56, it = true) => `<text x="110" y="74" text-anchor="middle" font-size="${size}" font-weight="700" ${it ? 'font-style="italic"' : ""} fill="var(--ink)" font-family="Georgia,'Times New Roman',serif">${t}</text>`;
+  const bar = x => `<line x1="${x}" x2="${x}" y1="35" y2="75" stroke="var(--ink)" stroke-width="2"/>`;
+  const end = x => bar(x) + `<rect x="${x+5}" y="35" width="5" height="40" fill="var(--ink)"/>`;
+  const art = {
+    p:word("p",72), f:word("f",72), mp:word("mp",64), mf:word("mf",64), pp:word("pp",64), ff:word("ff",64),
+    cresc:`<path d="M190 34 L30 55 L190 76" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>`,
+    decresc:`<path d="M30 34 L190 55 L30 76" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>`,
+    stacc:S5 + nh(110,60) + `<circle cx="110" cy="76" r="3.5" fill="var(--pink)"/>`,
+    ten:S5 + nh(110,60) + `<rect x="100" y="73" width="20" height="3.5" fill="var(--pink)"/>`,
+    acc:S5 + nh(110,60) + `<path d="M98 80 L122 86 L98 92" fill="none" stroke="var(--pink)" stroke-width="3"/>`,
+    ferm:S5 + nh(110,60) + `<path d="M90 24 a20 17 0 0 1 40 0" fill="none" stroke="var(--pink)" stroke-width="3.5"/><circle cx="110" cy="20" r="3.5" fill="var(--pink)"/>`,
+    slur:S5 + nh(70,70) + nh(110,60) + nh(150,50) + `<path d="M66 84 Q110 104 152 66" fill="none" stroke="var(--pink)" stroke-width="3"/>`,
+    tie:S5 + nh(80,60) + nh(140,60) + `<path d="M84 72 Q110 88 136 72" fill="none" stroke="var(--pink)" stroke-width="3"/>`,
+    rep:S5 + nh(70,60) + nh(120,55) + bar(166) + `<rect x="172" y="35" width="5" height="40" fill="var(--ink)"/><circle cx="157" cy="50" r="3.5" fill="var(--pink)"/><circle cx="157" cy="60" r="3.5" fill="var(--pink)"/>`,
+    dc:S5 + nh(60,60) + nh(100,55) + end(180) + `<text x="176" y="24" text-anchor="end" font-size="22" font-weight="700" font-style="italic" fill="var(--pink)" font-family="Georgia,serif">D.C.</text>`,
+    fine:S5 + nh(60,60) + nh(100,55) + end(180) + `<text x="186" y="24" text-anchor="end" font-size="22" font-weight="700" font-style="italic" fill="var(--pink)" font-family="Georgia,serif">Fine</text>`,
+    volta:S5 + nh(50,60) + nh(150,55) + bar(110) + `<circle cx="102" cy="50" r="3" fill="var(--ink)"/><circle cx="102" cy="60" r="3" fill="var(--ink)"/>
+      <path d="M20 30 V14 H104" fill="none" stroke="var(--pink)" stroke-width="2.5"/><path d="M116 30 V14 H206" fill="none" stroke="var(--pink)" stroke-width="2.5"/>
+      <text x="28" y="29" font-size="16" font-weight="700" fill="var(--pink)">1.</text><text x="124" y="29" font-size="16" font-weight="700" fill="var(--pink)">2.</text>`,
+    allegro:word("Allegro",44), andante:word("Andante",44), moderato:word("Moderato",40), adagio:word("Adagio",44), rit:word("rit.",56), atempo:word("a tempo",46)
+  };
+  return `<svg class="staff" viewBox="0 0 220 110" style="max-width:300px" role="img" aria-label="음악 기호">${art[k]}</svg>`;
+}
+// 솜이가 쳐서 들려주는 기호: 같은 짧은 선율을 세기·길이·빠르기만 바꿔 친다
+const MEL = [60,62,64,65,67,65,64,62];
+function playSym(k){
+  const seq = MEL.slice(0, 6), base = {p:.05, pp:.03, f:.42, ff:.5}[k];
+  if(base) return seq.forEach((m,i) => tone(m, .5, base, i*.42));
+  if(k === "cresc" || k === "decresc") return seq.forEach((m,i) => tone(m, .5, k === "cresc" ? .03 + i*.08 : .45 - i*.08, i*.42));
+  if(k === "stacc") return seq.forEach((m,i) => tone(m, .1, .3, i*.42));
+  if(k === "slur" || k === "ten") return seq.forEach((m,i) => tone(m, .55, .26, i*.42));
+  if(k === "acc") return seq.forEach((m,i) => tone(m, .45, i === 3 ? .5 : .12, i*.42));
+  if(k === "ferm") return seq.forEach((m,i) => tone(m, i === 5 ? 2.4 : .45, .26, i*.42));
+  if(k === "allegro") return MEL.forEach((m,i) => tone(m, .2, .26, i*.18));
+  if(k === "adagio") return MEL.slice(0,5).forEach((m,i) => tone(m, .9, .26, i*.85));
+  if(k === "rit"){ let t = 0; MEL.forEach((m,i) => { tone(m, .4, .26, t); t += .22 + i*i*.025; }); }
+}
+const SYM = {
+  p:{nm:"p 피아노", ans:"여리게", hear:1}, f:{nm:"f 포르테", ans:"세게", hear:1}, mp:{nm:"mp 메조 피아노", ans:"조금 여리게"}, mf:{nm:"mf 메조 포르테", ans:"조금 세게"},
+  pp:{nm:"pp 피아니시모", ans:"아주 여리게", hear:1}, ff:{nm:"ff 포르티시모", ans:"아주 세게", hear:1},
+  cresc:{nm:"크레셴도", ans:"점점 세게", hear:1}, decresc:{nm:"디크레셴도", ans:"점점 여리게", hear:1},
+  stacc:{nm:"스타카토", ans:"짧게 끊어서", hear:1}, ten:{nm:"테누토", ans:"음 길이를 꽉 채워서", hear:1}, acc:{nm:"악센트", ans:"그 음만 세게", hear:1}, ferm:{nm:"페르마타", ans:"알맞게 늘여서", hear:1},
+  slur:{nm:"이음줄", ans:"다른 음들을 부드럽게 이어서", hear:1}, tie:{nm:"붙임줄", ans:"같은 음 둘을 하나로 길게"},
+  rep:{nm:"도돌이표", ans:"앞으로 돌아가 한 번 더"}, dc:{nm:"D.C. 다 카포", ans:"맨 처음으로 돌아가기"}, fine:{nm:"Fine 피네", ans:"여기서 끝"}, volta:{nm:"1·2번 괄호", ans:"두 번째엔 2번 괄호로 건너뛰기"},
+  allegro:{nm:"Allegro 알레그로", ans:"빠르게", hear:1}, andante:{nm:"Andante 안단테", ans:"걷는 빠르기로"}, moderato:{nm:"Moderato 모데라토", ans:"보통 빠르기로"},
+  adagio:{nm:"Adagio 아다지오", ans:"느리게", hear:1}, rit:{nm:"rit. 리타르단도", ans:"점점 느리게", hear:1}, atempo:{nm:"a tempo 아 템포", ans:"원래 빠르기로"}
+};
+// 보기 고르기 문제 만들기: 맞는 답 + 같은 단계(모자라면 전체)에서 고른 오답
+function choices(right, pool, all, n = 4){
+  const wrong = shuffle(pool.filter(x => x !== right)); if(wrong.length < n - 1) wrong.push(...shuffle(all.filter(x => x !== right && !wrong.includes(x))));
+  return shuffle([right, ...wrong.slice(0, n - 1)]);
+}
+
+const CHORDS = {C:[60,64,67,"도"], Dm:[62,65,69,"레"], Em:[64,67,71,"미"], F:[65,69,72,"파"], G:[67,71,74,"솔"], Am:[69,72,76,"라"]};
+const IV_WHY = {2:"바로 옆 계단이야. 줄에서 칸, 칸에서 줄로", 3:"한 칸 건너뛰어. 줄에서 다음 줄, 칸에서 다음 칸으로", 4:"줄에서 칸으로 세 계단 건너", 5:"줄에서 한 줄 건너 줄, 칸에서 한 칸 건너 칸으로",
+  6:"5도보다 한 계단 더", 7:"8도(옥타브)보다 한 계단 모자라", 8:"같은 이름 음! 줄이면 칸, 칸이면 줄로 끝나"};
+const ivName = n => n === 8 ? "8도 (옥타브)" : `${n}도`;
+function ivPair(ns){ const n = pick(ns); const i = Math.floor(Math.random()*(WHITE.length - n + 1)); return [WHITE[i], WHITE[i + n - 1], n]; }
+const keyQ = (st, notes, answer, prompt, why, keysig) => { const tn = notes.find(n => n.mark) || notes[notes.length-1];
+  return {type:"key", k:JSON.stringify([notes,answer]), answer, why, prompt, name:spellName(answer, tn.m === answer ? (tn.sp || (tn.acc === "b" ? "b" : "")) : ""),
+    svg: readStaffSvg(notes, {color: st.color, keysig})}; };
+
+const ZONES = [
+  {id:"rh", name:"리듬 언덕", cls:"r5", ic:"drum", sticker:"rhythm", desc:"음표 길이를 읽고 박자에 맞춰 쳐. 화면의 '탁!' 단추, 아무 건반, 진짜 피아노 모두 돼.",
+    stages:[
+    {id:"rh1", title:"4분음표와 2분음표", beats:4, bars:1, bpm:72, counts:true, cells:[[1],[1],[2]], rounds:5,
+      teach:"까만 음표(4분음표)는 한 박, 속이 빈 음표(2분음표)는 두 박이야. 솜이가 '하나 둘 셋 넷' 세어 주면 그다음부터 쳐!"},
+    {id:"rh2", title:"온음표와 쉼표", beats:4, bars:1, bpm:72, counts:true, cells:[[1],[2],[-1],[4],[-2]], rounds:5,
+      teach:"막대 없는 동그라미는 온음표, 네 박을 꾹. 번개 모양은 4분쉼표, 한 박 쉬어. 쉼표에서는 치지 않아!"},
+    {id:"rh3", title:"8분음표 짝꿍", beats:4, bars:1, bpm:66, counts:true, cells:[[1],[.5,.5],[.5,.5],[2],[-1]], rounds:6,
+      teach:"지붕으로 이어진 8분음표 둘은 한 박 안에 두 번! '하나-그리고'처럼 빠르게 두 번 쳐."},
+    {id:"rh4", title:"3박자와 점2분음표", beats:3, bars:1, bpm:76, counts:true, cells:[[1],[2],[3],[.5,.5],[-1]], rounds:6,
+      teach:"3/4는 한 마디에 세 박이야. 점이 붙은 2분음표는 두 박에 한 박을 더해 세 박!"},
+    {id:"rh5", title:"점4분음표", beats:4, bars:1, bpm:66, counts:false, cells:[[1.5,.5],[1.5,.5],[1],[.5,.5],[2],[-1]], rounds:6,
+      teach:"점4분음표는 한 박 반, 뒤에 붙은 8분음표는 반 박. '따-안 따'처럼 쳐. 이번엔 박자 숫자가 안 나와."},
+    {id:"rh6", title:"두 마디 리듬", beats:4, bars:2, bpm:76, counts:false, cells:[[1],[2],[.5,.5],[1.5,.5],[-1],[3,1]], rounds:6,
+      teach:"이제 두 마디를 이어서! 지금까지 배운 음표와 쉼표가 다 나와."}
+    ].map(s => { const len = s.beats*s.bars; return {...s, len,
+      q(){ const p = rhythmPattern(s); return {type:"rhythm", k:p.join(), pat:p, beats:s.beats, bars:s.bars, len, bpm:s.bpm, counts:s.counts}; },
+      demo(){ return rhythmSvg({pat:rhythmPattern(s), beats:s.beats, bars:s.bars, len, counts:true}); }}; })},
+
+  {id:"ks", name:"조표 탑", cls:"r6", ic:"sharp", sticker:"keysig", desc:"♯(올림표)·♭(내림표)·♮(제자리표)와 조표를 읽고 검은 건반을 찾아.",
+    stages:[
+    {id:"ks1", title:"올림표 ♯", rounds:8, color:true, teach:"♯(올림표)이 붙으면 바로 오른쪽 검은 건반을 쳐. 파♯은 파 옆 검은 건반!",
+      show:[{m:66, acc:"#", label:"파♯"}, {m:61, acc:"#", label:"도♯"}],
+      q(){ const m = pick([61,63,66,68,70]); return keyQ(this, [{m, acc:"#"}], m, "♯이 붙은 음을 쳐 봐", `${spellName(m)}은 ${KO[stepOf(m)%7]} 바로 오른쪽 검은 건반이야`); }},
+    {id:"ks2", title:"내림표 ♭", rounds:8, color:true, teach:"♭(내림표)이 붙으면 바로 왼쪽 검은 건반이야. 시♭은 시 왼쪽 검은 건반!",
+      show:[{m:70, acc:"b", label:"시♭"}, {m:63, acc:"b", label:"미♭"}],
+      q(){ const m = pick([61,63,66,68,70]); return keyQ(this, [{m, acc:"b"}], m, "♭이 붙은 음을 쳐 봐", `${spellName(m,"b")}은 ${KO[stepOf(m+1)%7]} 바로 왼쪽 검은 건반이야`); }},
+    {id:"ks3", title:"제자리표 ♮", rounds:8, color:true, teach:"한 마디 안에서 ♯·♭은 계속 효과가 있어. ♮(제자리표)가 나오면 원래 흰 건반으로 돌아가!",
+      show:[{m:66, acc:"#", label:"파♯"}, {m:65, acc:"n", label:"파"}],
+      q(){ const r = Math.random();
+        if(r < .5){ const [a, b, sp] = pick([[66,65,"#"],[61,60,"#"],[68,67,"#"],[70,71,"b"],[63,64,"b"]]);
+          const first = {m:a, acc:sp, sp:sp === "b" ? "b" : ""}, second = Math.random() < .5 ? {m:b, acc:"n", mark:true} : {m:a, acc:"", sp:first.sp, mark:true};
+          return keyQ(this, [first, second], second.m, "동그라미 친 음표를 쳐 봐", second.acc === "n" ? "♮이 붙어서 원래 흰 건반으로 돌아갔어" : "같은 마디 안이라 앞의 " + ACC_GLYPH[sp] + "이 계속 붙어 있어"); }
+        const sp = pick(["#","b"]), m = pick([61,63,66,68,70]);
+        return keyQ(this, [{m, acc:sp, sp:sp === "b" ? "b" : ""}], m, "이 음을 쳐 봐", `${spellName(m, sp === "b" ? "b" : "")}이야`); }},
+    {id:"ks4", title:"솔 장조 (♯ 하나)", rounds:10, color:false, keysig:[{m:77, acc:"#"}],
+      teach:"맨 앞 조표 자리에 ♯이 파 줄에 있으면, 곡 전체의 '파'는 모두 파♯이야. 음표에 ♯이 없어도!",
+      show:[{m:66, acc:"", label:"파♯"}, {m:67, label:"솔"}],
+      q(){ const m = pick([62,64,66,66,66,67,69,71,72,74]); return keyQ(this, [{m, acc:""}], m, "조표를 보고 쳐 봐", m === 66 ? "조표에 파♯이 있으니까 파는 검은 건반!" : `${spellName(m)}이야`, this.keysig); }},
+    {id:"ks5", title:"바 장조 (♭ 하나)", rounds:10, color:false, keysig:[{m:70, acc:"b"}],
+      teach:"조표에 ♭이 가운데 줄(시)에 있으면, 곡 전체의 '시'는 모두 시♭이야.",
+      show:[{m:70, acc:"", sp:"b", label:"시♭"}, {m:65, label:"파"}],
+      q(){ const m = pick([60,62,64,65,67,69,70,70,70,72]); return keyQ(this, [{m, acc:"", sp:m === 70 ? "b" : ""}], m, "조표를 보고 쳐 봐", m === 70 ? "조표에 시♭이 있으니까 시는 왼쪽 검은 건반!" : `${spellName(m)}이야`, this.keysig); }},
+    {id:"ks6", title:"라 장조 (♯ 둘)", rounds:10, color:false, keysig:[{m:78, acc:"#"}, {m:73, acc:"#"}],
+      teach:"조표에 ♯이 둘이면 파♯과 도♯! 파와 도가 나오면 모두 검은 건반이야.",
+      show:[{m:66, acc:"", label:"파♯"}, {m:73, acc:"", label:"도♯"}],
+      q(){ const m = pick([61,62,64,66,66,67,69,71,73,73,74]); return keyQ(this, [{m, acc:""}], m, "조표를 보고 쳐 봐", isBlack(m) ? `조표 때문에 ${spellName(m)}이야` : `${spellName(m)}이야`, this.keysig); }},
+    {id:"ks7", title:"조표와 제자리표", rounds:10, color:false, keysig:[{m:78, acc:"#"}],
+      teach:"조표에 파♯이 있어도 음표 앞에 ♮이 붙으면 그 마디에서는 그냥 파(흰 건반)야.",
+      show:[{m:66, acc:"", label:"파♯"}, {m:65, acc:"n", label:"파"}],
+      q(){ const r = Math.random(), m = r < .4 ? 66 : r < .8 ? 65 : pick([62,64,67,69,71,72]);
+        return keyQ(this, [{m, acc:m === 65 ? "n" : ""}], m, "조표와 ♮을 보고 쳐 봐", m === 65 ? "♮이 붙어서 흰 건반 파!" : m === 66 ? "조표에 파♯이 있어서 검은 건반" : `${spellName(m)}이야`, this.keysig); }}
+    ].map(s => ({...s, demo(){ return readStaffSvg(s.show, {color:true, keysig:s.keysig}); }}))},
+
+  {id:"iv", name:"음정 다리", cls:"r7", ic:"bridge", sticker:"interval", desc:"두 음 사이가 몇 계단인지(음정) 모양으로 한눈에 읽어. 계단 수 = 음정 숫자!",
+    stages:[
+    {id:"iv1", title:"2도와 3도", ns:[2,3], how:"mel", color:true, rounds:8, teach:"아래 음도 1로 세. 줄→바로 옆 칸은 2도, 줄→다음 줄은 3도야."},
+    {id:"iv2", title:"4도와 5도", ns:[2,3,4,5], how:"mel", color:true, rounds:10, teach:"5도는 줄→한 줄 건너 줄. 4도는 줄과 칸이 섞여. 도-솔이 5도야!"},
+    {id:"iv3", title:"쌓은 음정", ns:[2,3,4,5], how:"harm", color:false, rounds:10, teach:"두 음을 동시에 치는 음정은 위아래로 쌓여 있어. 2도는 머리가 옆으로 비켜 앉아."},
+    {id:"iv4", title:"6도부터 옥타브까지", ns:[3,5,6,7,8], how:"mix", color:false, rounds:10, teach:"8도(옥타브)는 이름이 같은 음! 6도는 5도보다 한 계단, 7도는 옥타브보다 한 계단 모자라."},
+    {id:"iv5", title:"귀로 듣는 음정", ns:[2,3,5,8], how:"ear", rounds:8, teach:"두 음을 차례로 들려줄게. 2도는 바로 옆, 3도는 '도-미', 5도는 '도-솔', 8도는 같은 이름 음이야."},
+    {id:"iv6", title:"음정 계단 치기", ns:[2,3,4,5,6], how:"key", color:false, rounds:10, teach:"첫 음에서 위로 몇 도 올라가는지 보고, 그 건반을 쳐 봐. 첫 음도 1로 세는 거 잊지 마!"}
+    ].map(s => ({...s, q(){ const [a, b, n] = ivPair(s.ns), harm = s.how === "harm" || s.how === "mix" && Math.random() < .5;
+      if(s.how === "key") return {...keyQ(s, [{m:a, label:pname(a)}], b, `${pname(a)}에서 위로 ${ivName(n)}!`, `${pname(a)}부터 ${n}계단 세면 ${pname(b)}`), k:`${a}-${n}`};
+      const opts = s.ns.map(x => ({label:ivName(x), ok:x === n}));
+      if(s.how === "ear") return {type:"choice", k:`${a}-${n}`, svg:`<div class="target" style="background:var(--sky)">${ic("loud",64)}</div>`, prompt:"두 음 사이는 몇 도일까?", play:() => { tone(a,.7,.3); tone(b,.9,.3,.65); }, opts, why:IV_WHY[n]};
+      return {type:"choice", k:`${a}-${n}-${harm}`, svg:readStaffSvg(harm ? [{ms:[a,b]}] : [{m:a},{m:b}], {color:s.color}), prompt:"두 음 사이는 몇 도일까?", opts, why:IV_WHY[n]}; },
+      demo(){ return readStaffSvg([{m:60, label:"도"}, {m:64, label:"3도"}, {m:60, label:"도"}, {m:67, label:"5도"}], {color:true}); }}))},
+
+  {id:"ch", name:"화음 동굴", cls:"r8", ic:"chord", sticker:"chord", desc:"세 음을 쌓은 화음을 하나의 모양으로 읽고 한 번에 쳐. 화면에서는 세 건반을 차례로 눌러도 돼.",
+    stages:[
+    {id:"ch1", title:"줄 눈사람 화음", pool:["C","Em","G"], color:true, rounds:6, teach:"세 음이 모두 줄에 걸린 눈사람 모양! 맨 아래 음에서 한 칸씩 건너 쌓았어. 세 건반을 모두 눌러 봐."},
+    {id:"ch2", title:"칸 눈사람 화음", pool:["Dm","F","Am"], color:true, rounds:6, teach:"이번엔 세 음이 모두 칸에 들어간 눈사람이야. 건반에서는 하나 건너 하나!"},
+    {id:"ch3", title:"화음 섞기", pool:["C","Dm","Em","F","G","Am"], color:false, rounds:8, teach:"색 없이 화음 여섯 개가 섞여 나와. 맨 아래 음만 찾으면 나머지는 하나 건너 하나야."},
+    {id:"ch4", title:"화음 이름 맞히기", pool:["C","Dm","Em","F","G","Am"], mode:"name", color:false, rounds:8, teach:"화음의 이름은 맨 아래 음(뿌리음) 이름이야. 도미솔은 '도 화음'!"},
+    {id:"ch5", title:"밝은 화음, 어두운 화음", mode:"ear", rounds:8, teach:"도미솔처럼 밝게 들리면 장화음, 라도미처럼 조금 슬프게 들리면 단화음이야. 귀를 쫑긋!"},
+    {id:"ch6", title:"펼친 화음", pool:["C","F","G","Am"], mode:"broken", color:false, rounds:8, teach:"화음을 한 음씩 펼쳐 놓았어. 아래 음부터 차례로 쳐 봐."}
+    ].map(s => ({...s, q(){
+      if(s.mode === "ear"){ const root = pick([60,62,65,67]), maj = Math.random() < .5, ms = [root, root + (maj ? 4 : 3), root + 7];
+        return {type:"choice", k:`${root}${maj}`, svg:`<div class="target" style="background:var(--sky)">${ic("loud",64)}</div>`, prompt:"밝은 화음일까, 어두운 화음일까?",
+          play:() => { ms.forEach(m => tone(m, 1.4, .2)); ms.forEach((m,i) => tone(m, .6, .25, 1.5 + i*.35)); },
+          opts:[{label:"☀️ 밝은 화음 (장화음)", ok:maj}, {label:"🌙 어두운 화음 (단화음)", ok:!maj}], why: maj ? "가운데 음이 한 칸 더 높아서 밝게 들려" : "가운데 음이 반음 낮아서 어둡게 들려"}; }
+      const c = pick(s.pool), [a, b, d, nm] = CHORDS[c];
+      if(s.mode === "name") return {type:"choice", k:c, svg:readStaffSvg([{ms:[a,b,d]}]), prompt:"무슨 화음일까?",
+        opts:choices(c, s.pool, s.pool).map(x => ({label:`${CHORDS[x][3]} 화음`, ok:x === c})), why:`맨 아래 음이 ${nm}야`};
+      if(s.mode === "broken") return {type:"chord", ordered:true, k:c, answer:[a,b,d], svg:readStaffSvg([{m:a},{m:b},{m:d}], {color:s.color}), prompt:"아래 음부터 차례로 쳐 봐", why:`${pname(a)} · ${pname(b)} · ${pname(d)}`};
+      return {type:"chord", k:c, answer:[a,b,d], svg:readStaffSvg([{ms:[a,b,d]}], {color:s.color}), prompt:"화음의 세 건반을 모두 눌러 봐", why:`${nm} 화음: ${pname(a)} · ${pname(b)} · ${pname(d)}`}; },
+      demo(){ return readStaffSvg([{ms:CHORDS.C.slice(0,3), label:"도 화음"}, {ms:CHORDS.F.slice(0,3), label:"파 화음"}], {color:true}); }}))},
+
+  {id:"sy", name:"음악 기호 마을", cls:"r9", ic:"sign", sticker:"symbol", desc:"악보 위 기호가 무슨 뜻인지 읽고, 솜이가 치는 소리를 듣고도 맞혀 봐.",
+    stages:[
+    {id:"sy1", title:"여리게와 세게", pool:["p","f","mp","mf"], rounds:8, teach:"p는 여리게(작게), f는 세게(크게)! 앞에 m이 붙으면 '조금'이라는 뜻이야."},
+    {id:"sy2", title:"점점 세게, 점점 여리게", pool:["pp","ff","cresc","decresc"], rounds:8, teach:"벌어지는 모양(<)은 점점 세게, 닫히는 모양(>)은 점점 여리게. pp·ff는 '아주'!"},
+    {id:"sy3", title:"짧게 · 꽉 · 세게 · 늘여서", pool:["stacc","ten","acc","ferm"], rounds:8, teach:"점은 짧게(스타카토), 막대는 꽉 채워(테누토), >는 그 음만 세게(악센트), 눈 모양은 늘여서(페르마타)!"},
+    {id:"sy4", title:"이음줄과 붙임줄", pool:["slur","tie","stacc","acc"], rounds:8, teach:"다른 음들을 잇는 곡선은 이음줄(부드럽게), 같은 음 둘을 잇는 곡선은 붙임줄(한 번만 길게)!"},
+    {id:"sy5", title:"도돌이표 길 찾기", pool:["rep","dc","fine","volta"], rounds:8, teach:"점 두 개 달린 세로줄은 도돌이표, D.C.는 맨 처음으로, Fine은 끝, 1·2번 괄호는 두 번째에 건너뛰기!"},
+    {id:"sy6", title:"빠르기말", pool:["allegro","andante","moderato","adagio","rit","atempo"], rounds:8, teach:"Allegro 빠르게, Moderato 보통으로, Andante 걷듯이, Adagio 느리게. rit.는 점점 느리게, a tempo는 원래대로!"},
+    {id:"sy7", title:"기호 모두 모으기", pool:Object.keys(SYM), rounds:12, teach:"지금까지 배운 기호가 모두 나와. 소리 문제도 섞여 있어!"}
+    ].map(s => ({...s, q(prev){ const hearable = s.pool.filter(k => SYM[k].hear);
+      if(hearable.length >= 2 && Math.random() < .35){ const k = pick(hearable);
+        return {type:"choice", k:"h"+k, svg:`<div class="target" style="background:var(--sky)">${ic("loud",64)}</div>`, prompt:"솜이가 어떤 기호대로 쳤을까?", play:() => playSym(k),
+          opts:choices(k, hearable, hearable).map(x => ({label:SYM[x].nm, ok:x === k})), why:`${SYM[k].nm}: ${SYM[k].ans}`, after:`${SYM[k].nm}: ${SYM[k].ans}!`}; }
+      const k = pick(s.pool);
+      return {type:"choice", k, svg:symSvg(k), prompt:"이 기호는 무슨 뜻일까?", opts:choices(k, s.pool, Object.keys(SYM)).map(x => ({label:SYM[x].ans, ok:x === k})), why:`${SYM[k].nm}: ${SYM[k].ans}`, after:`${SYM[k].nm}: ${SYM[k].ans}!`}; },
+      demo(){ return `<div class="row" style="justify-content:center;flex-wrap:wrap">${s.pool.slice(0, 2).map(symSvg).join("")}</div>`; }}))}
+];
+const ZST = Object.fromEntries(ZONES.flatMap(z => z.stages.map((st, i) => [st.id, {z, st, i}])));
+const zoneUnlocked = (z, i) => i === 0 || (S.zone[z.stages[i-1].id]||0) >= 1;
+const nextZoneStage = z => z.stages.find((st, i) => zoneUnlocked(z, i) && (S.zone[st.id]||0) < 3) || z.stages[z.stages.length-1];
+function zoneCfg(st){ const {z} = ZST[st.id]; return {kind:"zone", zoneId:st.id, title:`${z.name} · ${st.title}`, rounds:st.rounds, intro:st.teach, introSvg:st.demo()}; }
+function zoneSetup(){ A.zst = ZST[A.zoneId].st; zoneNext(); }
+function zoneNext(){
+  if(!A) return; if(A.round >= A.rounds) return finish();
+  let q, n = 0; do { q = A.zst.q(A.q); } while(A.q && q.k === A.q.k && ++n < 8);
+  A.q = q; A.wrongThis = 0; A.lock = false; A.got = []; A.rmode = null; glow(null);
+  const st = $("#stage");
+  if(q.type === "rhythm") return rhythmRender();
+  if(q.type === "choice"){
+    st.innerHTML = `${q.svg}${q.play ? `<button class="btn ghost" id="zrep">${ic("loud",18)} 다시 듣기</button>` : ""}<div class="prompt" id="zp">${q.prompt}</div>
+      <div class="zch">${q.opts.map((o,i) => `<button data-c="${i}">${esc(o.label)}</button>`).join("")}</div>`;
+    if(q.play){ $("#zrep").onclick = q.play; setTimeout(() => { if(A && A.q === q) q.play(); }, 350); }
+    st.querySelectorAll("[data-c]").forEach(b => b.onclick = () => zoneChoice(+b.dataset.c, b));
+    return;
+  }
+  st.innerHTML = `${q.svg}<div class="prompt" id="zp">${q.prompt}</div>${q.type === "chord" ? `<div class="zdots" id="zd" aria-live="polite">${q.answer.map(() => "○").join("")}</div>` : ""}`;
+}
+function zoneRight(el, msg, wait = 900){
+  if(A.wrongThis === 0){ A.right++; hit(); }
+  A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, "var(--mint)");
+  if(msg) $("#zp").textContent = msg; setTimeout(() => { if(A && A.running) zoneNext(); }, wait);
+}
+function zoneWrong(el){
+  A.wrongThis++; if(A.wrongThis === 1) A.wrong++; shake(el); miss();
+  const q = A.q; if(A.wrongThis >= 2 && q.why) $("#zp").textContent = "힌트: " + q.why;
+  if(A.wrongThis >= 2 && q.type === "key") glow(keyOfMidi(q.answer), true);
+  if(A.wrongThis >= 2 && q.type === "chord") q.answer.forEach(m => keyEls[keyOfMidi(m)]?.classList.add("glow"));
+}
+function zoneChoice(i, b){
+  if(A.lock || b.disabled) return; const o = A.q.opts[i];
+  if(o.ok){ b.classList.add("ok"); zoneRight(b, A.q.after || `${o.label}! 맞았어`, 1100); }
+  else { b.disabled = true; b.classList.add("no"); zoneWrong(b); }
+}
+function zoneKey(id, el, fromMic){
+  const q = A.q; if(!q || A.lock) return;
+  if(q.type === "rhythm") return zoneTap(fromMic);
+  if(q.type === "choice") return;
+  const km = N[id].midi, same = m => fromMic ? pcOf(km - m) === 0 : km === m;
+  if(q.type === "key") return same(q.answer) ? zoneRight(el, `${q.name}! 맞았어`) : zoneWrong(el);
+  // 화음: 세 건반을 모두 (펼친 화음은 아래부터 차례로)
+  const need = q.ordered ? [q.answer[A.got.length]] : q.answer.filter(m => !A.got.includes(m));
+  const hitM = need.find(same);
+  if(hitM === undefined){ if(q.answer.some(m => A.got.includes(m) && same(m))) return; A.got = []; glow(null); zoneWrong(el); }
+  else { A.got.push(hitM); burst(el, noteColor(hitM)); if(A.wrongThis < 2) keyEls[id]?.classList.add("glow"); }
+  $("#zd").textContent = q.answer.map(m => A.got.includes(m) ? "●" : "○").join("");
+  if(A.got.length === q.answer.length) zoneRight(el, q.ordered ? "펼친 화음 완성!" : `${q.why.split(":")[0]} 완성!`);
+}
+
+/* 리듬 치기: 솜이가 '하나 둘 셋 넷' 센 다음부터 박에 맞춰 친다. 친 때와 음표 자리의 차이를 잰다 */
+function rhythmRender(res){
+  const q = A.q;
+  $("#stage").innerHTML = rhythmSvg(q, res || {}) + `<div class="prompt" id="zp">${res ? res.msg : "리듬을 읽고, 솜이가 넷까지 세면 박자에 맞춰 쳐 봐"}</div>
+    <div class="row" style="justify-content:center;flex-wrap:wrap"><button class="btn ghost" id="rlis">${ic("loud",18)} 들어 보기</button><button class="btn" id="rgo">${res ? "다시 쳐 보기" : "시작"}</button></div>
+    <button class="tap" id="rtap" aria-label="박자 치기">탁!</button>`;
+  $("#rlis").onclick = () => rhythmRun(true);
+  $("#rgo").onclick = () => rhythmRun(false);
+  $("#rtap").addEventListener("pointerdown", e => { e.preventDefault(); $("#rtap").classList.add("down"); setTimeout(() => $("#rtap")?.classList.remove("down"), 120); tone(72, .15, .2); zoneTap(false); });
+}
+function rhythmRun(listen){
+  if(A.rmode) return; const a = audio(); if(!a) return;
+  const q = A.q, spb = 60/q.bpm, lead = .3, T0 = a.currentTime + lead + q.beats*spb, endT = T0 + q.len*spb;
+  A.rmode = listen ? "listen" : "count"; A.taps = []; A.T0 = T0; A.spb = spb;
+  $("#rlis").disabled = $("#rgo").disabled = true;
+  for(let i=0;i<q.beats;i++) tone(i ? 93 : 98, .05, .14, lead + i*spb);
+  const clicks = listen || !S.settings.mic;   // 마이크로 들을 때는 똑딱이가 피아노 소리를 가리지 않게 세기만 한다
+  if(clicks) for(let i=0;i<q.len;i++) tone(i % q.beats ? 93 : 98, .04, .06, lead + q.beats*spb + i*spb);
+  if(listen){ let t = 0; q.pat.forEach(d => { if(d > 0) tone(72, Math.abs(d)*spb*.85, .3, T0 - a.currentTime + t*spb); t += Math.abs(d); }); }
+  const cur = $("#rcur"), L = +$("#rsvg").dataset.l, U = +$("#rsvg").dataset.u, words = ["하나","둘","셋","넷"];
+  const loop = () => { if(!A || !A.rmode) return; const now = a.currentTime;
+    if(now < T0){ const b = Math.floor((now - (T0 - q.beats*spb))/spb); if(b >= 0) $("#zp").textContent = words[b] + "…"; }
+    else { if(A.rmode === "count"){ A.rmode = "play"; } $("#zp").textContent = listen ? "잘 들어 봐" : "지금!";
+      cur.setAttribute("visibility","visible"); const x = L + 14 + (now - T0)/spb*U; cur.setAttribute("x1", x); cur.setAttribute("x2", x); }
+    if(now >= endT + .6*spb){ cur.setAttribute("visibility","hidden"); const m = A.rmode; A.rmode = null;
+      $("#rlis").disabled = $("#rgo").disabled = false; if(listen) $("#zp").textContent = "이제 '시작'을 눌러 쳐 봐"; else if(m) rhythmJudge(); return; }
+    raf = requestAnimationFrame(loop); };
+  raf = requestAnimationFrame(loop);
+}
+function zoneTap(fromMic){
+  if(!A || !(A.rmode === "play" || A.rmode === "count")) return;
+  const t = (ac.currentTime - (fromMic ? MIC_LAT : 0) - A.T0)/A.spb;
+  if(t >= -.5) A.taps.push(t);
+}
+function rhythmJudge(){
+  const q = A.q, tol = Math.max(.3, .17/A.spb), on = [], marks = {}, used = new Set(), errs = [];
+  let t = 0; q.pat.forEach((d, i) => { if(d > 0) on.push({i, t}); t += Math.abs(d); });
+  on.forEach(o => { let best = -1, bd = 1e9; A.taps.forEach((x, j) => { if(!used.has(j) && Math.abs(x - o.t) < bd){ bd = Math.abs(x - o.t); best = j; } });
+    if(best >= 0 && bd <= tol){ used.add(best); marks[o.i] = "ok"; errs.push(A.taps[best] - o.t); } else marks[o.i] = "miss"; });
+  const missed = on.filter(o => marks[o.i] === "miss").length, extra = A.taps.length - used.size, mean = errs.length ? errs.reduce((a,b)=>a+b,0)/errs.length : 0;
+  const ok = !missed && extra <= (S.settings.mic ? 1 : 0);
+  const lean = mean < -.12 ? " 조금 서둘렀어." : mean > .12 ? " 조금 늦었어." : "";
+  if(ok){ rhythmRender({marks, taps:A.taps, msg:""}); zoneRight($("#rtap"), (lean ? "맞았어!" + lean : "박자 딱 맞았어!"), 1500); return; }
+  const why = !A.taps.length ? "아직 안 쳤어. '지금!'이 나오면 쳐 봐" : [missed ? `분홍 음표 ${missed}개를 놓쳤어.` : "", extra ? `쉼표나 긴 음표에서 ${extra}번 더 쳤어.` : "", lean].join(" ").trim();
+  rhythmRender({marks, taps:A.taps, msg:why + " 파란 세모가 네가 친 곳이야."});
+  if(!A.taps.length) return;   // 한 번도 안 친 건 틀린 걸로 세지 않는다
+  zoneWrong($("#rtap"));
+  if(A.wrongThis >= 2){ A.round++; setProg(A.round/A.rounds); $("#rgo").disabled = true; $("#zp").textContent += " 다음 리듬으로 가 보자!"; setTimeout(() => { if(A && A.running) zoneNext(); }, 2600); }
+}
+
 function stat(id, ok){ const s = noteStat(id); ok ? s.r++ : s.w++; s.last = Date.now(); S.notes[id] = s; }
 
 function onKey(id, el, fromMic, loud){
@@ -1750,6 +2118,7 @@ function onKey(id, el, fromMic, loud){
   if(A.kind==="balloon") return balloonKey(id, el);
   if(A.kind==="sight") return sightKey(id, el, fromMic);
   if(A.kind==="read") return readKey(id, el, fromMic);
+  if(A.kind==="zone") return zoneKey(id, el, fromMic);
   if(A.lock) return;
   // 건반 찾기는 '도'면 어느 도든 정답. 소리·악보 문제는 높이까지 맞아야 한다 (Piano Master의 '옥타브만 다름' 알림).
   const sameName = N[id].letter && N[id].letter===N[A.target].letter;
@@ -1936,6 +2305,7 @@ function finish(){
   d.sessions++; d.minutes += (Date.now()-A.t0)/60000;
   if(A.lessonId) S.stars[A.lessonId] = Math.max(S.stars[A.lessonId]||0, stars);
   if(A.readId) S.read[A.readId] = Math.max(S.read[A.readId]||0, stars);
+  if(A.zoneId) S.zone[A.zoneId] = Math.max(S.zone[A.zoneId]||0, stars);
   if(A.mission) d.missions[A.mission] = true;
   if(!A.mission && A.isNext) d.missions.lesson = true;
   if(A.kind==="song") savePhrases();
@@ -1949,6 +2319,7 @@ function finish(){
     S.speed[A.song] = A.speed; medal = A.speed; gems += 3; if(A.speed===2) give("cheetah"); }
   if(A.kind==="sight" && A.wrong===0) give("sight");
   if(A.readId === "r5" && stars === 3) give("reader"); if(A.readId === "r10" && stars === 3) give("grand");
+  if(A.zoneId && stars === 3){ const z = ZST[A.zoneId].z; if(z.stages[z.stages.length-1].id === A.zoneId) give(z.sticker); }
   let perfMedal = false;
   if(A.kind==="song" && A.perf && A.song && A.phrase == null && !A.custom && stars===3 && !S.perf[A.song]){ S.perf[A.song] = true; perfMedal = true; gems += 5; give("stage"); }
   if(A.kind==="dyn" && stars===3) give("dyn");
