@@ -21,10 +21,10 @@
    레이아웃: 한 화면 앱. 위에는 화면 콘텐츠, 아래에는 탭 바. 연습 화면은 탭 바를 숨기고 건반을 화면 아래에 붙인다. */
 :root{
   --bg:#FFF5F9; --bg2:#FCE8F1; --card:#FFFFFF; --ink:#3A2340; --ink2:#7A6080; --line:#F2D8E5;
-  --pink:#E0438A; --pink-soft:#FFE1EE; --berry-edge:#A9255F;
-  --sky:#2F8FD6; --sky-soft:#E1F1FC; --sky-edge:#1F6AA3;
-  --mint:#24B383; --butter:#FFBE2E; --butter-edge:#D6960A;
-  --tile-1:#1F86C9; --tile-2:#1E9E6A; --tile-3:#D9661A; --tile-4:#D63A6E;
+  --pink:#C93374; --pink-ink:#B02A66; --pink-soft:#FFE1EE; --berry-edge:#8C1D50;
+  --sky:#1F72B5; --sky-soft:#E1F1FC; --sky-edge:#155487;
+  --mint:#15805D; --mint-edge:#0E5C43; --butter:#FFBE2E; --butter-edge:#A97200;
+  --tile-1:#176BA6; --tile-2:#147A52; --tile-3:#B04E0C; --tile-4:#C02C60;
   --key:#FFFFFF; --key-edge:#E9D3E3; --black:#3B2547; --shadow:none;
   --c-C:#FF5C7A; --c-D:#FF9640; --c-E:#F5C400; --c-F:#3FCB7A; --c-G:#3BAEF5; --c-A:#6E7BFF; --c-B:#B86CF5;
   --display:"Jua","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
@@ -32,11 +32,11 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#1A1420; --bg2:#2A2130; --card:#241C2B; --ink:#FFF0F6; --ink2:#C9B2CF; --line:#3B2F43;
-  --pink-soft:#46243A; --berry-edge:#8E1E50; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
+  --pink-ink:#FF8CBE; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
   --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1A1420; --bg2:#2A2130; --card:#241C2B; --ink:#FFF0F6; --ink2:#C9B2CF; --line:#3B2F43;
-  --pink-soft:#46243A; --berry-edge:#8E1E50; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
+  --pink-ink:#FF8CBE; --pink-soft:#46243A; --berry-edge:#7A1645; --sky-soft:#1E3346; --sky-edge:#174F7A; --butter-edge:#A87405;
   --key:#FFF8FC; --key-edge:#BFA6C9; --black:#120A1A; color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;word-break:keep-all;overflow-wrap:break-word}
@@ -60,11 +60,15 @@ h2{font-size:22px} h3{font-size:18px}
 .btn.ghost:active:not([disabled]){box-shadow:0 1px 0 var(--line)}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
 .ic{display:inline-block;vertical-align:-.18em;flex:none}
+::selection{background:var(--pink-soft);color:var(--ink)}
+html{accent-color:var(--pink);caret-color:var(--pink-ink);scrollbar-color:var(--line) transparent;-webkit-tap-highlight-color:transparent}
+button,a,input,select,label,summary{touch-action:manipulation}
+a{color:var(--sky);text-underline-offset:3px}
 
 /* 홈 */
 .hello{display:flex;gap:14px;align-items:flex-end}
 .bubble{position:relative;background:var(--card);border-radius:22px 22px 22px 6px;padding:14px 16px;flex:1;min-width:0}
-.bubble b{font-family:var(--display);font-weight:400;font-size:20px;display:block;color:var(--pink)}
+.bubble b{font-family:var(--display);font-weight:400;font-size:20px;display:block;color:var(--pink-ink)}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .chip{background:var(--card);border-radius:18px;padding:10px;text-align:center}
 .chip b{font-family:var(--display);font-weight:400;font-size:26px;display:block;font-variant-numeric:tabular-nums}
@@ -89,8 +93,10 @@ h2{font-size:22px} h3{font-size:18px}
 .wkey.frz{background:#CFE8FA;border-color:#9ACAEB;color:#1F4E73}
 .wkey.today{box-shadow:inset 0 -6px 0 var(--pink)}
 .wkey .ic{color:inherit}
+.wkey.lighting{animation:keylight 1.1s cubic-bezier(.2,.8,.2,1) 1}
+@keyframes keylight{0%{background:var(--key);transform:translateY(0)}35%{transform:translateY(5px)}60%{background:#FFC6DE;transform:translateY(0)}100%{}}
 .streakline{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.streakline .big{font-family:var(--display);font-size:34px;color:var(--pink);line-height:1;font-variant-numeric:tabular-nums}
+.streakline .big{font-family:var(--display);font-size:34px;color:var(--pink-ink);line-height:1;font-variant-numeric:tabular-nums}
 .quest{display:flex;flex-direction:column}
 .qrow{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:8px 0;position:relative}
 .qrow::before{content:"";position:absolute;left:23px;top:0;bottom:0;width:6px;background:var(--bg2)}
@@ -104,7 +110,7 @@ h2{font-size:22px} h3{font-size:18px}
 .qrow .txt span{font-size:14px;color:var(--ink2)}
 .qrow.done .txt b{color:var(--ink2)}
 .qrow.chest .qnode{background:var(--bg2);color:var(--ink2)}
-.qrow.chest.ready .qnode{background:var(--butter);color:#5C3B00;animation:chestwiggle 2.4s ease-in-out infinite}
+.qrow.chest.ready .qnode{background:var(--butter);color:#5C3B00;animation:chestwiggle 2.4s ease-in-out 3}
 .qrow.chest.opened .qnode{background:var(--mint);color:#fff}
 @keyframes chestwiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-8deg)}90%{transform:rotate(8deg)}95%{transform:rotate(-4deg)}}
 .goalline{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2)}
@@ -127,7 +133,7 @@ h2{font-size:22px} h3{font-size:18px}
 .collect b{font-family:var(--display);font-weight:400;font-size:18px;font-variant-numeric:tabular-nums}
 /* 보상 순간: 레벨 업, 보물상자 */
 .reward-pop{display:flex;flex-direction:column;align-items:center;gap:10px}
-.reward-pop .big{font-family:var(--display);font-size:44px;color:var(--pink);line-height:1}
+.reward-pop .big{font-family:var(--display);font-size:44px;color:var(--pink-ink);line-height:1}
 .jump{animation:jump .9s ease-out 1}
 @keyframes jump{0%{transform:translateY(0)}30%{transform:translateY(-18px)}55%{transform:translateY(0)}72%{transform:translateY(-6px)}100%{transform:translateY(0)}}
 
@@ -145,10 +151,10 @@ h2{font-size:22px} h3{font-size:18px}
 .stop:nth-child(4n+3){justify-content:center}
 .stop:nth-child(4n){justify-content:flex-start;padding-left:8%}
 .node{display:flex;flex-direction:column;align-items:center;gap:4px;width:170px;max-width:60vw;text-align:center}
-.disc{width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--pink);border:4px solid var(--pink);box-shadow:0 6px 0 var(--berry-edge);transition:transform .1s}
+.disc{width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--pink-ink);border:4px solid var(--pink);box-shadow:0 6px 0 var(--berry-edge);transition:transform .1s}
 .disc:active:not([disabled]){transform:translateY(4px);box-shadow:0 2px 0 var(--berry-edge)}
-.node.cleared .disc{background:var(--mint);border-color:var(--mint);color:#fff;box-shadow:0 6px 0 #178A63}
-.node.next .disc{background:var(--pink);color:#fff;animation:bob 1.6s ease-in-out infinite}
+.node.cleared .disc{background:var(--mint);border-color:var(--mint);color:#fff;box-shadow:0 6px 0 var(--mint-edge)}
+.node.next .disc{background:var(--pink);color:#fff;animation:bob 1.6s ease-in-out 3}
 .node.locked .disc{background:var(--bg2);border-color:var(--bg2);color:var(--ink2);box-shadow:0 6px 0 var(--line);cursor:not-allowed}
 .node .nm{font-family:var(--display);font-size:16px;line-height:1.2;background:var(--card);padding:3px 10px;border-radius:12px;word-break:keep-all}
 .node.locked .nm{color:var(--ink2)}
@@ -203,7 +209,7 @@ h2{font-size:22px} h3{font-size:18px}
 .ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ctrl label{font-family:var(--display);min-width:3.2em}
 .stepper{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:99px;overflow:hidden;background:var(--bg)}
-.stepper button{width:34px;height:34px;font-size:18px}
+.stepper button{width:44px;height:44px;font-size:20px}
 .stepper output{min-width:3.2em;text-align:center;font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
 .rollwrap{overflow-x:auto;max-width:100%;border-radius:14px;background:var(--bg2)}
 #roll{display:block;height:200px}
@@ -213,14 +219,14 @@ h2{font-size:22px} h3{font-size:18px}
 .barchip.g{background:var(--mint)} .barchip.y{background:var(--butter);color:var(--ink)} .barchip.r{background:var(--pink)}
 .barchip[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:1px}
 .recbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;border-radius:18px;background:var(--bg2);text-align:center}
-.recbig{font-family:var(--display);font-size:56px;line-height:1;color:var(--pink)}
+.recbig{font-family:var(--display);font-size:56px;line-height:1;color:var(--pink-ink)}
 .plan{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:1.4em}
 .plan li{padding:2px 0}
 .takes{display:flex;flex-direction:column;gap:4px;font-size:14px}
 .takes div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:3px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px;border-radius:16px;font-family:var(--display);font-size:14px;color:var(--ink2)}
 .tab svg{width:26px;height:26px}
-.tab[aria-current="page"]{background:var(--pink-soft);color:var(--pink)}
+.tab[aria-current="page"]{background:var(--pink-soft);color:var(--pink-ink)}
 
 /* 연습 화면 */
 body.playing .tabs{display:none}
@@ -237,8 +243,8 @@ body.playing .app{padding-block:12px 12px}
 #lane{display:block;width:100%;height:260px}
 .songbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .speed{display:flex;gap:4px;background:var(--bg2);border-radius:99px;padding:4px}
-.speed button{padding:6px 12px;border-radius:99px;font-size:14px;font-family:var(--display)}
-.speed button[aria-pressed="true"]{background:var(--card);color:var(--pink);box-shadow:0 2px 0 var(--line)}
+.speed button{padding:6px 12px;min-height:40px;border-radius:99px;font-size:15px;font-family:var(--display)}
+.speed button[aria-pressed="true"]{background:var(--card);color:var(--pink-ink);box-shadow:0 2px 0 var(--line)}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--card);z-index:2;text-align:center;padding:16px}
 .staff{width:min(320px,90%);height:auto}
 
@@ -285,10 +291,10 @@ body.playing .app{padding-block:12px 12px}
 .moodbtn span{font-size:40px;line-height:1.1}
 .moodbtn small{font-family:var(--body);font-size:12px;color:var(--ink2)}
 .moodbtn:hover{border-color:var(--pink)}
-button.pill{border:2px solid var(--line);cursor:pointer}
+button.pill{border:2px solid var(--line);cursor:pointer;min-height:40px;padding:6px 14px}
 .medals{font-size:15px;letter-spacing:2px}
 .medals .off{filter:grayscale(1);opacity:.3}
-.judge{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--display);font-size:20px;color:var(--pink);background:var(--card);padding:2px 14px;border-radius:99px;pointer-events:none;animation:pop .3s;white-space:nowrap}
+.judge{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--display);font-size:20px;color:var(--pink-ink);background:var(--card);padding:2px 14px;border-radius:99px;pointer-events:none;animation:pop .3s;white-space:nowrap}
 .judge:empty{display:none}
 .dyncard{width:170px;height:170px;border-radius:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;color:#fff;animation:pop .35s}
 .dyncard span{font-size:72px;line-height:1.1}
@@ -298,7 +304,7 @@ button.pill{border:2px solid var(--line);cursor:pointer}
 .guide{max-width:100%}
 .guide svg{max-width:100%;height:auto}
 details.help summary{cursor:pointer;color:var(--ink2);font-size:14px}
-.btn.sm{font-size:14px;padding:7px 12px;flex:none}
+.btn.sm{font-size:15px;padding:8px 12px;min-height:44px;min-width:44px;flex:none;display:inline-grid;place-items:center}
 .micpill{font-family:var(--display);font-size:15px;padding:4px 12px;border-radius:99px;background:var(--bg2);color:var(--ink2);flex:none;transition:background .1s}
 .micpill.hot{background:var(--mint);color:#fff}
 .meter{height:12px;border-radius:99px;background:var(--bg2);overflow:hidden}
@@ -315,8 +321,8 @@ details.help summary{cursor:pointer;color:var(--ink2);font-size:14px}
 .item .btn{font-size:15px;padding:8px 16px;margin-top:auto}
 .item.on{border-color:var(--pink);background:var(--pink-soft)}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--bg);font-family:var(--display)}
-.seg button[aria-pressed="true"]{border-color:var(--pink);background:var(--pink-soft);color:var(--pink)}
+.seg button{padding:8px 14px;min-height:44px;border-radius:99px;border:2px solid var(--line);background:var(--bg);font-family:var(--display)}
+.seg button[aria-pressed="true"]{border-color:var(--pink);background:var(--pink-soft);color:var(--pink-ink)}
 .xpweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:110px}
 .xpweek div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;font-size:12px;color:var(--ink2)}
 .xpweek i{display:block;width:70%;border-radius:8px 8px 3px 3px;background:var(--sky);min-height:3px}
@@ -451,7 +457,7 @@ function merge(o){
   s.settings.goal = [10,20,30].includes(+s.settings.goal) ? +s.settings.goal : 20;
   const days = {}; Object.entries(s.days && typeof s.days === "object" ? s.days : {}).forEach(([k,d]) => { if(!isDay(k) || !d || typeof d !== "object") return;
     days[k] = {sessions:+d.sessions||0, minutes:+d.minutes||0, xp:+d.xp||0, missions:Object.fromEntries(["warm","lesson","review","sight","piece"].map(x=>[x,!!d.missions?.[x]])),
-      ...(d.frozen?{frozen:true}:{}), ...(d.chestOpened?{chestOpened:true}:{}), ...(["great","ok","tired"].includes(d.mood)?{mood:d.mood}:{}),
+      ...(d.frozen?{frozen:true}:{}), ...(d.chestOpened?{chestOpened:true}:{}), ...(d.lit?{lit:true}:{}), ...(["great","ok","tired"].includes(d.mood)?{mood:d.mood}:{}),
       ...(Array.isArray(d.plan) && d.plan.length && d.plan.every(x=>["warm","lesson","review","sight","piece"].includes(x)) ? {plan:d.plan.slice()} : {})}; });
   s.days = days;
   // 곡 연습실 기록: 숫자만 남긴다
@@ -479,7 +485,7 @@ const allDone = k => { const d = S.days[k], m = d?.missions||{}; return (d?.plan
 /* 오늘 기분 ('한 마디'의 컨디션 고르기를 아이용으로). 졸린 날엔 짧게 두 개만 해도 왕관을 받는다. */
 const MOODS = {
   great:{em:"😆", name:"신나", plan:["warm","lesson","review","sight"], warm:6, review:8, chest:15, say:["좋아, 신나는 날이구나!","오늘은 퀘스트 4개야. 다 하면 보물상자가 더 커!"]},
-  ok:   {em:"🙂", name:"보통", plan:["lesson","review","sight"], warm:5, review:6, chest:10, say:["보통인 날도 좋아.","퀘스트 3개를 차근차근 해 보자!"]},
+  ok:   {em:"🙂", name:"보통", plan:["lesson","review","sight"], warm:5, review:6, chest:10, say:["보통인 날도 좋아.","퀘스트 3개, 하나씩 해 보자."]},
   tired:{em:"😪", name:"졸려", plan:["warm","sight"], warm:3, review:4, chest:10, say:["졸린 날엔 짧게 하자.","퀘스트 2개만 하면 오늘도 왕관이야. 연속 기록도 이어져!"]}
 };
 function mood(){ return MOODS[S.days[dkey()]?.mood] || MOODS.ok; }
@@ -539,7 +545,7 @@ function missions(){
   const md = mood(), nl = nextLesson(), wk = weakest(3), hp = hardestPhrase();
   const all = {
     warm:{key:"warm", title:"손가락 풀기", sub:`배운 음 ${md.warm}개 빨리 찾기`, cfg:{kind:"find", notes:learnedNotes(), rounds:md.warm, title:"손가락 풀기", mission:"warm"}},
-    lesson:{key:"lesson", title:"오늘의 레슨", sub:`${nl.icon} ${nl.title}`, cfg:{...lessonCfg(nl), mission:"lesson"}},
+    lesson:{key:"lesson", title:"오늘의 레슨", sub:nl.title, cfg:{...lessonCfg(nl), mission:"lesson"}},
     review: hp
       ? {key:"review", title:"솜이의 복습", sub:`${SONGS[hp.song].name} ${hp.p+1}번째 소절 다시 치기`, cfg:{kind:"song", song:hp.song, phrase:hp.p, title:`${SONGS[hp.song].name} · ${hp.p+1}번째 소절`, mission:"review", tip:"자주 틀린 부분만 잘라 왔어. 천천히 해 보자"}}
       : {key:"review", title:"솜이의 복습", sub:`${wk.map(n=>N[n].name).join(" · ")} 다시 보기`, cfg:{kind:"find", notes:wk, rounds:md.review, title:"솜이의 복습", mission:"review"}},
@@ -606,7 +612,7 @@ function placeStep(){
   p.si++; const n = PLACEMENT[p.si];
   Object.assign(A, {kind:n.kind, notes:n.notes, rounds:n.rounds, round:0, target:null, lock:true}); p.base = A.right;
   glow(null); setProg(p.done/PLACE_TOTAL); ding();
-  $("#stage").innerHTML = `<div class="target" style="background:var(--mint)">✓</div><div class="prompt">${p.si}단계 통과! 이번엔 ${n.label}</div>`;
+  $("#stage").innerHTML = `<div class="target" style="background:var(--mint)">${ic("check",64,3)}</div><div class="prompt">${p.si}단계 통과! 이번엔 ${n.label}</div>`;
   setTimeout(() => { if(A && A.place === p) nextRound(); }, 1500);
 }
 function placeDone(){
@@ -632,13 +638,15 @@ function placeDone(){
 }
 function lessonCfg(l){ return {kind:l.kind, notes:l.notes, rounds:l.rounds, song:l.song, title:l.title, lessonId:l.id, tip:l.tip}; }
 
+// 오늘 보물상자를 이미 열었는지
+const d0lit = () => !!S.days[dkey()]?.chestOpened;
 function somiSays(){
   const k = dkey(), st = streak();
   if(!S.log.length) return ["안녕! 나는 피아노 요정 토끼 솜이야.","오늘의 퀘스트 첫 번째부터 같이 해 볼까?"];
-  if(allDone(k)) return ["오늘 퀘스트 완료! 정말 멋져.","내일도 만나서 스탬프를 하나 더 찍자."];
+  if(allDone(k)) return [`오늘 퀘스트를 다 했어. 오늘 건반이 금빛이야!`, d0lit() ? "내일 건반에도 불을 켜 보자." : "보물상자를 열어 봐."];
   const weak = learnedNotes().map(id=>({id,s:noteStat(id)})).filter(o=>o.s.r+o.s.w>=3).sort((a,b)=>(a.s.r/(a.s.r+a.s.w))-(b.s.r/(b.s.r+b.s.w)))[0];
   if(weak && weak.s.r/(weak.s.r+weak.s.w) < .75) { const nm = N[weak.id].name; return [`${eul(nm)} 가끔 헷갈리더라.`,`복습 퀘스트에서 ${eul(nm)} 꼭 다시 찾아보자!`]; }
-  if(!practiced(k) && st>0) return [`벌써 ${st}일 연속이야!`,"오늘도 조금만 치면 기록이 이어져."];
+  if(!practiced(k) && st>0) return [`${st}일 연속이야.`,`오늘 하나만 쳐도 ${st+1}일 연속이 돼!`];
   const lines = [["건반을 칠 때마다 손가락이 튼튼해져.","천천히 해도 괜찮아!"],["틀려도 괜찮아.","틀린 음은 솜이가 기억했다가 다시 알려줄게."],["하루 10분이면 충분해.","매일 조금씩이 제일 좋아."]];
   return lines[new Date().getDate()%lines.length];
 }
@@ -683,6 +691,7 @@ const ICONS = {
   check:"M5 12.5l4.5 4.5L19 7",
   mic:"M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
   folder:"M3 6h6l2 2h10v11H3z",
+  play:"M7 4.5v15l12-7.5z",
   keys:"M3 5h18v14H3z M7.5 5v8 M11 5v14 M14.5 5v8 M18 5v8",
   sticker:"M4 4h11l5 5v11H4z M15 4v5h5 M9 13.5a1 1 0 1 0 0-.1 M15 13.5a1 1 0 1 0 0-.1 M9 17c1.7 1.3 4.3 1.3 6 0"
 };
@@ -729,6 +738,7 @@ $("#tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); 
 
 /* 홈 = 게임 허브: 히어로(솜이·레벨·가진 것) → 이번 주 건반 → 오늘의 퀘스트 길(끝에 보물상자) → 놀이터 → 내가 만든 노래
    고리 세 개: 한 음마다 바로 반응(30초) → 퀘스트를 다 하면 상자(10분) → 레벨·연속 기록·모음(매일) */
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const QUEST_IC = {warm:"spark", lesson:"map", piece:"note", review:"repeat", sight:"sheet"};
 function renderHome(){
   let [l1,l2] = somiSays(); const k = dkey(), st = streak();
@@ -742,7 +752,7 @@ function renderHome(){
     const cls = allDone(key) ? "gold" : practiced(key) ? "on" : frozen(key) ? "frz" : "";
     const mark = allDone(key) ? ic("crown",18) : practiced(key) ? ic("note",18) : frozen(key) ? ic("shield",18) : "";
     const what = allDone(key) ? "퀘스트 모두 완료" : practiced(key) ? "연습함" : frozen(key) ? "방패로 지킴" : "쉰 날";
-    return `<div class="wkey ${cls} ${key===k?"today":""}" role="img" aria-label="${key===k?"오늘":wd[d.getDay()]+"요일"}: ${what}">${mark}<span>${key===k?"오늘":wd[d.getDay()]}</span></div>`; }).join("");
+    return `<div class="wkey ${cls} ${key===k?"today":""} ${key===k && practiced(k) && !d0.lit && !reduceMotion() ? "lighting" : ""}" role="img" aria-label="${key===k?"오늘":wd[d.getDay()]+"요일"}: ${what}">${mark}<span>${key===k?"오늘":wd[d.getDay()]}</span></div>`; }).join("");
   const xpToday = d0.xp || 0;
   const tile = (id, color, icon, title, desc, open, lock) => `<button class="tile" id="${id}" style="background:var(${color})" ${open?"":"disabled"}>${ic(open?icon:"lock",30)}<b>${title}</b><span>${open?desc:lock}</span></button>`;
   $("#s-home").innerHTML = `
@@ -752,7 +762,7 @@ function renderHome(){
         <div><div class="lvbar" role="progressbar" aria-label="다음 레벨까지" aria-valuemin="0" aria-valuemax="${lv.need}" aria-valuenow="${lv.into}"><i style="width:${Math.round(lv.into/lv.need*100)}%"></i></div>
           <span class="muted" style="font-size:13px">다음 레벨까지 ${lv.need - lv.into} XP</span></div></div>
       <div class="stats"><span class="stat" style="color:var(--sky)">${ic("gem",18)}<span style="color:var(--ink)">${S.gems}</span></span><span class="stat" style="color:var(--sky)">${ic("shield",18)}<span style="color:var(--ink)">${S.freezes}</span></span>
-        <span class="stat" style="color:var(--butter-edge)">${ic("star",18)}<span style="color:var(--ink)">${totalStars()}</span></span><span class="stat" style="color:var(--pink)">${ic("sticker",18)}<span style="color:var(--ink)">${S.stickers.length}</span></span></div>
+        <span class="stat" style="color:var(--butter-edge)">${ic("star",18)}<span style="color:var(--ink)">${totalStars()}</span></span><span class="stat" style="color:var(--pink-ink)">${ic("sticker",18)}<span style="color:var(--ink)">${S.stickers.length}</span></span></div>
     </section>
     ${!S.placed && !S.log.length ? `<div class="card" style="display:flex;flex-direction:column;gap:10px">
       <h2>처음 왔구나! 실력부터 알아볼까?</h2>
@@ -792,7 +802,7 @@ function renderHome(){
     ${S.songs.length ? `<section class="card" style="display:flex;flex-direction:column;gap:10px" aria-label="내가 만든 노래"><h2>내가 만든 노래</h2>
       ${S.songs.map((s,i)=>`<div class="mysong"><div class="txt"><b>${esc(s.title)}</b><span>${s.notes.length}음 · ${esc(s.d.slice(5).replace("-","/"))}</span>
         <div class="dots">${s.notes.slice(0,16).map(o=>`<i style="background:${colorOf(o.n.replace("#",""))}"></i>`).join("")}</div></div>
-        <button class="btn ghost sm" data-play="${i}" aria-label="${esc(s.title)} 들어보기">▶</button><button class="btn alt sm" data-follow="${i}">따라 치기</button><button class="btn ghost sm" data-del="${i}" aria-label="${esc(s.title)} 지우기">✕</button></div>`).join("")}</section>` : ""}`;
+        <button class="btn ghost sm" data-play="${i}" aria-label="${esc(s.title)} 들어보기">${ic("play",18)}</button><button class="btn alt sm" data-follow="${i}">따라 치기</button><button class="btn ghost sm" data-del="${i}">지우기</button></div>`).join("")}</section>` : ""}`;
   const el = $("#s-home");
   el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const m = ms[+b.dataset.m]; m.go ? m.go() : startActivity(m.cfg); });
   $("#free").onclick = () => startActivity({kind:"free", title:"내 노래 만들기"});
@@ -801,7 +811,7 @@ function renderHome(){
     startActivity({kind:"song", custom:s.notes.map(o=>`${o.n}:${o.b}`).join(" "), title:`${s.title} 따라 치기`, tip:"내가 만든 노래를 떨어지는 음표로 쳐 보자"}); });
   el.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
     if(b.dataset.armed){ S.songs.splice(+b.dataset.del,1); save(); renderHome(); return; }
-    b.dataset.armed = "1"; b.textContent = "지울까?"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent = "✕"; } }, 3000); });
+    b.dataset.armed = "1"; b.textContent = "정말?"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent = "지우기"; } }, 3000); });
   el.querySelectorAll("[data-mood]").forEach(b => b.onclick = () => setMood(b.dataset.mood));
   $("#remood")?.addEventListener("click", () => { delete d0.mood; save(); renderHome(); });
   $("#place")?.addEventListener("click", startPlacement);
@@ -810,6 +820,7 @@ function renderHome(){
   $("#sightgo").onclick = () => startActivity({kind:"sight", title:"솜이의 깜짝 악보"});
   $("#balloon").onclick = () => startActivity({kind:"balloon", notes:learnedNotes(), title:"음표 풍선 터뜨리기"});
   $("#openchest")?.addEventListener("click", openChest);
+  if(practiced(k) && !d0.lit){ d0.lit = true; save(); }
   // 레벨이 올랐으면 한 번 축하한다 (어디서 XP를 받았든 홈에 돌아오면)
   if(lv.L > S.levelSeen && !document.querySelector(".modal")) levelUp(S.levelSeen, lv);
 }
@@ -1372,7 +1383,7 @@ function micTick(){
 function micPill(){
   const p = $("#micpill"); if(!p) return; p.hidden = !Mic.stream || cur!=="play"; if(p.hidden) return;
   p.classList.toggle("hot", Mic.tr && Mic.tr.st.rms > Mic.tr.st.floor*4);
-  p.textContent = "🎤 " + (Mic.heard ? N[Mic.heard].short || N[Mic.heard].name : "듣는 중");
+  p.innerHTML = ic("mic",16) + " " + (Mic.heard ? (N[Mic.heard].short || N[Mic.heard].name) : "듣는 중");
 }
 /* 소리 맞추기: 조용할 때 잡음 크기를 재고, 가운데 도를 3번 들어 피아노 조율이 얼마나 어긋났는지 잰다 */
 let calTimer = 0;
@@ -1434,7 +1445,7 @@ function startActivity(cfg){
   if(cfg.kind==="free"){ A.rec = []; A.saved = true; A.running = true;
     st.innerHTML = `<div class="compose"><div class="prompt" id="fp">마음대로 쳐 봐! 치는 음이 오선지에 그려져</div>
       <div class="staffwrap" id="staffwrap"></div>
-      <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="rlisten">▶ 들어보기</button><button class="btn ghost" id="rundo">한 음 지우기</button><button class="btn" id="rsave">저장하기</button></div>
+      <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="rlisten">${ic("play",18)} 들어보기</button><button class="btn ghost" id="rundo">한 음 지우기</button><button class="btn" id="rsave">저장하기</button></div>
       <div class="row" id="savebox" hidden style="flex-wrap:wrap;justify-content:center"><label for="rtitle" class="muted">노래 제목</label><input id="rtitle" maxlength="16"><button class="btn alt" id="rok">이 제목으로 저장</button></div></div>`;
     $("#rlisten").onclick = () => playNotes(recNotes(), true);
     $("#rundo").onclick = () => { A.rec.pop(); A.saved = !A.rec.length; renderCompose(); };
@@ -1445,7 +1456,7 @@ function startActivity(cfg){
     song:"내려오는 음표가 선에 닿으면 그 건반을 눌러! 맞을 때까지 기다려 줄게", balloon:"풍선에 적힌 음과 같은 건반을 누르면 펑! 위로 날아가기 전에 터뜨려 봐",
     sight:"처음 보는 악보야! 음표 색 힌트 없이 읽고 쳐 봐. 맞게 치면 음표에 색이 칠해져",
     dyn:"피아노는 작게도 크게도 칠 수 있어! 🐭가 나오면 살금살금 작게, 🦁가 나오면 쾅 크게 쳐 봐. 건반은 아무거나 괜찮아"}[cfg.kind];
-  st.innerHTML = `<div class="overlay">${bunny(80)}<div class="prompt">${cfg.intro||intro}</div>${S.settings.mic?`<div class="pill">🎤 진짜 피아노로 쳐도 돼. 솜이가 듣고 있어</div>
+  st.innerHTML = `<div class="overlay">${bunny(80)}<div class="prompt">${cfg.intro||intro}</div>${S.settings.mic?`<div class="pill">${ic("mic",16)} 진짜 피아노로 쳐도 돼. 솜이가 듣고 있어</div>
     ${cfg.kind!=="dyn"?`<details class="help"${cfg.lessonId==="l1"||cfg.place?" open":""}><summary>진짜 피아노에서 가운데 도는 어디?</summary>${middleCSvg()}</details>`:""}`:""}${cfg.tip?`<div class="muted">${esc(cfg.tip)}</div>`:""}<button class="btn" id="go">준비됐어!</button></div>`;
   $("#go").onclick = () => { audio(); A.running = true; cfg.kind==="song" ? songSetup() : cfg.kind==="balloon" ? balloonSetup() : cfg.kind==="sight" ? sightSetup() : cfg.kind==="dyn" ? dynSetup() : nextRound(); };
 }
@@ -1562,7 +1573,7 @@ function sightSetup(){
   A.seq = makeSight(); A.idx = 0; A.miss = false; A.wrongThis = 0;
   $("#stage").innerHTML = `<div class="compose"><div class="prompt" id="sp">왼쪽부터 음표를 읽고 쳐 봐. 분홍 동그라미가 지금 칠 음이야</div>
     <div class="staffwrap" id="sightstaff"></div>
-    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="slisten">▶ 먼저 들어보기</button></div></div>`;
+    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="slisten">${ic("play",18)} 먼저 들어보기</button></div></div>`;
   $("#slisten").onclick = () => playNotes(A.seq.map(o=>({n:o.note, b:o.dur})));
   renderSight();
 }
@@ -1628,7 +1639,7 @@ function nextRound(){
   A.target = pickWeighted(A.notes, A.target); A.wrongThis = 0; A.lock = false; glow(null);
   const n = N[A.target], st = $("#stage");
   if(A.kind==="find") st.innerHTML = `<div class="target" style="background:${colorOf(n.id)}">${n.short}</div><div class="prompt">${eul(n.short)} 찾아 눌러 봐!</div>
-    ${S.settings.mic ? `<div class="pill">🎹 진짜 피아노: ${whereOnPiano(n.id)}</div>` : ""}`;
+    ${S.settings.mic ? `<div class="pill">${ic("keys",16)} 진짜 피아노에서는 ${whereOnPiano(n.id)}</div>` : ""}`;
   if(A.kind==="ear"){ st.innerHTML = `<button class="target" id="rep" style="background:var(--sky)" aria-label="다시 듣기"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button><div class="prompt">눌러서 다시 들어도 돼</div><div class="muted">${A.notes.map(x=>N[x].name).join(" · ")} 중에 하나야</div>`;
     $("#rep").onclick = () => tone(n.midi); setTimeout(()=>tone(n.midi),350); }
   if(A.kind==="staff") st.innerHTML = staffSvg(n.id) + `<div class="prompt">이 음표는 무슨 음일까?</div>`;
@@ -1853,7 +1864,11 @@ function finish(){
   const td = totalDays(); if(td>=5) give("d5"); if(td>=15) give("d15");
   save();
   const fresh = S.stickers.filter(s=>!before.has(s)).map(id=>STICKERS.find(x=>x[0]===id));
-  const msg = stars===3 ? "완벽해! 솜이가 깜짝 놀랐어" : stars===2 ? "아주 잘했어! 조금만 더 하면 별 3개!" : "끝까지 해낸 게 제일 멋져. 다시 하면 더 잘할 거야";
+  // 결과 한마디: 막연한 칭찬 대신 방금 일어난 일과 다음 목표를 말한다
+  const toThree = A.kind === "balloon" ? Math.max(0, 18 - A.right) : Math.max(0, Math.ceil(total*.9) - A.right);
+  const msg = stars===3 ? (A.wrong===0 ? "한 번도 안 틀렸어!" : "별 3개! 거의 다 맞혔어")
+    : stars===2 ? (A.kind === "balloon" ? `풍선 ${toThree}개만 더 터뜨리면 별 3개야` : `${toThree}개만 더 맞히면 별 3개야`)
+    : "끝까지 쳤어. 틀린 음은 솜이가 기억해 둘게";
   const m = document.createElement("div"); m.className = "modal";
   m.innerHTML = `<div class="card" role="dialog" aria-label="결과">${bunny(84)}<h2>${msg}</h2>
     <div class="bigstars">${[1,2,3].map(n=>`<span class="${n<=stars?"on":""}" style="animation-delay:${n*.18}s">★</span>`).join("")}</div>
@@ -1962,7 +1977,7 @@ function renderLabAction(){
   if(LV.phase === "rec"){ box.innerHTML = `<div class="recbox"><div class="recbig" id="recbig">4</div><div id="rectxt">준비…</div><div class="meter" style="width:min(320px,90%)"><i id="reclv"></i></div>
       <button class="btn" id="recstop">다 쳤어!</button><span class="muted" style="font-size:13px">다 치고 4초 동안 조용하면 저절로 끝나</span></div>`; $("#recstop").onclick = () => recStop(false); return; }
   if(LV.phase === "busy"){ box.innerHTML = `<div class="recbox">${bunny(64)}<div id="busytxt">${LV.msg || "솜이가 듣는 중…"}</div><div class="meter" style="width:min(320px,90%)"><i id="busylv"></i></div></div>`; return; }
-  box.innerHTML = `<div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="labplay">▶ 들어보기</button><button class="btn" id="labrec">${ic("mic",20)} 녹음하기</button>
+  box.innerHTML = `<div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="labplay">${ic("play",18)} 들어보기</button><button class="btn" id="labrec">${ic("mic",20)} 녹음하기</button>
       <label class="btn ghost" for="labfile" style="cursor:pointer">${ic("folder",20)} 녹음 파일 올리기</label><input type="file" id="labfile" accept="audio/*" hidden></div>
     ${LV.msg ? `<p class="muted" role="status" style="margin:0">${esc(LV.msg)}</p>` : `<p class="muted" style="margin:0;font-size:13px">휴대폰을 피아노 위에 두고, ${LV.a}~${LV.b}마디를 ${HANDS.find(h=>h[0]===LV.hand)[1]}으로 쭉 쳐 봐. 틀려도 멈추지 말고 끝까지!</p>`}`;
   $("#labplay").onclick = () => playRange();
