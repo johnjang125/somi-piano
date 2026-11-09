@@ -199,7 +199,7 @@ a{color:var(--sky);text-underline-offset:3px}
 .bar{display:grid;grid-template-columns:64px 1fr 72px;gap:var(--space-3);align-items:center;font-size:var(--text-sm)}
 .bar .track{height:14px;background:var(--bg2);border-radius:var(--radius-full);overflow:hidden}
 .bar .fill{height:100%;border-radius:var(--radius-full)}
-.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.bars.wide .bar{grid-template-columns:72px 1fr 104px} .bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .cal{display:grid;grid-template-columns:repeat(14,1fr);gap:var(--space-1)}
 .cal div{aspect-ratio:1;border-radius:var(--radius-inner);background:var(--bg2);max-width:100%}
 .cal .p{background:var(--pink-soft)} .cal .g{background:var(--pink)}
@@ -437,6 +437,7 @@ const STICKERS = [
   ["interval","🌉","음정 건축가","음정 다리 마지막 단계 별 3개"],
   ["chord","🔦","화음 탐험가","화음 동굴 마지막 단계 별 3개"],
   ["symbol","🪧","기호 해독가","음악 기호 마을 마지막 단계 별 3개"],
+  ["exam","📝","별나라 시험","한 달에 한 번 별나라 시험 보기"],
   ["stage","🎤","연주회 스타","연주회 모드로 노래 별 3개"],
   ["dyn","🦁","셈여림 박사","셈여림 놀이 별 3개"],
   ["recorder","🎙️","녹음 연주가","곡 연습실에서 처음 녹음하기"],
@@ -454,7 +455,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},rev:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},rev:{},exams:[],xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -499,6 +500,8 @@ function merge(o){
   s.rev = Object.fromEntries(Object.entries(s.rev && typeof s.rev === "object" ? s.rev : {})
     .filter(([k,v]) => k.length <= 200 && /^(r\d+|rh\d+|ks\d+|iv\d+|ch\d+|sy\d+)\|/.test(k) && v && isDay(v.due))
     .slice(-200).map(([k,v]) => [k, {b:num(v.b,0,5), due:v.due, w:num(v.w,1,999), t:String(v.t||"").slice(0,40)}]));
+  s.exams = (Array.isArray(s.exams) ? s.exams : []).filter(e => e && isDay(e.d) && e.r && typeof e.r === "object").slice(-24)
+    .map(e => ({d:e.d, r:Object.fromEntries(Object.entries(e.r).filter(([k,v]) => ["read","rh","ks","iv","ch","sy"].includes(k) && Array.isArray(v)).map(([k,v]) => [k, [num(v[0],0,50), num(v[1],1,50)]]))}));
   s.perf = Object.fromEntries(Object.keys(s.perf && typeof s.perf === "object" ? s.perf : {}).filter(k => SONGS[k] && s.perf[k] === true).map(k => [k, true]));
   s.speed = Object.fromEntries(Object.entries(s.speed && typeof s.speed === "object" ? s.speed : {}).filter(([k,v]) => SONGS[k] && [0,1,2].includes(v)));
   ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
@@ -834,6 +837,10 @@ function renderHome(){
           ${done && !d0.chestOpened ? `<button class="btn gold" id="openchest">열기</button>` : ""}</div>
       </div>
     </section>
+    ${examReady() ? `<section class="card" style="display:flex;flex-direction:column;gap:var(--space-3)" aria-label="별나라 시험">
+      <h2>📝 이번 달 별나라 시험</h2>
+      <span class="muted" style="font-size:var(--text-sm)">한 달에 한 번! 지금까지 연 섬에서 ${EXAM_TOPICS.reduce((a,t)=>a+t.n,0)}문제를 골고루 물어봐. 5분쯤 걸려. 다 보면 시험 스티커를 줄게.</span>
+      <button class="btn alt" id="examgo" style="align-self:flex-start">시험 보기</button></section>` : ""}
     <section class="card" style="display:flex;flex-direction:column;gap:var(--space-3)" aria-label="놀이터">
       <h2>놀이터</h2>
       <div class="arcade">
@@ -850,6 +857,7 @@ function renderHome(){
   const el = $("#s-home");
   el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const m = ms[+b.dataset.m]; m.go ? m.go() : startActivity(m.cfg); });
   $("#free").onclick = () => startActivity({kind:"free", title:"내 노래 만들기"});
+  if($("#examgo")) $("#examgo").onclick = () => startActivity(examCfg());
   el.querySelectorAll("[data-play]").forEach(b => b.onclick = () => playNotes(S.songs[+b.dataset.play].notes));
   el.querySelectorAll("[data-follow]").forEach(b => b.onclick = () => { const s = S.songs[+b.dataset.follow];
     startActivity({kind:"song", custom:s.notes.map(o=>`${o.n}:${o.b}`).join(" "), title:`${s.title} 따라 치기`, tip:"내가 만든 노래를 떨어지는 음표로 쳐 보자"}); });
@@ -964,6 +972,8 @@ function weeklyReport(){
   const lines = [`🎹 ${name}의 이번 주 피아노 연습 (${md(days[0])}~${md(days[6])})`, "",
     `• 연습한 날: ${practicedN}일 / 7일 (연속 ${streak()}일째)`, `• 퀘스트 모두 완료(왕관): ${crowns}일`, `• 모은 XP: ${xp} · 연습 시간: 약 ${mins}분 · 끝낸 연습: ${logs.length}개`];
   const pieces = Object.entries(S.lab).map(([id, r]) => ({id, p: LIB?.find(x => x.id === +id), tk: r.takes.filter(t => days.includes(t.d)), all: r.takes})).filter(x => x.tk.length);
+  const ex = S.exams.find(e => days.includes(e.d));
+  if(ex) lines.push("", "📝 별나라 시험: " + EXAM_TOPICS.filter(t => ex.r[t.id]).map(t => `${t.name} ${ex.r[t.id][0]}/${ex.r[t.id][1]}`).join(" · "));
   if(pieces.length){
     lines.push("", "🎼 곡 연습 (녹음 분석)");
     pieces.forEach(({id, p, tk, all}) => { const title = p ? [p.composer, p.title].filter(Boolean).join(" ") : `곡 ${id}`, best = Math.max(...tk.map(t=>t.score));
@@ -1034,6 +1044,16 @@ function renderParent(){
      <div class="chips"><div class="chip"><b>${streak()}</b><span>연속 일수</span></div><div class="chip"><b>${Math.round(mins)}</b><span>총 연습 분</span></div><div class="chip"><b>${S.log.length}</b><span>끝낸 연습</span></div></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>음별 첫 시도 정답률</h3><div class="bars">${bars}</div>
      <div class="muted" style="font-size:var(--text-sm)">정답률이 낮거나 오래 안 본 음이 '솜이의 복습' 퀘스트에 자주 나옵니다.</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>별나라 시험 (영역별)</h3>
+     ${(() => { const ex = S.exams, last = ex[ex.length-1], prev = ex[ex.length-2];
+       if(!last) return `<div class="muted">아직 본 시험이 없어요. 악보 읽기 첫 단계를 깨면 홈 화면에 매달 시험 카드가 나와요.</div>`;
+       const rows = EXAM_TOPICS.filter(t => last.r[t.id]).map(t => { const p = pct(last.r[t.id]), q = pct(prev?.r[t.id]), d = q == null ? "" : p - q;
+         return `<div class="bar"><span>${t.name}</span><div class="track"><div class="fill" style="width:${p}%;background:${p >= 80 ? "var(--mint)" : p >= 50 ? "var(--butter)" : "var(--pink)"}"></div></div><span class="v">${p}%${d === "" ? "" : ` (${d >= 0 ? "+" : ""}${d})`}</span></div>`; }).join("");
+       const weak = EXAM_TOPICS.filter(t => last.r[t.id] && pct(last.r[t.id]) < 60).map(t => t.name);
+       return `<div class="muted" style="font-size:var(--text-sm)">${esc(last.d.replace(/-/g,". "))} 시험${prev ? ` · 괄호는 ${esc(prev.d.slice(0,7).replace("-","년 "))}월 대비` : ""}</div><div class="bars wide">${rows}</div>
+         ${weak.length ? `<div class="muted" style="font-size:var(--text-sm)">60%가 안 된 영역: <b>${weak.join(", ")}</b>. 레슨 선생님께 한 번 더 봐 달라고 해 보세요.</div>` : ""}`; })()}
+     <button class="btn ghost" id="examnow" style="align-self:flex-start">${examThisMonth() ? "이번 달 시험 다시 보기" : "지금 시험 보기"}</button>
+     <div class="muted" style="font-size:var(--text-sm)">열려 있는 단계에서만 내요. 다시 보면 이번 달 결과가 바뀝니다.</div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>틀린 문제 노트</h3>
      ${(() => { const list = Object.entries(S.rev).sort((a,b) => a[1].due.localeCompare(b[1].due)), due = revDue().length;
        if(!list.length) return `<div class="muted">아직 틀린 문제가 없어요. 악보 읽기와 새 구역(리듬·조표·음정·화음·기호)에서 처음에 틀린 문제가 여기에 모여요.</div>`;
@@ -1052,6 +1072,7 @@ function renderParent(){
   $("#s-parent").querySelectorAll("[data-goal]").forEach(b => b.onclick = () => { S.settings.goal = +b.dataset.goal; save(); renderParent(); });
   $("#midi").onclick = connectMidi;
   $("#pt").onclick = startPlacement;
+  $("#examnow").onclick = () => startActivity(examCfg());
   $("#wkcopy").onclick = () => { const t = $("#wk"), m = $("#wkmsg");
     navigator.clipboard?.writeText(t.value).then(() => m.textContent = "복사했어요. 카톡 대화창에 붙여 넣으면 돼요.", () => { t.select(); m.textContent = "자동 복사가 안 돼서 글을 선택해 두었어요. 길게 눌러 복사하세요."; })
       ?? (t.select(), m.textContent = "글을 선택해 두었어요. 길게 눌러 복사하세요."); };
@@ -2030,11 +2051,11 @@ const ZST = Object.fromEntries(ZONES.flatMap(z => z.stages.map((st, i) => [st.id
 const zoneUnlocked = (z, i) => i === 0 || (S.zone[z.stages[i-1].id]||0) >= 1;
 const nextZoneStage = z => z.stages.find((st, i) => zoneUnlocked(z, i) && (S.zone[st.id]||0) < 3) || z.stages[z.stages.length-1];
 function zoneCfg(st){ const {z} = ZST[st.id]; return {kind:"zone", zoneId:st.id, title:`${z.name} · ${st.title}`, rounds:st.rounds, intro:st.teach, introSvg:st.demo()}; }
-function zoneSetup(){ A.zst = A.zoneId === "rev" ? revStage(A.revKeys) : ZST[A.zoneId].st; A.rounds = A.zst.n ?? A.rounds;
+function zoneSetup(){ A.zst = A.zoneId === "rev" ? revStage(A.revKeys) : A.zoneId === "exam" ? examStage() : ZST[A.zoneId].st; A.rounds = A.zst.n ?? A.rounds;
   if(!A.rounds){ toast("오늘은 복습할 문제가 없어!"); A = null; go("home"); return; } zoneNext(); }
 function zoneNext(){
   if(!A) return; if(A.round >= A.rounds) return finish();
-  let q, n = 0; do { q = A.zst.q(A.q); } while(A.zoneId !== "rev" && A.q && q.k === A.q.k && ++n < 8);
+  let q, n = 0; do { q = A.zst.q(A.q); } while(!["rev","exam"].includes(A.zoneId) && A.q && q.k === A.q.k && ++n < 8);
   A.q = q; A.wrongThis = 0; A.lock = false; A.got = []; A.rmode = null; glow(null);
   const st = $("#stage");
   if(q.type === "rhythm") return rhythmRender();
@@ -2048,13 +2069,21 @@ function zoneNext(){
   st.innerHTML = `${q.svg}<div class="prompt" id="zp">${q.prompt}</div>${q.type === "chord" ? `<div class="zdots" id="zd" aria-live="polite">${q.answer.map(() => "○").join("")}</div>` : ""}`;
 }
 function zoneRight(el, msg, wait = 900){
-  if(A.wrongThis === 0){ A.right++; hit(); revMark(revKeyOf(A.q), true, revLabel(A.q)); }
+  if(A.wrongThis === 0){ A.right++; hit(); revMark(revKeyOf(A.q), true, revLabel(A.q)); if(A.exam) examRec(A.q, true); }
   A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, "var(--mint)");
   if(msg) $("#zp").textContent = msg; setTimeout(() => { if(A && A.running) zoneNext(); }, wait);
 }
 function zoneWrong(el){
   A.wrongThis++; if(A.wrongThis === 1){ A.wrong++; revMark(revKeyOf(A.q), false, revLabel(A.q)); } shake(el); miss();
-  const q = A.q; if(A.wrongThis >= 2 && q.why) $("#zp").textContent = "힌트: " + q.why;
+  const q = A.q;
+  // 시험: 한 번만 풀고, 틀리면 정답을 보여 준 뒤 다음 문제로
+  if(A.exam){ examRec(q, false); A.round++; A.lock = true; setProg(A.round/A.rounds);
+    $("#zp").textContent = "정답: " + (q.type === "rhythm" ? "분홍 음표 자리에서 쳐야 해" : q.why || q.name || "");
+    document.querySelectorAll("#stage [data-c]").forEach((b, i) => { if(q.opts?.[i]?.ok) b.classList.add("ok"); b.disabled = true; });
+    ["#rgo","#rlis"].forEach(x => { if($(x)) $(x).disabled = true; });
+    if(q.type === "key") glow(keyOfMidi(q.answer), true);
+    if(q.type === "chord") q.answer.forEach(m => keyEls[keyOfMidi(m)]?.classList.add("glow"));
+    setTimeout(() => { if(A && A.running) zoneNext(); }, 2200); return; } if(A.wrongThis >= 2 && q.why) $("#zp").textContent = "힌트: " + q.why;
   if(A.wrongThis >= 2 && q.type === "key") glow(keyOfMidi(q.answer), true);
   if(A.wrongThis >= 2 && q.type === "chord") q.answer.forEach(m => keyEls[keyOfMidi(m)]?.classList.add("glow"));
 }
@@ -2083,10 +2112,10 @@ function zoneKey(id, el, fromMic){
    처음 시도에서 틀린 문제를 기록한다. 다음 날 다시 내고, 맞히면 1→2→4→8→16일 뒤로 미룬다.
    다섯 번 연속(간격마다) 맞히면 노트에서 졸업. 틀리면 다시 다음 날부터. 한 번도 안 틀린 문제는 기록하지 않는다. */
 const REV_GAP = [1, 2, 4, 8, 16];
-const revKeyOf = q => q.rk || `${A.zoneId}|${q.k}`;
+const revKeyOf = q => q.rk || `${q.sid || A.zoneId}|${q.k}`;
 function revLabel(q){
   if(q.rt) return q.rt;
-  const st = ZST[A.zoneId]?.st; if(!st) return "";
+  const st = ZST[q.sid || A.zoneId]?.st; if(!st) return "";
   const tag = q.type === "key" ? q.name : q.type === "chord" ? (q.ordered ? "펼친 화음" : q.why.split(":")[0])
     : q.type === "choice" ? (q.after ? q.after.split(":")[0] : q.opts.find(o => o.ok).label) : q.pat.map(d => ({4:"온",3:"점2분",2:"2분",1.5:"점4분",1:"4분",.5:"8분"})[Math.abs(d)] + (d < 0 ? "쉼표" : "")).join("·");
   return `${st.title} · ${tag}`;
@@ -2120,6 +2149,36 @@ function revStage(keys){
   const qs = keys.map(revQuestion).filter(Boolean); let i = 0;
   return {id:"rev", title:"솜이의 복습", n:qs.length, q(){ return qs[i++] || qs[qs.length-1]; }};
 }
+
+/* ---------- 별나라 시험 (한 달에 한 번) ----------
+   열려 있는 단계에서 영역마다 몇 문제씩 섞어 낸다. 힌트 없이 한 번만, 틀리면 정답을 보여 주고 넘어간다.
+   틀린 문제는 틀린 문제 노트에도 들어간다. 결과는 영역별 [맞힌 수, 문제 수]로 남겨 어른 탭에서 지난 달과 비교한다. */
+const EXAM_TOPICS = [{id:"read", name:"악보 읽기", n:4}, {id:"rh", name:"리듬", n:2}, {id:"ks", name:"조표", n:3}, {id:"iv", name:"음정", n:3}, {id:"ch", name:"화음", n:3}, {id:"sy", name:"음악 기호", n:3}];
+const monthKey = (d = dkey()) => d.slice(0, 7);
+const examThisMonth = () => S.exams.find(e => monthKey(e.d) === monthKey());
+const examReady = () => !examThisMonth() && (S.read.r1 || 0) >= 1;
+function examStage(){
+  const qs = [];
+  EXAM_TOPICS.forEach(t => {
+    const stages = t.id === "read" ? READ.filter((r, i) => readUnlocked(i)) : (z => z.stages.filter((st, i) => zoneUnlocked(z, i)))(ZONES.find(z => z.id === t.id));
+    const seen = new Set();
+    for(let i = 0, tries = 0; i < t.n && tries < 40; tries++){
+      const st = pick(stages); let q;
+      if(t.id === "read"){ const m = pick(st.notes);
+        q = {type:"key", k:String(m), answer:m, name:pname(m), why:`${pname(m)}${m < 60 || m > 76 ? " (같은 이름 건반)" : ""}`, prompt:"이 음표는 무슨 음일까?",
+          svg:readStaffSvg([{m}], {clef:st.clef, color:false}), rk:`${st.id}|${m}`, rt:`${st.title} · ${pname(m)}`};
+      } else { q = st.q.call(st); q.sid = st.id; }
+      const key = q.rk || st.id + "|" + q.k; if(seen.has(key)) continue; seen.add(key);
+      qs.push({...q, topic:t.id}); i++;
+    }
+  });
+  const order = shuffle(qs); let i = 0;
+  return {id:"exam", title:"별나라 시험", n:order.length, q(){ return order[i++] || order[order.length-1]; }};
+}
+function examRec(q, ok){ const r = (A.res ||= {})[q.topic] ||= [0, 0]; r[1]++; if(ok) r[0]++; }
+function examCfg(){ return {kind:"zone", zoneId:"exam", exam:true, title:"별나라 시험", rounds:1,
+  intro:"한 달에 한 번 보는 별나라 시험이야! 지금까지 연 섬에서 골고루 물어볼게. 힌트 없이 한 번씩만 풀고, 틀리면 정답을 알려 주고 넘어가. 틀려도 괜찮아, 솜이가 기억했다가 복습에 내 줄게."}; }
+const pct = r => r ? Math.round(r[0] / r[1] * 100) : null;
 
 /* 리듬 치기: 솜이가 '하나 둘 셋 넷' 센 다음부터 박에 맞춰 친다. 친 때와 음표 자리의 차이를 잰다 */
 function rhythmRender(res){
@@ -2168,7 +2227,7 @@ function rhythmJudge(){
   rhythmRender({marks, taps:A.taps, msg:why + " 파란 세모가 네가 친 곳이야."});
   if(!A.taps.length) return;   // 한 번도 안 친 건 틀린 걸로 세지 않는다
   zoneWrong($("#rtap"));
-  if(A.wrongThis >= 2){ A.round++; setProg(A.round/A.rounds); $("#rgo").disabled = true; $("#zp").textContent += " 다음 리듬으로 가 보자!"; setTimeout(() => { if(A && A.running) zoneNext(); }, 2600); }
+  if(!A.exam && A.wrongThis >= 2){ A.round++; setProg(A.round/A.rounds); $("#rgo").disabled = true; $("#zp").textContent += " 다음 리듬으로 가 보자!"; setTimeout(() => { if(A && A.running) zoneNext(); }, 2600); }
 }
 
 function stat(id, ok){ const s = noteStat(id); ok ? s.r++ : s.w++; s.last = Date.now(); S.notes[id] = s; }
@@ -2384,6 +2443,7 @@ function finish(){
     S.speed[A.song] = A.speed; medal = A.speed; gems += 3; if(A.speed===2) give("cheetah"); }
   if(A.kind==="sight" && A.wrong===0) give("sight");
   if(A.readId === "r5" && stars === 3) give("reader"); if(A.readId === "r10" && stars === 3) give("grand");
+  if(A.exam){ S.exams = S.exams.filter(e => monthKey(e.d) !== monthKey(k)).concat({d:k, r:A.res || {}}); give("exam"); }
   if(A.zoneId && ZST[A.zoneId] && stars === 3){ const z = ZST[A.zoneId].z; if(z.stages[z.stages.length-1].id === A.zoneId) give(z.sticker); }
   let perfMedal = false;
   if(A.kind==="song" && A.perf && A.song && A.phrase == null && !A.custom && stars===3 && !S.perf[A.song]){ S.perf[A.song] = true; perfMedal = true; gems += 5; give("stage"); }
@@ -2398,7 +2458,7 @@ function finish(){
   const fresh = S.stickers.filter(s=>!before.has(s)).map(id=>STICKERS.find(x=>x[0]===id));
   // 결과 한마디: 막연한 칭찬 대신 방금 일어난 일과 다음 목표를 말한다
   const toThree = A.kind === "balloon" ? Math.max(0, 18 - A.right) : Math.max(0, Math.ceil(total*.9) - A.right);
-  const msg = stars===3 ? (A.wrong===0 ? "한 번도 안 틀렸어!" : "별 3개! 거의 다 맞혔어")
+  const msg = A.exam ? "시험 끝! 영역별로 이만큼 맞혔어" : stars===3 ? (A.wrong===0 ? "한 번도 안 틀렸어!" : "별 3개! 거의 다 맞혔어")
     : stars===2 ? (A.kind === "balloon" ? `풍선 ${toThree}개만 더 터뜨리면 별 3개야` : `${toThree}개만 더 맞히면 별 3개야`)
     : "끝까지 쳤어. 틀린 음은 솜이가 기억해 둘게";
   const m = document.createElement("div"); m.className = "modal";
@@ -2406,16 +2466,18 @@ function finish(){
     <div class="bigstars">${[1,2,3].map(n=>`<span class="${n<=stars?"on":""}" style="animation-delay:${n*.18}s">★</span>`).join("")}</div>
     <div class="muted">${A.kind==="balloon" ? `풍선 ${A.right}개를 터뜨렸어!` : `${total}개 중 ${A.right}개를 한 번에 맞혔어`}${A.maxCombo>=3?` · 최고 콤보 ${A.maxCombo}`:""}</div>
     <div class="reward">${rewardStats(xp, gems)}</div>
+    ${A.exam ? `<div class="bars" style="width:100%">${EXAM_TOPICS.filter(t => A.res?.[t.id]).map(t => { const r = A.res[t.id];
+      return `<div class="bar"><span>${t.name}</span><div class="track"><div class="fill" style="width:${pct(r)}%;background:var(--mint)"></div></div><span class="v">${r[0]} / ${r[1]}</span></div>`; }).join("")}</div>` : ""}
     ${perfMedal ? `<div class="allclear" style="width:100%;background:var(--pink);color:#fff">🎤 연주회 메달! 박자까지 딱 맞게 쳤어</div>` : ""}
     ${medal != null ? `<div class="allclear" style="width:100%">${SP_EM[medal]} ${SPEEDS[medal][0]} 빠르기 메달! ${medal<2?`다음엔 ${SP_EM[medal+1]} ${SPEEDS[medal+1][0]}에 도전해 봐`:"가장 빠른 메달까지 다 모았어"}</div>` : ""}
     ${goalNow ? `<div class="allclear" style="width:100%;background:var(--mint);color:#fff">오늘 목표 ${goal} XP 달성! 보석 5개 더</div>` : ""}
     ${chest ? `<div class="allclear" style="width:100%">오늘 퀘스트 모두 완료! 홈에서 보물상자를 열어 봐</div>` : ""}
     ${fresh.length ? `<div><b style="font-family:var(--display);font-weight:400">새 스티커!</b><div class="newstk">${fresh.map(s=>`<span title="${s[2]}">${s[1]}</span>`).join("")}</div></div>` : ""}
-    <div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="again">한 번 더</button><button class="btn" id="home">좋아!</button></div></div>`;
+    <div class="row" style="flex-wrap:wrap;justify-content:center">${A.exam ? "" : `<button class="btn ghost" id="again">한 번 더</button>`}<button class="btn" id="home">좋아!</button></div></div>`;
   document.body.appendChild(m); fanfare(); confetti();
   const cfg = {...A}; ["round","right","wrong","wrongThis","combo","maxCombo","running","lock","seq","idx","t","miss","target","phr","pm","offset","balloons","left","spawn","escaped"].forEach(x=>delete cfg[x]);
   if(medal != null) delete cfg.speed;
-  m.querySelector("#again").onclick = () => { m.remove(); startActivity(cfg); };
+  if(m.querySelector("#again")) m.querySelector("#again").onclick = () => { m.remove(); startActivity(cfg); };
   m.querySelector("#home").onclick = () => { m.remove(); go(A && A.lessonId && !A.mission ? "map" : "home"); };
 }
 
