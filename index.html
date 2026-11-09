@@ -454,7 +454,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},rev:{},xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -495,6 +495,10 @@ function merge(o){
   s.lab = cleanLab(s.lab); s.adultLab = cleanLab(s.adultLab);   // 어른 연습실 기록도 같은 규칙으로
   s.read = Object.fromEntries(Object.entries(s.read && typeof s.read === "object" ? s.read : {}).filter(([k,v]) => /^r\d+$/.test(k) && [0,1,2,3].includes(v)));
   s.zone = Object.fromEntries(Object.entries(s.zone && typeof s.zone === "object" ? s.zone : {}).filter(([k,v]) => /^(rh|ks|iv|ch|sy)\d+$/.test(k) && [0,1,2,3].includes(v)));
+  // 틀린 문제 노트: 열쇠 모양과 숫자 범위를 확인하고, 오래된 것부터 200개까지만
+  s.rev = Object.fromEntries(Object.entries(s.rev && typeof s.rev === "object" ? s.rev : {})
+    .filter(([k,v]) => k.length <= 200 && /^(r\d+|rh\d+|ks\d+|iv\d+|ch\d+|sy\d+)\|/.test(k) && v && isDay(v.due))
+    .slice(-200).map(([k,v]) => [k, {b:num(v.b,0,5), due:v.due, w:num(v.w,1,999), t:String(v.t||"").slice(0,40)}]));
   s.perf = Object.fromEntries(Object.keys(s.perf && typeof s.perf === "object" ? s.perf : {}).filter(k => SONGS[k] && s.perf[k] === true).map(k => [k, true]));
   s.speed = Object.fromEntries(Object.entries(s.speed && typeof s.speed === "object" ? s.speed : {}).filter(([k,v]) => SONGS[k] && [0,1,2].includes(v)));
   ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
@@ -579,7 +583,9 @@ function missions(){
         return {key:"warm", title:z.name, sub:st.title, cfg:{...zoneCfg(st), rounds:Math.min(st.rounds, md.warm + 4), mission:"warm"}}; }
       const r = nextRead(); return {key:"warm", title:"악보 읽기", sub:r.title, cfg:{...readCfg(r), rounds:Math.min(r.rounds, md.warm + 4), mission:"warm"}}; })(),
     lesson:{key:"lesson", title:"오늘의 레슨", sub:nl.title, cfg:{...lessonCfg(nl), mission:"lesson"}},
-    review: hp
+    review: revDue().length
+      ? {key:"review", title:"솜이의 복습", sub:`틀렸던 문제 ${Math.min(revDue().length, md.review + 2)}개 다시 풀기`, cfg:{...revCfg(md.review + 2), mission:"review"}}
+      : hp
       ? {key:"review", title:"솜이의 복습", sub:`${SONGS[hp.song].name} ${hp.p+1}번째 소절 다시 치기`, cfg:{kind:"song", song:hp.song, phrase:hp.p, title:`${SONGS[hp.song].name} · ${hp.p+1}번째 소절`, mission:"review", tip:"자주 틀린 부분만 잘라 왔어. 천천히 해 보자"}}
       : {key:"review", title:"솜이의 복습", sub:`${wk.map(n=>N[n].name).join(" · ")} 다시 보기`, cfg:{kind:"find", notes:wk, rounds:md.review, title:"솜이의 복습", mission:"review"}},
     sight:{key:"sight", title:"깜짝 악보", sub:"배운 음으로 만든 처음 보는 4마디", cfg:{kind:"sight", title:"솜이의 깜짝 악보", mission:"sight"}}
@@ -1028,6 +1034,12 @@ function renderParent(){
      <div class="chips"><div class="chip"><b>${streak()}</b><span>연속 일수</span></div><div class="chip"><b>${Math.round(mins)}</b><span>총 연습 분</span></div><div class="chip"><b>${S.log.length}</b><span>끝낸 연습</span></div></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>음별 첫 시도 정답률</h3><div class="bars">${bars}</div>
      <div class="muted" style="font-size:var(--text-sm)">정답률이 낮거나 오래 안 본 음이 '솜이의 복습' 퀘스트에 자주 나옵니다.</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>틀린 문제 노트</h3>
+     ${(() => { const list = Object.entries(S.rev).sort((a,b) => a[1].due.localeCompare(b[1].due)), due = revDue().length;
+       if(!list.length) return `<div class="muted">아직 틀린 문제가 없어요. 악보 읽기와 새 구역(리듬·조표·음정·화음·기호)에서 처음에 틀린 문제가 여기에 모여요.</div>`;
+       return `<div class="muted" style="font-size:var(--text-sm)">모두 ${list.length}개 · 오늘 복습할 것 ${due}개. 맞히면 1·2·4·8·16일 뒤에 다시 묻고, 다섯 번 맞히면 노트에서 빠져요.</div>
+       <div class="takes">${list.slice(0, 15).map(([k,v]) => `<div><span>${esc(v.t || k)}${v.w > 1 ? ` · ${v.w}번 틀림` : ""}</span><span class="muted">${v.due <= dkey() ? "오늘" : esc(v.due.slice(5).replace("-","/"))}</span></div>`).join("")}</div>`; })()}
+     <div class="muted" style="font-size:var(--text-sm)">복습할 문제가 있는 날엔 '솜이의 복습' 퀘스트가 이 문제들을 먼저 내요.</div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>연습 일지</h3><div class="log">${log}</div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>기록 옮기기</h3>
      <p class="muted" style="margin:0;font-size:var(--text-sm)">다른 기기로 옮기거나 백업하려면 코드를 복사해 두세요. 새 기기에서 붙여 넣고 불러오면 됩니다.</p>
@@ -1783,11 +1795,11 @@ function readKey(id, el, fromMic){
   if(A.lock) return;
   const t = A.tMidi, km = N[id].midi, inRange = t >= 60 && t <= 76, exact = inRange && !fromMic, sameName = pcOf(km - t) === 0;
   if(exact ? km === t : sameName){
-    stat("m"+t, A.wrongThis===0); if(A.wrongThis===0){ A.right++; hit(); }
+    stat("m"+t, A.wrongThis===0); if(A.wrongThis===0){ A.right++; hit(); revMark(`${A.readId}|${t}`, true); }
     A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, noteColor(t)); $("#rp").textContent = `${pname(t)}! 맞았어`;
     setTimeout(readNext, 750);
   } else {
-    A.wrongThis++; if(A.wrongThis===1) A.wrong++; shake(el); miss();
+    A.wrongThis++; if(A.wrongThis===1){ A.wrong++; revMark(`${A.readId}|${t}`, false, `${A.stage.title} · ${pname(t)}`); } shake(el); miss();
     if(A.wrongThis >= (A.stage.hint === "late" ? 1 : 2)){
       $("#rp").textContent = `힌트: ${pname(t)}${inRange ? "" : ` (같은 이름 건반을 눌러)`}`;
       glow(NOTES.find(x => inRange ? x.midi === t : x.white && x.midi >= 60 && x.midi < 72 && pcOf(x.midi - t) === 0)?.id, true);
@@ -2018,10 +2030,11 @@ const ZST = Object.fromEntries(ZONES.flatMap(z => z.stages.map((st, i) => [st.id
 const zoneUnlocked = (z, i) => i === 0 || (S.zone[z.stages[i-1].id]||0) >= 1;
 const nextZoneStage = z => z.stages.find((st, i) => zoneUnlocked(z, i) && (S.zone[st.id]||0) < 3) || z.stages[z.stages.length-1];
 function zoneCfg(st){ const {z} = ZST[st.id]; return {kind:"zone", zoneId:st.id, title:`${z.name} · ${st.title}`, rounds:st.rounds, intro:st.teach, introSvg:st.demo()}; }
-function zoneSetup(){ A.zst = ZST[A.zoneId].st; zoneNext(); }
+function zoneSetup(){ A.zst = A.zoneId === "rev" ? revStage(A.revKeys) : ZST[A.zoneId].st; A.rounds = A.zst.n ?? A.rounds;
+  if(!A.rounds){ toast("오늘은 복습할 문제가 없어!"); A = null; go("home"); return; } zoneNext(); }
 function zoneNext(){
   if(!A) return; if(A.round >= A.rounds) return finish();
-  let q, n = 0; do { q = A.zst.q(A.q); } while(A.q && q.k === A.q.k && ++n < 8);
+  let q, n = 0; do { q = A.zst.q(A.q); } while(A.zoneId !== "rev" && A.q && q.k === A.q.k && ++n < 8);
   A.q = q; A.wrongThis = 0; A.lock = false; A.got = []; A.rmode = null; glow(null);
   const st = $("#stage");
   if(q.type === "rhythm") return rhythmRender();
@@ -2035,12 +2048,12 @@ function zoneNext(){
   st.innerHTML = `${q.svg}<div class="prompt" id="zp">${q.prompt}</div>${q.type === "chord" ? `<div class="zdots" id="zd" aria-live="polite">${q.answer.map(() => "○").join("")}</div>` : ""}`;
 }
 function zoneRight(el, msg, wait = 900){
-  if(A.wrongThis === 0){ A.right++; hit(); }
+  if(A.wrongThis === 0){ A.right++; hit(); revMark(revKeyOf(A.q), true, revLabel(A.q)); }
   A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, "var(--mint)");
   if(msg) $("#zp").textContent = msg; setTimeout(() => { if(A && A.running) zoneNext(); }, wait);
 }
 function zoneWrong(el){
-  A.wrongThis++; if(A.wrongThis === 1) A.wrong++; shake(el); miss();
+  A.wrongThis++; if(A.wrongThis === 1){ A.wrong++; revMark(revKeyOf(A.q), false, revLabel(A.q)); } shake(el); miss();
   const q = A.q; if(A.wrongThis >= 2 && q.why) $("#zp").textContent = "힌트: " + q.why;
   if(A.wrongThis >= 2 && q.type === "key") glow(keyOfMidi(q.answer), true);
   if(A.wrongThis >= 2 && q.type === "chord") q.answer.forEach(m => keyEls[keyOfMidi(m)]?.classList.add("glow"));
@@ -2054,7 +2067,8 @@ function zoneKey(id, el, fromMic){
   const q = A.q; if(!q || A.lock) return;
   if(q.type === "rhythm") return zoneTap(fromMic);
   if(q.type === "choice") return;
-  const km = N[id].midi, same = m => fromMic ? pcOf(km - m) === 0 : km === m;
+  // 건반에 없는 낮은 음(낮은음자리표 복습)은 같은 이름 건반이면 정답
+  const km = N[id].midi, same = m => fromMic || m < 60 || m > 76 ? pcOf(km - m) === 0 : km === m;
   if(q.type === "key") return same(q.answer) ? zoneRight(el, `${q.name}! 맞았어`) : zoneWrong(el);
   // 화음: 세 건반을 모두 (펼친 화음은 아래부터 차례로)
   const need = q.ordered ? [q.answer[A.got.length]] : q.answer.filter(m => !A.got.includes(m));
@@ -2063,6 +2077,48 @@ function zoneKey(id, el, fromMic){
   else { A.got.push(hitM); burst(el, noteColor(hitM)); if(A.wrongThis < 2) keyEls[id]?.classList.add("glow"); }
   $("#zd").textContent = q.answer.map(m => A.got.includes(m) ? "●" : "○").join("");
   if(A.got.length === q.answer.length) zoneRight(el, q.ordered ? "펼친 화음 완성!" : `${q.why.split(":")[0]} 완성!`);
+}
+
+/* ---------- 틀린 문제 노트 + 날짜로 정하는 복습 ----------
+   처음 시도에서 틀린 문제를 기록한다. 다음 날 다시 내고, 맞히면 1→2→4→8→16일 뒤로 미룬다.
+   다섯 번 연속(간격마다) 맞히면 노트에서 졸업. 틀리면 다시 다음 날부터. 한 번도 안 틀린 문제는 기록하지 않는다. */
+const REV_GAP = [1, 2, 4, 8, 16];
+const revKeyOf = q => q.rk || `${A.zoneId}|${q.k}`;
+function revLabel(q){
+  if(q.rt) return q.rt;
+  const st = ZST[A.zoneId]?.st; if(!st) return "";
+  const tag = q.type === "key" ? q.name : q.type === "chord" ? (q.ordered ? "펼친 화음" : q.why.split(":")[0])
+    : q.type === "choice" ? (q.after ? q.after.split(":")[0] : q.opts.find(o => o.ok).label) : q.pat.map(d => ({4:"온",3:"점2분",2:"2분",1.5:"점4분",1:"4분",.5:"8분"})[Math.abs(d)] + (d < 0 ? "쉼표" : "")).join("·");
+  return `${st.title} · ${tag}`;
+}
+function revMark(key, ok, label){
+  const r = S.rev[key];
+  if(!ok) S.rev[key] = {b:0, due:dkey(addDays(new Date(), 1)), w:(r?.w||0) + 1, t:(label || r?.t || "").slice(0,40)};
+  else if(!r || r.due > dkey()) return;     // 아직 복습 날이 아니면 단계는 그대로
+  else if(r.b + 1 >= REV_GAP.length) delete S.rev[key];
+  else { r.b++; r.due = dkey(addDays(new Date(), REV_GAP[r.b])); }
+  save();   // 중간에 그만둬도 노트는 남게
+}
+const revDue = () => Object.entries(S.rev).filter(([,v]) => v.due <= dkey()).sort((a,b) => a[1].due.localeCompare(b[1].due) || b[1].w - a[1].w).map(([k]) => k);
+function revCfg(n){ const keys = revDue().slice(0, n);
+  return {kind:"zone", zoneId:"rev", revKeys:keys, title:"솜이의 복습 · 틀렸던 문제", rounds:keys.length,
+    intro:`전에 틀렸던 문제 ${keys.length}개를 다시 가져왔어. 이번에 맞히면 솜이가 며칠 뒤에 한 번 더 물어볼게!`}; }
+// 기록된 열쇠로 같은 문제를 다시 만든다. 리듬은 박자 그대로, 나머지는 단계 문제를 다시 뽑아 같은 것을 찾는다.
+function revQuestion(key){
+  const i = key.indexOf("|"), sid = key.slice(0, i), k = key.slice(i + 1), base = {rk:key, rt:S.rev[key]?.t};
+  const r = READ.find(x => x.id === sid);
+  if(r){ const m = +k; if(!m) return null;
+    return {type:"key", k, answer:m, name:pname(m), why:`${pname(m)}${m < 60 || m > 76 ? " (같은 이름 건반)" : ""}`, prompt:"전에 틀렸던 음표야. 무슨 음일까?",
+      svg:readStaffSvg([{m}], {clef:r.clef, color:false}), ...base}; }
+  const z = ZST[sid]; if(!z) return null; const st = z.st;
+  if(sid.startsWith("rh")){ const pat = k.split(",").map(Number); if(!pat.length || pat.some(isNaN)) return null;
+    return {type:"rhythm", k, pat, beats:st.beats, bars:st.bars, len:st.len, bpm:st.bpm, counts:st.counts, ...base}; }
+  for(let t = 0; t < 400; t++){ const q = st.q.call(st); if(q.k === k) return {...q, ...base, prompt:"전에 틀렸던 문제야. " + q.prompt}; }
+  return null;
+}
+function revStage(keys){
+  const qs = keys.map(revQuestion).filter(Boolean); let i = 0;
+  return {id:"rev", title:"솜이의 복습", n:qs.length, q(){ return qs[i++] || qs[qs.length-1]; }};
 }
 
 /* 리듬 치기: 솜이가 '하나 둘 셋 넷' 센 다음부터 박에 맞춰 친다. 친 때와 음표 자리의 차이를 잰다 */
@@ -2314,7 +2370,7 @@ function finish(){
   d.sessions++; d.minutes += (Date.now()-A.t0)/60000;
   if(A.lessonId) S.stars[A.lessonId] = Math.max(S.stars[A.lessonId]||0, stars);
   if(A.readId) S.read[A.readId] = Math.max(S.read[A.readId]||0, stars);
-  if(A.zoneId) S.zone[A.zoneId] = Math.max(S.zone[A.zoneId]||0, stars);
+  if(A.zoneId && ZST[A.zoneId]) S.zone[A.zoneId] = Math.max(S.zone[A.zoneId]||0, stars);
   if(A.mission) d.missions[A.mission] = true;
   if(!A.mission && A.isNext) d.missions.lesson = true;
   if(A.kind==="song") savePhrases();
@@ -2328,7 +2384,7 @@ function finish(){
     S.speed[A.song] = A.speed; medal = A.speed; gems += 3; if(A.speed===2) give("cheetah"); }
   if(A.kind==="sight" && A.wrong===0) give("sight");
   if(A.readId === "r5" && stars === 3) give("reader"); if(A.readId === "r10" && stars === 3) give("grand");
-  if(A.zoneId && stars === 3){ const z = ZST[A.zoneId].z; if(z.stages[z.stages.length-1].id === A.zoneId) give(z.sticker); }
+  if(A.zoneId && ZST[A.zoneId] && stars === 3){ const z = ZST[A.zoneId].z; if(z.stages[z.stages.length-1].id === A.zoneId) give(z.sticker); }
   let perfMedal = false;
   if(A.kind==="song" && A.perf && A.song && A.phrase == null && !A.custom && stars===3 && !S.perf[A.song]){ S.perf[A.song] = true; perfMedal = true; gems += 5; give("stage"); }
   if(A.kind==="dyn" && stars===3) give("dyn");
