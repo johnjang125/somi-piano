@@ -23,7 +23,7 @@
   --bg:#FFF5F9; --bg2:#FCE8F1; --card:#FFFFFF; --ink:#3A2340; --ink2:#7A6080; --line:#F2D8E5;
   --pink:#C93374; --pink-ink:#B02A66; --pink-soft:#FFE1EE; --berry-edge:#8C1D50;
   --sky:#1F72B5; --sky-soft:#E1F1FC; --sky-edge:#155487;
-  --mint:#15805D; --mint-edge:#0E5C43; --mint-soft:#DDF5EA; --butter-soft:#FFF2CC; --peach-soft:#FFE6D6; --lilac-soft:#ECE4FF; --butter:#FFBE2E; --butter-edge:#A97200;
+  --mint:#15805D; --mint-edge:#0E5C43; --mint-soft:#DDF5EA; --butter-soft:#FFF2CC; --peach-soft:#FFE6D6; --lilac-soft:#F0EAFF; --butter:#FFBE2E; --butter-edge:#A97200;
   --tile-1:#176BA6; --tile-2:#147A52; --tile-3:#B04E0C; --tile-4:#C02C60;
   --key:#FFFFFF; --key-edge:#E9D3E3; --black:#3B2547; --shadow:none;
   --c-C:#FF5C7A; --c-D:#FF9640; --c-E:#F5C400; --c-F:#3FCB7A; --c-G:#3BAEF5; --c-A:#6E7BFF; --c-B:#B86CF5;
@@ -201,8 +201,9 @@ a{color:var(--sky);text-underline-offset:3px}
 .bar .fill{height:100%;border-radius:var(--radius-full)}
 .bars.wide .bar{grid-template-columns:72px 1fr 104px} .bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .cal{display:grid;grid-template-columns:repeat(14,1fr);gap:var(--space-1)}
-.cal div{aspect-ratio:1;border-radius:var(--radius-inner);background:var(--bg2);max-width:100%}
-.cal .p{background:var(--pink-soft)} .cal .g{background:var(--pink)}
+.cal div{aspect-ratio:1;border-radius:var(--radius-inner);background:var(--bg2);max-width:100%;display:grid;place-items:center;color:var(--pink-ink)}
+.cal .p{background:var(--pink-soft);box-shadow:inset 0 0 0 2px var(--pink)} .cal .g{background:var(--pink);color:var(--on-fill)}
+.cal .ic{width:70%;height:70%}
 .log{display:flex;flex-direction:column;gap:var(--space-1-5);font-size:var(--text-sm);max-height:220px;overflow:auto}
 .log div{display:flex;justify-content:space-between;gap:var(--space-2);border-bottom:1px dashed var(--line);padding-bottom:var(--space-1)}
 
@@ -271,17 +272,19 @@ body.playing .app{padding-block:var(--space-3) var(--space-3)}
 /* 건반 */
 .kbwrap{margin-top:auto;padding-top:var(--space-4)}
 .kb{position:relative;display:flex;height:190px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.wk{flex:1;position:relative;background:var(--key);border:2px solid var(--key-edge);border-top:0;border-radius:0 0 var(--radius-element) var(--radius-element);margin:0 1px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:var(--space-3);gap:var(--space-1-5);box-shadow:inset 0 -6px 0 rgba(0,0,0,.06);transition:background .1s}
+.wk{flex:1;position:relative;padding:0;font:inherit;cursor:pointer;background:var(--key);border:2px solid var(--key-edge);border-top:0;border-radius:0 0 var(--radius-element) var(--radius-element);margin:0 1px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:var(--space-3);gap:var(--space-1-5);box-shadow:inset 0 -6px 0 rgba(0,0,0,.06);transition:background .1s}
 .wk .dot{width:22px;height:22px;border-radius:50%}
 .wk .lb{font-family:var(--display);font-size:var(--text-lg);color:var(--key-label);line-height:1}
 .wk.hide-lb .lb{visibility:hidden}
-.bk{position:absolute;top:0;width:7%;height:60%;background:var(--black);border-radius:0 0 10px 10px;z-index:2;box-shadow:inset 0 -6px 0 rgba(255,255,255,.12)}
+.bk{position:absolute;padding:0;cursor:pointer;top:0;width:7%;height:60%;background:var(--black);border-radius:0 0 10px 10px;z-index:2;box-shadow:inset 0 -6px 0 rgba(255,255,255,.12)}
 .wk.down{background:var(--pink-soft);box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
 .bk.down{background:var(--black-down)}
-.wk.glow{animation:glow 1s ease-in-out infinite}
-.bk.glow{animation:glowb 1s ease-in-out infinite}
-@keyframes glow{50%{background:var(--key-glow);box-shadow:0 0 0 4px var(--butter) inset}}
-@keyframes glowb{50%{background:var(--black-glow)}}
+/* 힌트 건반: 노란 바탕과 테두리가 늘 남고, 깜빡임은 움직임을 허용한 기기에서만 덧붙인다 */
+.wk.glow{background:var(--key-glow);box-shadow:0 0 0 4px var(--butter) inset}
+.bk.glow{background:var(--black-glow);box-shadow:0 0 0 3px var(--butter) inset}
+@media (prefers-reduced-motion:no-preference){.wk.glow{animation:glow 1s ease-in-out infinite}.bk.glow{animation:glowb 1s ease-in-out infinite}}
+@keyframes glow{50%{background:var(--key)}}
+@keyframes glowb{50%{background:var(--black)}}
 .shake{animation:shake .3s}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
@@ -990,7 +993,8 @@ function weeklyReport(){
   return lines.join("\n");
 }
 function renderParent(){
-  const days14 = Array.from({length:14},(_,i)=>{ const k = dkey(addDays(new Date(),i-13)); return `<div class="${allDone(k)?"g":practiced(k)?"p":""}" title="${k}"></div>`; }).join("");
+  const days14 = Array.from({length:14},(_,i)=>{ const k = dkey(addDays(new Date(),i-13)); const g = allDone(k), p = practiced(k);
+    return `<div class="${g?"g":p?"p":""}" title="${k}" role="img" aria-label="${k.slice(5).replace("-","/")} ${g?"퀘스트 모두 완료":p?"연습함":"쉰 날"}">${g?ic("crown",14,2.6):p?ic("note",14,2.6):""}</div>`; }).join("");
   const mins = Object.values(S.days).reduce((a,d)=>a+(d.minutes||0),0);
   const notes = NOTES.filter(n=>n.white);
   const bars = notes.map(n => { const s = noteStat(n.id), t = s.r+s.w, p = t?Math.round(s.r/t*100):null;
@@ -1040,7 +1044,7 @@ function renderParent(){
        return `<div class="${x>=S.settings.goal?"hit":""}"><span>${x}</span><i style="height:${Math.round(x/mx*70)}%"></i>${["일","월","화","수","목","금","토"][d.getDay()]}</div>`; }).join("")}</div>
      <div class="muted" style="font-size:var(--text-sm)">분홍 막대 = 하루 목표를 채운 날 · 보석 ${S.gems}개 · 방패 ${S.freezes}개</div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>최근 14일</h3><div class="cal">${days14}</div>
-     <div class="muted" style="font-size:var(--text-sm)">연한 분홍 = 연습한 날, 진한 분홍 = 퀘스트 3개 모두 완료</div>
+     <div class="muted" style="font-size:var(--text-sm)">♪ = 연습한 날, 👑 = 퀘스트를 모두 끝낸 날</div>
      <div class="chips"><div class="chip"><b>${streak()}</b><span>연속 일수</span></div><div class="chip"><b>${Math.round(mins)}</b><span>총 연습 분</span></div><div class="chip"><b>${S.log.length}</b><span>끝낸 연습</span></div></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>음별 첫 시도 정답률</h3><div class="bars">${bars}</div>
      <div class="muted" style="font-size:var(--text-sm)">정답률이 낮거나 오래 안 본 음이 '솜이의 복습' 퀘스트에 자주 나옵니다.</div></div>
@@ -1104,7 +1108,7 @@ function renderParent(){
     const id = +b.dataset.delmine; saveMine(loadMine().filter(p => p.id !== id)); delete S.lab[id]; save();
     if(LIB) LIB = LIB.filter(p => p.id !== id); if(LV.piece?.id === id) LV.piece = null; renderParent(); scmsg("지웠어요."); });
   $("#cal").onclick = calibrate;
-  $("#micon").onchange = async e => { if(e.target.checked && !(await micStart())){ e.target.checked = false; $("#calmsg").textContent = micErr; return; }
+  $("#micon").onchange = async e => { if(e.target.checked && !(await micStart())){ e.target.checked = false; $("#calmsg").textContent = micErr(); return; }
     S.settings.mic = e.target.checked; save(); if(!S.settings.micOffset && e.target.checked) $("#calmsg").textContent = "'소리 맞추기'도 한 번 해 주세요."; };
   const msg = t => $("#msg").textContent = t;
   $("#cp").onclick = () => { const code = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $("#bk").value = code;
@@ -1121,9 +1125,10 @@ const keyEls = {};
 function buildKb(){
   const kb = $("#kb"); kb.innerHTML = "";
   const whites = NOTES.filter(n=>n.white), ww = 100/whites.length;
-  whites.forEach(n => { const el = document.createElement("div"); el.className = "wk"+(S.settings.labels && !(A && A.hideLabels) ? "" : " hide-lb"); el.dataset.n = n.id;
-    el.innerHTML = `<span class="dot" style="background:${colorOf(n.id)}"></span><span class="lb">${n.short}</span>`; kb.appendChild(el); keyEls[n.id]=el; });
-  let wi = 0; NOTES.forEach(n => { if(n.white){ wi++; return; } const el = document.createElement("div"); el.className="bk"; el.dataset.n=n.id;
+  const key = (n, cls) => { const el = document.createElement("button"); el.type = "button"; el.tabIndex = -1; el.className = cls; el.dataset.n = n.id; el.setAttribute("aria-label", n.name); return el; };
+  whites.forEach(n => { const el = key(n, "wk"); el.className = "wk"+(S.settings.labels && !(A && A.hideLabels) ? "" : " hide-lb");
+    el.innerHTML = `<span class="dot" aria-hidden="true" style="background:${colorOf(n.id)}"></span><span class="lb">${n.short}</span>`; kb.appendChild(el); keyEls[n.id]=el; });
+  let wi = 0; NOTES.forEach(n => { if(n.white){ wi++; return; } const el = key(n, "bk");
     el.style.left = `calc(${wi*ww}% - 3.5%)`; kb.appendChild(el); keyEls[n.id]=el; });
 }
 // loud: 진짜 피아노 소리 세기 (마이크는 소리 크기, 디지털 피아노는 건반 누른 세기). 화면 건반은 없음.
@@ -1133,6 +1138,8 @@ function press(id, fromPiano, fromMic, loud){
   onKey(id, el, fromMic, loud);
 }
 $("#kb").addEventListener("pointerdown", e => { const k = e.target.closest("[data-n]"); if(!k) return; e.preventDefault(); press(k.dataset.n); });
+// 손가락·마우스는 pointerdown으로 이미 쳤다. 포인터 없는 누르기(읽어 주기 기능의 두 번 탭 등)만 click으로 받는다
+$("#kb").addEventListener("click", e => { const k = e.target.closest("[data-n]"); if(k && e.detail === 0) press(k.dataset.n); });
 document.addEventListener("keydown", e => { if(cur!=="play" || e.repeat || e.target.matches("input,textarea")) return; const id = KEYMAP[e.key.toLowerCase()]; if(id){ e.preventDefault(); press(id); } });
 function glow(id,on){ Object.values(keyEls).forEach(el=>el.classList.remove("glow")); if(on && keyEls[id]) keyEls[id].classList.add("glow"); }
 function shake(el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
@@ -1449,7 +1456,7 @@ async function scoreFromFile(name, u8, pickupBeats){
 const Mic = {stream:null, an:null, buf:null, timer:0, tr:null, onRaw:null, heard:null, wake:null};
 async function micStart(){
   if(Mic.stream) return true;
-  const a = audio(); if(!a || !navigator.mediaDevices?.getUserMedia) return false;
+  const a = audio(); if(!a || !navigator.mediaDevices?.getUserMedia){ Mic.err = "unsupported"; return false; }
   try{
     Mic.stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
     Mic.an = a.createAnalyser(); Mic.an.fftSize = 2048; a.createMediaStreamSource(Mic.stream).connect(Mic.an);
@@ -1457,7 +1464,7 @@ async function micStart(){
     Mic.timer = setInterval(micTick, 25);
     try{ Mic.wake = await navigator.wakeLock?.request("screen"); }catch(e){}
     return true;
-  }catch(e){ micStop(); return false; }
+  }catch(e){ Mic.err = e.name; micStop(); return false; }
 }
 function micStop(){
   clearInterval(Mic.timer); Mic.stream?.getTracks().forEach(t=>t.stop()); Mic.stream = Mic.an = Mic.tr = null; Mic.onRaw = null;
@@ -1480,7 +1487,7 @@ let calTimer = 0;
 async function calibrate(){
   const msg = t => { const m = $("#calmsg"); if(m) m.textContent = t; }, meter = $("#calmeter");
   clearTimeout(calTimer); micStop();
-  if(!(await micStart())){ msg(micErr); return; }
+  if(!(await micStart())){ msg(micErr()); return; }
   Mic.tr.st.offset = 0; meter.hidden = false;
   const levels = [], sh = setInterval(() => { if(!Mic.tr){ clearInterval(sh); return; } meter.firstElementChild.style.width = Math.min(100, Mic.tr.st.rms*800) + "%"; levels.push(Mic.tr.st.rms); }, 50);
   msg("1. 잠깐 조용히 해 주세요…");
@@ -1503,7 +1510,16 @@ async function calibrate(){
   };
   calTimer = setTimeout(() => { if(cents.length < 3 && Mic.tr){ msg("도 소리가 잘 안 들려요. 휴대폰을 피아노 가까이 두고 '소리 맞추기'를 다시 눌러 주세요."); micStop(); meter.hidden = true; } }, 25000);
 }
-const micErr ="마이크를 쓸 수 없어요. claude.ai 링크 안에서는 막혀 있어서, 따로 올린 https 주소로 열어야 해요.";
+const PAGES_URL = "johnjang125.github.io/somi-piano";
+function micErr(){
+  const e = Mic.err, framed = window.top !== window;
+  if(framed) return `claude.ai 링크 안에서는 마이크가 막혀 있어요. 휴대폰 브라우저에서 ${PAGES_URL} 로 열어 주세요.`;
+  if(e === "unsupported" || !window.isSecureContext) return `이 주소나 브라우저에서는 마이크를 쓸 수 없어요. 크롬이나 사파리에서 ${PAGES_URL} 로 열어 주세요.`;
+  if(e === "NotAllowedError" || e === "SecurityError") return "마이크 사용이 막혀 있어요. 주소창 옆 자물쇠(또는 ⓘ)를 눌러 마이크를 '허용'으로 바꾼 뒤 다시 켜 주세요.";
+  if(e === "NotFoundError" || e === "OverconstrainedError") return "마이크를 찾지 못했어요. 휴대폰이나 이어폰 마이크가 연결돼 있는지 확인하고 다시 켜 주세요.";
+  if(e === "NotReadableError") return "다른 앱이 마이크를 쓰고 있어요. 통화나 녹음 앱을 닫고 다시 켜 주세요.";
+  return "마이크를 켜지 못했어요. 페이지를 새로 고친 뒤 다시 켜 주세요.";
+}
 
 /* 진짜 디지털 피아노 (Sonata, Piano Master처럼 Web MIDI로 연결). 건반 범위 밖의 음은 옥타브를 옮겨 맞춘다. */
 let midiName = "";
@@ -1533,7 +1549,7 @@ function startActivity(cfg){
   A.hideLabels = ["read","find","staff","sight","song","zone"].includes(cfg.kind) && A.readHint !== "name";
   buildKb();
   go("play"); glow(null); showCombo();
-  if(S.settings.mic) micStart().then(ok => { if(!ok) toast(micErr); micPill(); });
+  if(S.settings.mic) micStart().then(ok => { if(!ok) toast(micErr()); micPill(); });
   $("#ptitle").textContent = cfg.title; $("#progbar").style.width = "0%";
   const st = $("#stage");
   if(cfg.kind==="free"){ A.rec = []; A.saved = true; A.running = true;
@@ -1868,6 +1884,7 @@ function rhythmSvg(q, opt = {}){
         if(beamNext) out += `<rect x="${sx-1}" y="${Y-46}" width="${U/2+2}" height="7" fill="${col}"/>`;
         else if(!beamPrev) out += `<path d="M${sx} ${Y-44} q4 10 12 14 q-2 6 -4 10" fill="none" stroke="${col}" stroke-width="2.6"/>`; }
     }
+    if(opt.marks?.[i]) out += `<text x="${x}" y="11" text-anchor="middle" font-size="14" font-weight="700" fill="${col}" font-family="var(--display)">${opt.marks[i] === "ok" ? "✓" : "✗"}</text>`;
     t += a; });
   if(q.counts) for(let b=0;b<q.len;b++) out += `<text x="${L + b*U + 14}" y="${Y+44}" text-anchor="middle" font-size="16" fill="var(--ink2)" font-family="var(--display)">${b % q.beats + 1}</text>`;
   (opt.taps || []).forEach(x => { const tx = L + x*U + 14; if(tx > 0 && tx < W) out += `<path d="M${tx} ${Y+26} l-6 10 h12z" fill="var(--sky)"/>`; });
@@ -2078,7 +2095,7 @@ function zoneWrong(el){
   const q = A.q;
   // 시험: 한 번만 풀고, 틀리면 정답을 보여 준 뒤 다음 문제로
   if(A.exam){ examRec(q, false); A.round++; A.lock = true; setProg(A.round/A.rounds);
-    $("#zp").textContent = "정답: " + (q.type === "rhythm" ? "분홍 음표 자리에서 쳐야 해" : q.why || q.name || "");
+    $("#zp").textContent = "정답: " + (q.type === "rhythm" ? "✗ 표시한 음표 자리에서 쳐야 해" : q.why || q.name || "");
     document.querySelectorAll("#stage [data-c]").forEach((b, i) => { if(q.opts?.[i]?.ok) b.classList.add("ok"); b.disabled = true; });
     ["#rgo","#rlis"].forEach(x => { if($(x)) $(x).disabled = true; });
     if(q.type === "key") glow(keyOfMidi(q.answer), true);
@@ -2223,7 +2240,7 @@ function rhythmJudge(){
   const ok = !missed && extra <= (S.settings.mic ? 1 : 0);
   const lean = mean < -.12 ? " 조금 서둘렀어." : mean > .12 ? " 조금 늦었어." : "";
   if(ok){ rhythmRender({marks, taps:A.taps, msg:""}); zoneRight($("#rtap"), (lean ? "맞았어!" + lean : "박자 딱 맞았어!"), 1500); return; }
-  const why = !A.taps.length ? "아직 안 쳤어. '지금!'이 나오면 쳐 봐" : [missed ? `분홍 음표 ${missed}개를 놓쳤어.` : "", extra ? `쉼표나 긴 음표에서 ${extra}번 더 쳤어.` : "", lean].join(" ").trim();
+  const why = !A.taps.length ? "아직 안 쳤어. '지금!'이 나오면 쳐 봐" : [missed ? `✗ 표시한 음표 ${missed}개를 놓쳤어.` : "", extra ? `쉼표나 긴 음표에서 ${extra}번 더 쳤어.` : "", lean].join(" ").trim();
   rhythmRender({marks, taps:A.taps, msg:why + " 파란 세모가 네가 친 곳이야."});
   if(!A.taps.length) return;   // 한 번도 안 친 건 틀린 걸로 세지 않는다
   zoneWrong($("#rtap"));
