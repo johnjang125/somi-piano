@@ -157,6 +157,12 @@ a{color:var(--sky);text-underline-offset:3px}
 .zch button.ok{background:var(--mint);color:var(--on-fill);border-color:var(--mint-edge);box-shadow:0 4px 0 var(--mint-edge)}
 .zch button.no{opacity:.45;text-decoration:line-through}
 .sure{display:flex;align-items:center;justify-content:center;gap:var(--space-2);flex-wrap:wrap;font-family:var(--display);font-size:var(--text-lg);padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);background:var(--bg2)}
+.hwrow{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;padding:var(--space-3);border-radius:var(--radius-element);background:var(--bg2)}
+.hwrow .txt{flex:1;min-width:12em;display:flex;flex-direction:column;gap:var(--space-1)}
+.hwrow .txt b{font-family:var(--display);font-weight:400;font-size:var(--text-lg)}
+.hwrow .txt span{font-size:var(--text-sm);color:var(--ink2)}
+.hwrow.done{background:var(--mint-soft)} .hwrow.done .lvbar i{background:var(--mint)}
+.hwbtns{display:flex;gap:var(--space-2);align-items:center}
 .zdots{font-size:var(--text-3xl);letter-spacing:8px;color:var(--pink-ink)}
 .tap{width:112px;height:112px;border-radius:50%;background:var(--butter);color:var(--on-butter);font-family:var(--display);font-size:var(--text-3xl);box-shadow:0 7px 0 var(--butter-edge);touch-action:manipulation;margin-bottom:var(--space-2)}
 .tap.down{transform:translateY(5px);box-shadow:0 2px 0 var(--butter-edge)}
@@ -459,7 +465,7 @@ const STICKERS = [
 
 /* ---------- 저장 ---------- */
 function fresh(){ return {v:1,name:"",settings:{labels:true,sound:true,goal:20},stars:{},notes:{},days:{},stickers:[],log:[],
-  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},rev:{},exams:[],xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
+  placed:false,placeLevel:0,songs:[],speed:{},perf:{},lab:{},adultLab:{},read:{},zone:{},rev:{},exams:[],hw:[],xp:0,gems:10,freezes:0,owned:["ribbon-pink"],outfit:{ribbon:"ribbon-pink",hat:null,wand:null},phrases:{},notice:null,updatedAt:Date.now()}; }
 
 /* ---------- 보석 상점 (듀오링고의 '연속 기록 방패'와 꾸미기 아이템) ---------- */
 const SHOP = [
@@ -506,6 +512,11 @@ function merge(o){
     .slice(-200).map(([k,v]) => [k, {b:num(v.b,0,5), due:v.due, w:num(v.w,1,999), t:String(v.t||"").slice(0,40)}]));
   s.exams = (Array.isArray(s.exams) ? s.exams : []).filter(e => e && isDay(e.d) && e.r && typeof e.r === "object").slice(-24)
     .map(e => ({d:e.d, r:Object.fromEntries(Object.entries(e.r).filter(([k,v]) => ["read","rh","ks","iv","ch","sy"].includes(k) && Array.isArray(v)).map(([k,v]) => [k, [num(v[0],0,50), num(v[1],1,50)]]))}));
+  // 레슨 숙제: 어른이 적은 글은 길이를 자르고, 날짜별 횟수는 숫자만
+  s.hw = (Array.isArray(s.hw) ? s.hw : []).filter(h => h && typeof h.title === "string" && h.title.trim()).slice(-12).map(h => ({id:num(h.id,1,9e15), title:h.title.slice(0,30), part:String(h.part||"").slice(0,30),
+    goal:num(h.goal,1,20), due:isDay(h.due) ? h.due : null, rw:isDay(h.rw) ? h.rw : null, from:isDay(h.from) ? h.from : null,
+    done:Object.fromEntries(Object.entries(h.done && typeof h.done === "object" ? h.done : {}).filter(([d]) => isDay(d)).map(([d,v]) => [d, num(v,0,99)]))}));
+  s.settings.metroBpm = num(s.settings.metroBpm || 80, 40, 180);
   s.perf = Object.fromEntries(Object.keys(s.perf && typeof s.perf === "object" ? s.perf : {}).filter(k => SONGS[k] && s.perf[k] === true).map(k => [k, true]));
   s.speed = Object.fromEntries(Object.entries(s.speed && typeof s.speed === "object" ? s.speed : {}).filter(([k,v]) => SONGS[k] && [0,1,2].includes(v)));
   ["xp","gems","freezes","placeLevel"].forEach(k => s[k] = Math.max(0, Math.floor(+s[k]||0)));
@@ -775,7 +786,34 @@ function bunny(size=96, outfit=S.outfit){
 
 /* ---------- 화면 전환 ---------- */
 let cur = "home";
+/* ---------- 레슨 숙제 수첩 ----------
+   어른이 레슨 날 숙제(곡·범위·하루 몇 번·다음 레슨 날)를 적고, 아이는 진짜 피아노로 한 번 칠 때마다 '한 번 쳤어!'를 누른다.
+   하루 목표를 채우면 그날 건반에 불이 켜지고(연속 기록) 보석 2·XP 5. 다음 레슨 날이 지나면 '지난 숙제'로 내려간다. */
+const hwActive = () => S.hw.filter(h => !h.due || h.due >= dkey());
+const hwToday = h => h.done[dkey()] || 0;
+function hwTap(id, delta){
+  const h = S.hw.find(x => x.id === id); if(!h) return; const k = dkey(), before = hwToday(h);
+  h.done[k] = Math.max(0, Math.min(99, before + delta));
+  if(delta > 0 && h.done[k] >= h.goal && h.rw !== k){   // 보상은 숙제마다 하루 한 번 (−1 했다 다시 채워도 또 주지 않는다)
+    h.rw = k;
+    const d = today(); if(!practiced(k)) d.sessions = 1;
+    d.xp = (d.xp||0) + 5; S.xp += 5; S.gems += 2;
+    S.log.push({d:k, t:`숙제 · ${h.title}`.slice(0,40), s:3, a:100}); if(S.log.length > 300) S.log.shift();
+    save(); fanfare(); confetti(); toast(`${h.title} 오늘 숙제 끝! 보석 2개`);
+  } else { save(); if(delta > 0) ding(); }
+  renderHome();
+}
+// 메트로놈: 오디오 시계로 미리 예약해서 박이 밀리지 않게 한다. 다른 화면으로 가면 멈춘다.
+let metro = null;
+function metroStop(){ if(metro){ clearInterval(metro.t); metro = null; } }
+function metroStart(){
+  const a = audio(); if(!a) return; metroStop();
+  let next = a.currentTime + .1, beat = 0;
+  metro = {t:setInterval(() => { while(next < a.currentTime + .25){ tone(beat % 4 ? 93 : 98, .05, beat % 4 ? .12 : .2, next - a.currentTime); next += 60 / S.settings.metroBpm; beat++; } }, 50)};
+}
+
 function go(name){
+  if(name !== "home") metroStop();
   cur = name;
   ["home","map","stk","shop","lab","parent","play"].forEach(s => $("#s-"+s).hidden = s!==name);
   if(name!=="lab") recStop(true);
@@ -841,6 +879,18 @@ function renderHome(){
           ${done && !d0.chestOpened ? `<button class="btn gold" id="openchest">열기</button>` : ""}</div>
       </div>
     </section>
+    ${hwActive().length ? `<section class="card" style="display:flex;flex-direction:column;gap:var(--space-3)" aria-label="레슨 숙제">
+      <h2>📒 오늘의 레슨 숙제</h2>
+      <span class="muted" style="font-size:var(--text-sm)">진짜 피아노로 한 번 칠 때마다 눌러 줘. 다 채우면 오늘 건반에 불이 켜져!</span>
+      ${hwActive().map(h => { const n = hwToday(h), ok = n >= h.goal;
+        return `<div class="hwrow ${ok ? "done" : ""}"><div class="txt"><b>${esc(h.title)}</b><span>${esc(h.part)}${h.part && h.due ? " · " : ""}${h.due ? `다음 레슨 ${esc(h.due.slice(5).replace("-","/"))}` : ""}</span>
+          <div class="goalline"><div class="lvbar" role="progressbar" aria-label="${esc(h.title)} 오늘 횟수" aria-valuemin="0" aria-valuemax="${h.goal}" aria-valuenow="${Math.min(n,h.goal)}"><i style="width:${Math.min(100, Math.round(n/h.goal*100))}%"></i></div>
+          <b style="font-variant-numeric:tabular-nums">${ok ? "✓ " : ""}${n} / ${h.goal}번</b></div></div>
+          <div class="hwbtns"><button class="btn ghost sm" data-hwminus="${h.id}" aria-label="${esc(h.title)} 한 번 빼기" ${n ? "" : "disabled"}>−1</button>
+          <button class="btn ${ok ? "ghost" : ""}" data-hwplus="${h.id}">${ok ? "또 쳤어" : "한 번 쳤어!"}</button></div></div>`; }).join("")}
+      <div class="row" style="flex-wrap:wrap"><button class="btn alt sm" id="metro" aria-pressed="${!!metro}">${metro ? "메트로놈 끄기" : "메트로놈 켜기"}</button>
+        <div class="stepper" role="group" aria-label="메트로놈 빠르기"><button id="bpmdn" aria-label="느리게">−</button><output id="bpm" aria-live="polite">♩=${S.settings.metroBpm}</output><button id="bpmup" aria-label="빠르게">+</button></div></div>
+    </section>` : ""}
     ${examReady() ? `<section class="card" style="display:flex;flex-direction:column;gap:var(--space-3)" aria-label="별나라 시험">
       <h2>📝 이번 달 별나라 시험</h2>
       <span class="muted" style="font-size:var(--text-sm)">한 달에 한 번! 지금까지 연 섬에서 ${EXAM_TOPICS.reduce((a,t)=>a+t.n,0)}문제를 골고루 물어봐. 5분쯤 걸려. 다 보면 시험 스티커를 줄게.</span>
@@ -862,6 +912,11 @@ function renderHome(){
   el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const m = ms[+b.dataset.m]; m.go ? m.go() : startActivity(m.cfg); });
   $("#free").onclick = () => startActivity({kind:"free", title:"내 노래 만들기"});
   if($("#examgo")) $("#examgo").onclick = () => startActivity(examCfg());
+  el.querySelectorAll("[data-hwplus]").forEach(b => b.onclick = () => hwTap(+b.dataset.hwplus, 1));
+  el.querySelectorAll("[data-hwminus]").forEach(b => b.onclick = () => hwTap(+b.dataset.hwminus, -1));
+  if($("#metro")){ $("#metro").onclick = () => { metro ? metroStop() : metroStart(); renderHome(); };
+    const bpm = d => { S.settings.metroBpm = Math.max(40, Math.min(180, S.settings.metroBpm + d)); save(); $("#bpm").textContent = `♩=${S.settings.metroBpm}`; };
+    $("#bpmdn").onclick = () => bpm(-4); $("#bpmup").onclick = () => bpm(4); }
   el.querySelectorAll("[data-play]").forEach(b => b.onclick = () => playNotes(S.songs[+b.dataset.play].notes));
   el.querySelectorAll("[data-follow]").forEach(b => b.onclick = () => { const s = S.songs[+b.dataset.follow];
     startActivity({kind:"song", custom:s.notes.map(o=>`${o.n}:${o.b}`).join(" "), title:`${s.title} 따라 치기`, tip:"내가 만든 노래를 떨어지는 음표로 쳐 보자"}); });
@@ -978,6 +1033,8 @@ function weeklyReport(){
   const lines = [`🎹 ${name}의 이번 주 피아노 연습 (${md(days[0])}~${md(days[6])})`, "",
     `• 연습한 날: ${practicedN}일 / 7일 (연속 ${streak()}일째)`, `• 퀘스트 모두 완료(왕관): ${crowns}일`, `• 모은 XP: ${xp} · 연습 시간: 약 ${mins}분 · 끝낸 연습: ${logs.length}개`];
   const pieces = Object.entries(S.lab).map(([id, r]) => ({id, p: LIB?.find(x => x.id === +id), tk: r.takes.filter(t => days.includes(t.d)), all: r.takes})).filter(x => x.tk.length);
+  const hws = S.hw.map(h => ({h, n:days.reduce((a,k) => a + (h.done[k]||0), 0), full:days.filter(k => (h.done[k]||0) >= h.goal).length})).filter(x => x.n);
+  if(hws.length){ lines.push("", "📒 레슨 숙제 (진짜 피아노)"); hws.forEach(({h, n, full}) => lines.push(`• ${h.title}${h.part ? " " + h.part : ""}: ${n}번 침, 하루 ${h.goal}번 채운 날 ${full}일`)); }
   const ex = S.exams.find(e => days.includes(e.d));
   if(ex) lines.push("", "📝 별나라 시험: " + EXAM_TOPICS.filter(t => ex.r[t.id]).map(t => `${t.name} ${ex.r[t.id][0]}/${ex.r[t.id][1]}`).join(" · "));
   if(pieces.length){
@@ -1051,6 +1108,18 @@ function renderParent(){
      <div class="chips"><div class="chip"><b>${streak()}</b><span>연속 일수</span></div><div class="chip"><b>${Math.round(mins)}</b><span>총 연습 분</span></div><div class="chip"><b>${S.log.length}</b><span>끝낸 연습</span></div></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>음별 첫 시도 정답률</h3><div class="bars">${bars}</div>
      <div class="muted" style="font-size:var(--text-sm)">정답률이 낮거나 오래 안 본 음이 '솜이의 복습' 퀘스트에 자주 나옵니다.</div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>레슨 숙제 수첩</h3>
+     <p class="muted" style="margin:0;font-size:var(--text-sm)">레슨 날 선생님이 내준 숙제를 적어 두세요. 아이 홈 화면에 '오늘의 레슨 숙제'로 나오고, 진짜 피아노로 칠 때마다 아이가 직접 횟수를 셉니다.</p>
+     <div class="field"><label for="hwt">숙제 곡</label><input id="hwt" maxlength="30" placeholder="예: 체르니 100번 12번"></div>
+     <div class="field"><label for="hwp">범위나 메모 (없으면 비워 두세요)</label><input id="hwp" maxlength="30" placeholder="예: 3~8마디, 왼손만 천천히"></div>
+     <div class="row" style="flex-wrap:wrap;align-items:flex-end">
+       <div class="field"><label for="hwg">하루 몇 번</label><select id="hwg" style="font:inherit;padding:var(--space-2);border-radius:var(--radius-element);border:2px solid var(--line);background:var(--bg);color:var(--ink)">${[1,2,3,4,5,6,8,10].map(v => `<option value="${v}" ${v===5?"selected":""}>${v}번</option>`).join("")}</select></div>
+       <div class="field"><label for="hwd">다음 레슨 날</label><input id="hwd" type="date" min="${dkey()}" value="${dkey(addDays(new Date(),7))}" style="width:auto"></div>
+       <button class="btn alt" id="hwadd">숙제 적기</button></div>
+     <div id="hwmsg" class="muted" role="status" style="font-size:var(--text-sm)"></div>
+     ${S.hw.length ? `<div class="takes">${S.hw.slice().reverse().map(h => { const days = Object.values(h.done).filter(v => v >= h.goal).length, total = Object.values(h.done).reduce((a,b)=>a+b,0), past = h.due && h.due < dkey();
+       return `<div><span>${past ? "지난 숙제 · " : ""}${esc(h.title)}${h.part ? " · " + esc(h.part) : ""} · 하루 ${h.goal}번 · 다 한 날 ${days}일, 모두 ${total}번</span><button class="pill" data-hwdel="${h.id}">지우기</button></div>`; }).join("")}</div>` : ""}
+   </div>
    <div class="card" style="display:flex;flex-direction:column;gap:var(--space-3)"><h3>별나라 시험 (영역별)</h3>
      ${(() => { const ex = S.exams, last = ex[ex.length-1], prev = ex[ex.length-2];
        if(!last) return `<div class="muted">아직 본 시험이 없어요. 악보 읽기 첫 단계를 깨면 홈 화면에 매달 시험 카드가 나와요.</div>`;
@@ -1080,6 +1149,12 @@ function renderParent(){
   $("#midi").onclick = connectMidi;
   $("#pt").onclick = startPlacement;
   $("#examnow").onclick = () => startActivity(examCfg());
+  $("#hwadd").onclick = () => { const title = $("#hwt").value.trim(); if(!title){ $("#hwmsg").textContent = "숙제 곡 이름을 적어 주세요."; $("#hwt").focus(); return; }
+    const due = $("#hwd").value; S.hw.push({id:Date.now(), title:title.slice(0,30), part:$("#hwp").value.trim().slice(0,30), goal:+$("#hwg").value || 5, due:/^\d{4}-\d{2}-\d{2}$/.test(due) ? due : null, from:dkey(), done:{}});
+    if(S.hw.length > 12) S.hw.shift(); save(); renderParent(); $("#hwmsg").textContent = `「${title}」을(를) 적었어요. 아이 홈 화면에 나와요.`; };
+  $("#s-parent").querySelectorAll("[data-hwdel]").forEach(b => b.onclick = () => {
+    if(!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "정말 지울까요?"; setTimeout(() => { if(b.isConnected){ delete b.dataset.armed; b.textContent = "지우기"; } }, 3000); return; }
+    S.hw = S.hw.filter(h => h.id !== +b.dataset.hwdel); save(); renderParent(); });
   $("#wkcopy").onclick = () => { const t = $("#wk"), m = $("#wkmsg");
     navigator.clipboard?.writeText(t.value).then(() => m.textContent = "복사했어요. 카톡 대화창에 붙여 넣으면 돼요.", () => { t.select(); m.textContent = "자동 복사가 안 돼서 글을 선택해 두었어요. 길게 눌러 복사하세요."; })
       ?? (t.select(), m.textContent = "글을 선택해 두었어요. 길게 눌러 복사하세요."); };
