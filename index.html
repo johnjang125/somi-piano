@@ -156,6 +156,7 @@ a{color:var(--sky);text-underline-offset:3px}
 .zch button:active:not([disabled]){transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 .zch button.ok{background:var(--mint);color:var(--on-fill);border-color:var(--mint-edge);box-shadow:0 4px 0 var(--mint-edge)}
 .zch button.no{opacity:.45;text-decoration:line-through}
+.sure{display:flex;align-items:center;justify-content:center;gap:var(--space-2);flex-wrap:wrap;font-family:var(--display);font-size:var(--text-lg);padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);background:var(--bg2)}
 .zdots{font-size:var(--text-3xl);letter-spacing:8px;color:var(--pink-ink)}
 .tap{width:112px;height:112px;border-radius:50%;background:var(--butter);color:var(--on-butter);font-family:var(--display);font-size:var(--text-3xl);box-shadow:0 7px 0 var(--butter-edge);touch-action:manipulation;margin-bottom:var(--space-2)}
 .tap.down{transform:translateY(5px);box-shadow:0 2px 0 var(--butter-edge)}
@@ -950,12 +951,14 @@ function renderMap(){
   $("#s-map").insertAdjacentHTML("beforeend", ZONES.map(z => { const got = z.stages.reduce((x,st)=>x+(S.zone[st.id]||0),0), nz = nextZoneStage(z);
     return `<section class="region ${z.cls}" aria-label="${z.name}"><div class="rhead"><h2>${z.name}</h2><span>별 ${got} / ${z.stages.length*3}</span></div>
     <p class="muted" style="margin:0 var(--space-1-5);font-size:var(--text-sm)">${z.desc}</p>
+    ${zoneFresh(z) ? `<button class="btn ghost sm" data-check="${z.id}" style="align-self:flex-start;margin-inline-start:var(--space-1-5)">이미 알아? 실력 확인하고 건너뛰기</button>` : ""}
     <div class="path">${z.stages.map((st,i) => { const s = S.zone[st.id]||0, lock = !zoneUnlocked(z, i), next = st === nz && !lock;
       return `<div class="stop"><div class="node ${lock?"locked":next?"next":s?"cleared":""}">
         <button class="disc" data-z="${st.id}" ${lock?`disabled aria-label="${st.title}: 잠겨 있음"`:`aria-label="${st.title} 시작"`}>${ic(lock?"lock":z.ic, 34)}</button>
         <div class="nm">${st.title}</div><div class="stars" aria-label="별 ${s}개">${[1,2,3].map(n=>n<=s?"★":`<span class="off">★</span>`).join("")}</div></div></div>`; }).join("")}</div></section>`; }).join(""));
   $("#s-map").querySelectorAll("[data-r]").forEach(b => b.onclick = () => startActivity(readCfg(READ[+b.dataset.r])));
   $("#s-map").querySelectorAll("[data-z]").forEach(b => b.onclick = () => startActivity(zoneCfg(ZST[b.dataset.z].st)));
+  $("#s-map").querySelectorAll("[data-check]").forEach(b => b.onclick = () => startActivity(checkCfg(ZONES.find(z => z.id === b.dataset.check))));
 }
 
 function renderStickers(){
@@ -1832,9 +1835,9 @@ function readKey(id, el, fromMic){
   if(A.lock) return;
   const t = A.tMidi, km = N[id].midi, inRange = t >= 60 && t <= 76, exact = inRange && !fromMic, sameName = pcOf(km - t) === 0;
   if(exact ? km === t : sameName){
-    stat("m"+t, A.wrongThis===0); if(A.wrongThis===0){ A.right++; hit(); revMark(`${A.readId}|${t}`, true); }
+    const first = A.wrongThis===0; stat("m"+t, first); if(first){ A.right++; hit(); revMark(`${A.readId}|${t}`, true); }
     A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, noteColor(t)); $("#rp").textContent = `${pname(t)}! 맞았어`;
-    setTimeout(readNext, 750);
+    askSure(first, `${A.readId}|${t}`, `${A.stage.title} · ${pname(t)}`, readNext, 750);
   } else {
     A.wrongThis++; if(A.wrongThis===1){ A.wrong++; revMark(`${A.readId}|${t}`, false, `${A.stage.title} · ${pname(t)}`); } shake(el); miss();
     if(A.wrongThis >= (A.stage.hint === "late" ? 1 : 2)){
@@ -2066,9 +2069,10 @@ const ZONES = [
 ];
 const ZST = Object.fromEntries(ZONES.flatMap(z => z.stages.map((st, i) => [st.id, {z, st, i}])));
 const zoneUnlocked = (z, i) => i === 0 || (S.zone[z.stages[i-1].id]||0) >= 1;
-const nextZoneStage = z => z.stages.find((st, i) => zoneUnlocked(z, i) && (S.zone[st.id]||0) < 3) || z.stages[z.stages.length-1];
+// 다음 갈 곳: 아직 별이 없는 열린 단계 먼저(실력 확인으로 건너뛴 뒤에도 이어지게), 없으면 별 3개가 안 된 단계
+const nextZoneStage = z => z.stages.find((st, i) => zoneUnlocked(z, i) && !(S.zone[st.id]||0)) || z.stages.find((st, i) => zoneUnlocked(z, i) && (S.zone[st.id]||0) < 3) || z.stages[z.stages.length-1];
 function zoneCfg(st){ const {z} = ZST[st.id]; return {kind:"zone", zoneId:st.id, title:`${z.name} · ${st.title}`, rounds:st.rounds, intro:st.teach, introSvg:st.demo()}; }
-function zoneSetup(){ A.zst = A.zoneId === "rev" ? revStage(A.revKeys) : A.zoneId === "exam" ? examStage() : ZST[A.zoneId].st; A.rounds = A.zst.n ?? A.rounds;
+function zoneSetup(){ A.zst = A.zoneId === "rev" ? revStage(A.revKeys) : A.zoneId === "exam" ? examStage() : A.check ? checkStage(A.check) : ZST[A.zoneId].st; A.rounds = A.zst.n ?? A.rounds;
   if(!A.rounds){ toast("오늘은 복습할 문제가 없어!"); A = null; go("home"); return; } zoneNext(); }
 function zoneNext(){
   if(!A) return; if(A.round >= A.rounds) return finish();
@@ -2086,15 +2090,34 @@ function zoneNext(){
   st.innerHTML = `${q.svg}<div class="prompt" id="zp">${q.prompt}</div>${q.type === "chord" ? `<div class="zdots" id="zd" aria-live="polite">${q.answer.map(() => "○").join("")}</div>` : ""}`;
 }
 function zoneRight(el, msg, wait = 900){
-  if(A.wrongThis === 0){ A.right++; hit(); revMark(revKeyOf(A.q), true, revLabel(A.q)); if(A.exam) examRec(A.q, true); }
+  const first = A.wrongThis === 0;
+  if(first){ A.right++; hit(); revMark(revKeyOf(A.q), true, revLabel(A.q)); if(A.exam) examRec(A.q, true); if(A.check) A.passed.push(A.q.sid); }
   A.round++; A.lock = true; setProg(A.round/A.rounds); glow(null); ding(); burst(el, "var(--mint)");
-  if(msg) $("#zp").textContent = msg; setTimeout(() => { if(A && A.running) zoneNext(); }, wait);
+  if(msg) $("#zp").textContent = msg;
+  askSure(first, revKeyOf(A.q), revLabel(A.q), zoneNext, wait);
+}
+/* 자신 있었어?: 처음에 맞힌 문제 세 개 중 하나꼴로 묻는다. '찍었어'면 운으로 맞힌 것일 수 있으니
+   틀린 문제 노트에 넣어 다음 날 다시 낸다(별·정답 수는 그대로). 시험·실력 확인에서는 묻지 않는다.
+   6초 안에 안 고르면 '알았어'로 친다. */
+function askSure(first, key, label, next, wait){
+  const cont = () => { if(A && A.running) next(); };
+  if(!first || A.exam || A.check || Math.random() > 1/3) return setTimeout(cont, wait);
+  const box = document.createElement("div"); box.className = "sure"; box.setAttribute("role", "group"); box.setAttribute("aria-label", "자신 있었어?");
+  box.innerHTML = `<span>자신 있었어?</span><button class="btn ghost sm" data-s="1">😀 알았어</button><button class="btn ghost sm" data-s="0">🤔 찍었어</button>`;
+  $("#stage").appendChild(box); box.querySelector("button").focus({preventScroll:true});
+  let done = false;
+  const pickSure = sure => { if(done) return; done = true; clearTimeout(tm); box.remove();
+    if(!sure){ revMark(key, false, label); toast("솔직하게 말해 줘서 고마워! 내일 한 번 더 물어볼게"); }
+    cont(); };
+  box.querySelectorAll("button").forEach(b => b.onclick = () => pickSure(b.dataset.s === "1"));
+  const tm = setTimeout(() => pickSure(true), 6000);
 }
 function zoneWrong(el){
   A.wrongThis++; if(A.wrongThis === 1){ A.wrong++; revMark(revKeyOf(A.q), false, revLabel(A.q)); } shake(el); miss();
   const q = A.q;
   // 시험: 한 번만 풀고, 틀리면 정답을 보여 준 뒤 다음 문제로
-  if(A.exam){ examRec(q, false); A.round++; A.lock = true; setProg(A.round/A.rounds);
+  if(A.exam || A.check){ if(A.exam) examRec(q, false); A.round++; A.lock = true; setProg(A.round/A.rounds);
+    if(A.check){ A.rounds = A.round; setProg(1); }   // 실력 확인은 처음 틀린 단계에서 멈춘다
     $("#zp").textContent = "정답: " + (q.type === "rhythm" ? "✗ 표시한 음표 자리에서 쳐야 해" : q.why || q.name || "");
     document.querySelectorAll("#stage [data-c]").forEach((b, i) => { if(q.opts?.[i]?.ok) b.classList.add("ok"); b.disabled = true; });
     ["#rgo","#rlis"].forEach(x => { if($(x)) $(x).disabled = true; });
@@ -2166,6 +2189,16 @@ function revStage(keys){
   const qs = keys.map(revQuestion).filter(Boolean); let i = 0;
   return {id:"rev", title:"솜이의 복습", n:qs.length, q(){ return qs[i++] || qs[qs.length-1]; }};
 }
+
+/* ---------- 구역 실력 확인 ----------
+   구역에 처음 들어갈 때, 단계마다 한 문제씩 순서대로 낸다. 힌트 없이 한 번만.
+   처음 틀린 단계에서 멈추고, 그 앞까지 맞힌 단계는 별 1개로 열어 건너뛰게 한다. */
+function checkStage(zid){ const z = ZONES.find(x => x.id === zid);
+  const qs = z.stages.map(st => ({...st.q.call(st), sid:st.id})); let i = 0;
+  return {id:"check", title:`${z.name} 실력 확인`, n:qs.length, q(){ return qs[i++] || qs[qs.length-1]; }}; }
+function checkCfg(z){ return {kind:"zone", zoneId:"check:" + z.id, check:z.id, passed:[], title:`${z.name} · 실력 확인`, rounds:1,
+  intro:`이미 아는 건 건너뛰자! ${z.name}의 단계마다 한 문제씩 물어볼게. 맞힌 단계는 별 1개로 바로 열리고, 처음 틀린 곳부터 배우면 돼.`}; }
+const zoneFresh = z => z.stages.every(st => !(S.zone[st.id] || 0));
 
 /* ---------- 별나라 시험 (한 달에 한 번) ----------
    열려 있는 단계에서 영역마다 몇 문제씩 섞어 낸다. 힌트 없이 한 번만, 틀리면 정답을 보여 주고 넘어간다.
@@ -2244,7 +2277,7 @@ function rhythmJudge(){
   rhythmRender({marks, taps:A.taps, msg:why + " 파란 세모가 네가 친 곳이야."});
   if(!A.taps.length) return;   // 한 번도 안 친 건 틀린 걸로 세지 않는다
   zoneWrong($("#rtap"));
-  if(!A.exam && A.wrongThis >= 2){ A.round++; setProg(A.round/A.rounds); $("#rgo").disabled = true; $("#zp").textContent += " 다음 리듬으로 가 보자!"; setTimeout(() => { if(A && A.running) zoneNext(); }, 2600); }
+  if(!A.exam && !A.check && A.wrongThis >= 2){ A.round++; setProg(A.round/A.rounds); $("#rgo").disabled = true; $("#zp").textContent += " 다음 리듬으로 가 보자!"; setTimeout(() => { if(A && A.running) zoneNext(); }, 2600); }
 }
 
 function stat(id, ok){ const s = noteStat(id); ok ? s.r++ : s.w++; s.last = Date.now(); S.notes[id] = s; }
@@ -2460,6 +2493,7 @@ function finish(){
     S.speed[A.song] = A.speed; medal = A.speed; gems += 3; if(A.speed===2) give("cheetah"); }
   if(A.kind==="sight" && A.wrong===0) give("sight");
   if(A.readId === "r5" && stars === 3) give("reader"); if(A.readId === "r10" && stars === 3) give("grand");
+  if(A.check) A.passed.forEach(id => S.zone[id] = Math.max(S.zone[id] || 0, 1));
   if(A.exam){ S.exams = S.exams.filter(e => monthKey(e.d) !== monthKey(k)).concat({d:k, r:A.res || {}}); give("exam"); }
   if(A.zoneId && ZST[A.zoneId] && stars === 3){ const z = ZST[A.zoneId].z; if(z.stages[z.stages.length-1].id === A.zoneId) give(z.sticker); }
   let perfMedal = false;
@@ -2475,7 +2509,9 @@ function finish(){
   const fresh = S.stickers.filter(s=>!before.has(s)).map(id=>STICKERS.find(x=>x[0]===id));
   // 결과 한마디: 막연한 칭찬 대신 방금 일어난 일과 다음 목표를 말한다
   const toThree = A.kind === "balloon" ? Math.max(0, 18 - A.right) : Math.max(0, Math.ceil(total*.9) - A.right);
-  const msg = A.exam ? "시험 끝! 영역별로 이만큼 맞혔어" : stars===3 ? (A.wrong===0 ? "한 번도 안 틀렸어!" : "별 3개! 거의 다 맞혔어")
+  const zc = A.check && ZONES.find(z => z.id === A.check);
+  const msg = A.exam ? "시험 끝! 영역별로 이만큼 맞혔어"
+    : zc ? (A.passed.length === zc.stages.length ? `${zc.name}을 다 알고 있었어! 모든 단계가 열렸어` : A.passed.length ? `${A.passed.length}단계까지 건너뛰었어! 「${zc.stages[A.passed.length].title}」부터 해 보자` : `「${zc.stages[0].title}」부터 차근차근 해 보자`) : stars===3 ? (A.wrong===0 ? "한 번도 안 틀렸어!" : "별 3개! 거의 다 맞혔어")
     : stars===2 ? (A.kind === "balloon" ? `풍선 ${toThree}개만 더 터뜨리면 별 3개야` : `${toThree}개만 더 맞히면 별 3개야`)
     : "끝까지 쳤어. 틀린 음은 솜이가 기억해 둘게";
   const m = document.createElement("div"); m.className = "modal";
@@ -2490,7 +2526,7 @@ function finish(){
     ${goalNow ? `<div class="allclear" style="width:100%;background:var(--mint);color:#fff">오늘 목표 ${goal} XP 달성! 보석 5개 더</div>` : ""}
     ${chest ? `<div class="allclear" style="width:100%">오늘 퀘스트 모두 완료! 홈에서 보물상자를 열어 봐</div>` : ""}
     ${fresh.length ? `<div><b style="font-family:var(--display);font-weight:400">새 스티커!</b><div class="newstk">${fresh.map(s=>`<span title="${s[2]}">${s[1]}</span>`).join("")}</div></div>` : ""}
-    <div class="row" style="flex-wrap:wrap;justify-content:center">${A.exam ? "" : `<button class="btn ghost" id="again">한 번 더</button>`}<button class="btn" id="home">좋아!</button></div></div>`;
+    <div class="row" style="flex-wrap:wrap;justify-content:center">${A.exam || A.check ? "" : `<button class="btn ghost" id="again">한 번 더</button>`}<button class="btn" id="home">좋아!</button></div></div>`;
   document.body.appendChild(m); fanfare(); confetti();
   const cfg = {...A}; ["round","right","wrong","wrongThis","combo","maxCombo","running","lock","seq","idx","t","miss","target","phr","pm","offset","balloons","left","spawn","escaped"].forEach(x=>delete cfg[x]);
   if(medal != null) delete cfg.speed;
